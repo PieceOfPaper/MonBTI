@@ -47,3 +47,4 @@ MBTI 검사처럼 질문에 답하는 경험을 제공하며, 기존 유저에�
 | REF-005 | [[MHW:IB] 무기를 고민하는 당신께, 무기추천 — 인벤](https://www.inven.co.kr/board/mhf/3749/9156) | 월드·아이스본 기준. 제목·도입부 확인, 상세 내용과 와일즈 적용 여부 검토 대기 |
 | REF-006 | [몬스터 헌터 와일즈 입문, 초보 무기 고르는 법 2026 — 꿀잼픽](https://sideprofit.tistory.com/269) | 와일즈 입문 무기 선택 글. 제목 확인, 상세 내용 검토 대기 |
 | REF-007 | [선브레이크 무기 퀴즈 — 몬스터헌터 공식 사이트](https://www.monsterhunter.com/content/sunbreak-weaponquiz/ko/) | 선브레이크 무기 퀴즈 참고 후보. 페이지 내용 확인 실패, 질문·결과 구조 검토 대기 |
+| REF-008 | [몬BTI 시리즈 추가 영상](https://youtu.be/MoAE0ex5cE8?si=ajQrbzEm0ljXNZFD) | 사용자 설명상 REF-001~REF-003과 같은 시리즈. 원문·자막·분류 검토 대기 |
