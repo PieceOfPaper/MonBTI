@@ -77,6 +77,7 @@ Codex를 설치·인증한 환경에서는 저장소 루트에서 `codex`를, Cl
 - .gitattributes: 텍스트 파일의 LF 통일
 - .gitignore: 개인 설정, 비밀 값, 의존성·빌드 결과·캐시 제외
 - .github/pull_request_template.md: 변경 목적, 문서 반영, 검증 및 미정 사항 기록
+- .claude/settings.json: Claude Code 공통 권한 허용 목록(테스트·빌드·의존성 설치와 읽기 전용 git 명령). 개인 설정은 `.claude/settings.local.json`에 둡니다.
 
 ## 공식 도구 문서
 
