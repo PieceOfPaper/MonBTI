@@ -5,135 +5,135 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_Weapon"
     },
-    "exported_at": "2026-10-05T12:34:47.428Z",
-    "converted_at": "2026-10-05T12:34:47.496Z"
+    "exported_at": "2026-10-05T14:07:41.053Z",
+    "converted_at": "2026-10-05T14:07:41.136Z"
   },
   "weapons": [
     {
       "weapon_id": "great_sword",
       "weapon_name": "대검",
-      "attack": 50,
-      "freedom": 50,
+      "attack": 70,
+      "freedom": 40,
       "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "resource": 10,
+      "counter": 60
     },
     {
       "weapon_id": "long_sword",
       "weapon_name": "태도",
       "attack": 50,
-      "freedom": 50,
-      "combo": 50,
+      "freedom": 70,
+      "combo": 70,
       "resource": 50,
-      "counter": 50
+      "counter": 90
     },
     {
       "weapon_id": "sword_and_shield",
       "weapon_name": "한손검",
-      "attack": 50,
-      "freedom": 50,
-      "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "attack": 0,
+      "freedom": 90,
+      "combo": 60,
+      "resource": 10,
+      "counter": 30
     },
     {
       "weapon_id": "dual_blades",
       "weapon_name": "쌍검",
-      "attack": 50,
-      "freedom": 50,
+      "attack": 0,
+      "freedom": 100,
       "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "resource": 60,
+      "counter": 20
     },
     {
       "weapon_id": "hammer",
       "weapon_name": "해머",
-      "attack": 50,
-      "freedom": 50,
-      "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "attack": 60,
+      "freedom": 60,
+      "combo": 70,
+      "resource": 20,
+      "counter": 30
     },
     {
       "weapon_id": "hunting_horn",
       "weapon_name": "수렵피리",
       "attack": 50,
-      "freedom": 50,
-      "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "freedom": 70,
+      "combo": 40,
+      "resource": 80,
+      "counter": 10
     },
     {
       "weapon_id": "lance",
       "weapon_name": "랜스",
-      "attack": 50,
-      "freedom": 50,
-      "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "attack": 20,
+      "freedom": 30,
+      "combo": 30,
+      "resource": 10,
+      "counter": 100
     },
     {
       "weapon_id": "gunlance",
       "weapon_name": "건랜스",
-      "attack": 50,
-      "freedom": 50,
-      "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "attack": 70,
+      "freedom": 0,
+      "combo": 80,
+      "resource": 40,
+      "counter": 30
     },
     {
       "weapon_id": "switch_axe",
       "weapon_name": "슬래시액스",
-      "attack": 50,
-      "freedom": 50,
-      "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "attack": 70,
+      "freedom": 60,
+      "combo": 40,
+      "resource": 80,
+      "counter": 60
     },
     {
       "weapon_id": "charge_blade",
       "weapon_name": "차지액스",
-      "attack": 50,
-      "freedom": 50,
-      "combo": 50,
-      "resource": 50,
+      "attack": 90,
+      "freedom": 0,
+      "combo": 100,
+      "resource": 100,
       "counter": 50
     },
     {
       "weapon_id": "insect_glaive",
       "weapon_name": "조충곤",
-      "attack": 50,
-      "freedom": 50,
-      "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "attack": 60,
+      "freedom": 80,
+      "combo": 70,
+      "resource": 80,
+      "counter": 20
     },
     {
       "weapon_id": "light_bowgun",
       "weapon_name": "라이트보우건",
-      "attack": 50,
-      "freedom": 50,
-      "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "attack": 20,
+      "freedom": 80,
+      "combo": 10,
+      "resource": 20,
+      "counter": 0
     },
     {
       "weapon_id": "heavy_bowgun",
       "weapon_name": "헤비보우건",
       "attack": 50,
-      "freedom": 50,
-      "combo": 50,
-      "resource": 50,
-      "counter": 50
+      "freedom": 40,
+      "combo": 10,
+      "resource": 20,
+      "counter": 10
     },
     {
       "weapon_id": "bow",
       "weapon_name": "활",
-      "attack": 50,
-      "freedom": 50,
-      "combo": 50,
+      "attack": 30,
+      "freedom": 90,
+      "combo": 10,
       "resource": 50,
-      "counter": 50
+      "counter": 20
     }
   ]
 }

@@ -5,18 +5,108 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_Question"
     },
-    "exported_at": "2026-10-05T12:34:47.428Z",
-    "converted_at": "2026-10-05T12:34:47.496Z"
+    "exported_at": "2026-10-05T14:07:41.053Z",
+    "converted_at": "2026-10-05T14:07:41.136Z"
   },
   "questions": [
     {
       "question_id": "wilds_q001",
       "question_order": 1,
-      "question_text": "나는 공격 중 자유롭게 움직이면서, 기회를 잡아 모아 둔 힘으로 큰 대미지를 넣고 싶다.",
-      "attack": 100,
-      "freedom": 50,
+      "question_text": "나는 결과가 한순간에 결정되는 일이라면, 그 순간을 기다리는 과정도 즐겁다.",
+      "attack": 80,
+      "freedom": 0,
       "combo": 0,
       "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q002",
+      "question_order": 2,
+      "question_text": "나는 각각 따로 끝나는 일보다, 앞에서 한 일이 다음 일로 이어지는 과정이 더 재미있다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 100,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q003",
+      "question_order": 3,
+      "question_text": "나는 잔고나 배터리처럼 계속 확인해야 하는 숫자가 늘어나면 피곤하다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 0,
+      "resource": -100,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q004",
+      "question_order": 4,
+      "question_text": "나는 가진 것을 아껴 두었다가 쓸 순간을 고르는 게 재미있다.",
+      "attack": 40,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 80,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q005",
+      "question_order": 5,
+      "question_text": "나는 누군가 던진 말에 딱 맞는 한마디를 돌려주는 게 재미있다.",
+      "attack": 20,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 0,
+      "counter": 60
+    },
+    {
+      "question_id": "wilds_q006",
+      "question_order": 6,
+      "question_text": "나는 내가 타이밍을 정하는 것보다, 주어진 신호에 맞춰 움직이는 게 편하다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 0,
+      "counter": 100
+    },
+    {
+      "question_id": "wilds_q007",
+      "question_order": 7,
+      "question_text": "나는 문제를 만났을 때 가능한 답을 늘리기보다, 조건에 딱 맞는 답을 찾아내는 게 재미있다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 0,
+      "counter": 40
+    },
+    {
+      "question_id": "wilds_q008",
+      "question_order": 8,
+      "question_text": "나는 상황이 바뀌면 하던 일을 바로 멈출 수 있어야 편하다.",
+      "attack": 0,
+      "freedom": 100,
+      "combo": -20,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q009",
+      "question_order": 9,
+      "question_text": "나는 기다리는 시간보다, 그동안 아무것도 할 수 없는 상황이 더 답답하다.",
+      "attack": 0,
+      "freedom": 100,
+      "combo": 0,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q010",
+      "question_order": 10,
+      "question_text": "나는 미리 여러 상황을 생각해 두기보다, 눈앞의 상황에 맞춰 바로 움직이는 게 편하다.",
+      "attack": 0,
+      "freedom": 60,
+      "combo": 0,
+      "resource": -20,
       "counter": 0
     }
   ]
