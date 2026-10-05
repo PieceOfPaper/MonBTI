@@ -19,6 +19,15 @@
 | DEC-007 | 기획서는 docs/ 하위 Markdown으로 관리 | Codex·Claude가 동일한 기획을 읽고 수정할 수 있도록 저장 |
 | DEC-008 | 공통 작업 지침은 AGENTS.md, Claude 진입은 CLAUDE.md | 공통 규칙을 한곳에서 관리하고 Claude가 가져오도록 연결 |
 
+## 2026-10-05 — 참고 자료 목록 단순화
+
+- ID: DEC-009
+- 상태: 확정
+- 근거: 사용자가 참고 자료를 표 대신 제목과 링크만 나열하도록 요청함.
+- 결정: README 하단과 docs/references.md에 제목·링크만 있는 단순한 목록을 사용함.
+- 영향: 자료 ID, 등록일, 검토 상태, 부가 설명을 목록에서 제거하고 공통 작업 지침에 같은 형식을 명시함.
+- 관련 문서: README.md, docs/references.md, AGENTS.md, docs/project-plan.md, docs/README.md
+
 ## 보류 및 미정
 
 참고 자료의 채택 범위, 성향 분류, 문항 수, 답변 형식, 점수 계산, 결과 및 공유 구성, 기술 스택은 미정입니다.

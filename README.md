@@ -24,7 +24,7 @@ MBTI 검사처럼 질문에 답하는 경험을 제공하며, 기존 유저에�
 | [프로젝트 기획](docs/project-plan.md) | 대상, 목적, 작품 선택 흐름, 범위 |
 | [검사 설계](docs/test-design.md) | 질문·분류·추천 설계와 미정 항목 |
 | [결정 기록](docs/decisions.md) | 확정 사항과 방향 변경 이력 |
-| [참고 자료 관리](docs/references.md) | 출처, 검토 상태, 반영 기록 |
+| [참고 자료](docs/references.md) | 참고 자료의 제목과 링크 목록 |
 | [개발 및 AI 협업](docs/development.md) | Codex·Claude 작업 방법과 개발 준비 |
 
 ## 문서 갱신 원칙
@@ -35,16 +35,11 @@ MBTI 검사처럼 질문에 답하는 경험을 제공하며, 기존 유저에�
 
 ## 참고 자료
 
-아래 자료는 사용자가 제공한 참고 후보입니다. 출처 등록과 내용 검토를 구분하며, 현재 원문·자막·이미지 검토 및 채택 범위는 미정입니다.
-특히 월드·아이스본 및 선브레이크 자료는 와일즈에 적용할 수 있는지 별도로 검토합니다.
-
-| ID | 자료 | 용도 및 상태 |
-| --- | --- | --- |
-| REF-001 | [몬BTI 참고 영상 1](https://youtu.be/jKEeixLy53s?si=PzxnGpjuApMbsB3w) | 사용자 설명상 월드 시기의 몬BTI 영상. 분류·설명 검토 대기 |
-| REF-002 | [몬BTI 참고 영상 2](https://youtu.be/H6VwKlf0sEM?si=PT2gZXIvy-vL2lh3) | 사용자 설명상 월드 시기의 몬BTI 영상. 분류·설명 검토 대기 |
-| REF-003 | [몬BTI 참고 영상 3](https://youtu.be/W1PIL_u_oz4?si=sXscg0owIdyuO2hC) | 사용자 설명상 월드 시기의 몬BTI 영상. 분류·설명 검토 대기 |
-| REF-004 | [An (almost) definitive guide to picking a weapon — Reddit](https://www.reddit.com/r/MonsterHunter/comments/1jj5hze/an_almost_definitive_guide_to_picking_a_weapon/?tl=ko) | 무기 선택 가이드 참고 후보. 본문·이미지·분류 검토 대기 |
-| REF-005 | [[MHW:IB] 무기를 고민하는 당신께, 무기추천 — 인벤](https://www.inven.co.kr/board/mhf/3749/9156) | 월드·아이스본 기준. 제목·도입부 확인, 상세 내용과 와일즈 적용 여부 검토 대기 |
-| REF-006 | [몬스터 헌터 와일즈 입문, 초보 무기 고르는 법 2026 — 꿀잼픽](https://sideprofit.tistory.com/269) | 와일즈 입문 무기 선택 글. 제목 확인, 상세 내용 검토 대기 |
-| REF-007 | [선브레이크 무기 퀴즈 — 몬스터헌터 공식 사이트](https://www.monsterhunter.com/content/sunbreak-weaponquiz/ko/) | 선브레이크 무기 퀴즈 참고 후보. 페이지 내용 확인 실패, 질문·결과 구조 검토 대기 |
-| REF-008 | [몬BTI 시리즈 추가 영상](https://youtu.be/MoAE0ex5cE8?si=ajQrbzEm0ljXNZFD) | 사용자 설명상 REF-001~REF-003과 같은 시리즈. 원문·자막·분류 검토 대기 |
+- [몬BTI 참고 영상 1](https://youtu.be/jKEeixLy53s?si=PzxnGpjuApMbsB3w)
+- [몬BTI 참고 영상 2](https://youtu.be/H6VwKlf0sEM?si=PT2gZXIvy-vL2lh3)
+- [몬BTI 참고 영상 3](https://youtu.be/W1PIL_u_oz4?si=sXscg0owIdyuO2hC)
+- [An (almost) definitive guide to picking a weapon — Reddit](https://www.reddit.com/r/MonsterHunter/comments/1jj5hze/an_almost_definitive_guide_to_picking_a_weapon/?tl=ko)
+- [[MHW:IB] 무기를 고민하는 당신께, 무기추천 — 인벤](https://www.inven.co.kr/board/mhf/3749/9156)
+- [몬스터 헌터 와일즈 입문, 초보 무기 고르는 법 2026 — 꿀잼픽](https://sideprofit.tistory.com/269)
+- [선브레이크 무기 퀴즈 — 몬스터헌터 공식 사이트](https://www.monsterhunter.com/content/sunbreak-weaponquiz/ko/)
+- [몬BTI 시리즈 추가 영상](https://youtu.be/MoAE0ex5cE8?si=ajQrbzEm0ljXNZFD)
