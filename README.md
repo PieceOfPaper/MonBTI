@@ -42,7 +42,9 @@ MBTI 검사처럼 질문에 답하는 경험을 제공하며, 기존 유저에�
 질문은 한 행에 ID·순서·문구와 `attack`, `freedom`, `combo`, `resource`, `counter`의 부호 있는 가중치를 기록합니다. 응답 1~6에 각각 -1·-0.6·-0.2·0.2·0.6·1을 곱해 축별로 합산합니다. 음수 가중치는 방향을 반대로 바꾸며, 0·빈칸은 해당 축에 영향을 주지 않습니다.
 무기 기준값 입력 범위는 0~100이며, 무기 14개에는 수정 가능한 임시값을 넣었고 질문 하나를 예시로 추가했습니다.
 사이트는 시트에서 내보낸 데이터를 검증·변환한 JSON을 배포에 포함하는 방식으로 개발합니다.
-열 정의와 반영 절차는 [시트 데이터 설계](docs/data-schema.md)에 기록했습니다. `npm run data:convert`로 시트를 검증·변환해 `src/data/wilds/`의 JSON을 갱신합니다.
+열 정의와 반영 절차는 [시트 데이터 설계](docs/data-schema.md)에 기록했습니다.
+시트 편집 후 [Actions → 시트 데이터 갱신](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data.yml)에서 **Run workflow → main → Run workflow**를 누르면 검증·JSON 갱신·데이터 커밋·Pages 배포까지 실행합니다. 별도의 입력값이나 인증 Secret은 필요하지 않습니다.
+로컬에서는 `npm run data:convert`로 같은 변환기를 실행할 수 있습니다.
 
 ## 문서
 

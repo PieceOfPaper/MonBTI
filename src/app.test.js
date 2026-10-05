@@ -5,6 +5,14 @@ import { renderGameSelection, renderQuestion, renderResult } from './ui/views.js
 import { computeAxisTotals } from './core/scoring.js';
 
 const wilds = supportedGames[0];
+// 화면·저장 테스트는 편집 가능한 원본 시트의 문항 ID·가중치와 분리한다.
+const testGame = {
+  ...wilds,
+  questions: [{
+    question_id: 'wilds_q001', question_order: 1, question_text: '테스트 질문',
+    attack: 100, freedom: 0, combo: 0, resource: 0, counter: 0,
+  }],
+};
 
 describe('작품 데이터', () => {
   it('현재 지원하는 작품은 와일즈뿐이다', () => {
@@ -41,17 +49,17 @@ describe('답변 저장', () => {
 
   it('저장한 답변을 다시 읽고 초기화할 수 있다', () => {
     const store = createAnswerStore(memory());
-    store.save(wilds, { wilds_q001: 5 });
-    expect(store.load(wilds)).toEqual({ wilds_q001: 5 });
-    store.clear(wilds);
-    expect(store.load(wilds)).toEqual({});
+    store.save(testGame, { wilds_q001: 5 });
+    expect(store.load(testGame)).toEqual({ wilds_q001: 5 });
+    store.clear(testGame);
+    expect(store.load(testGame)).toEqual({});
   });
 
   it('저장소가 없거나 오류가 나도 빈 답변으로 진행한다', () => {
     const broken = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); }, removeItem: () => {} };
-    expect(createAnswerStore(null).load(wilds)).toEqual({});
-    expect(createAnswerStore(broken).load(wilds)).toEqual({});
-    expect(() => createAnswerStore(broken).save(wilds, {})).not.toThrow();
+    expect(createAnswerStore(null).load(testGame)).toEqual({});
+    expect(createAnswerStore(broken).load(testGame)).toEqual({});
+    expect(() => createAnswerStore(broken).save(testGame, {})).not.toThrow();
   });
 });
 
@@ -61,25 +69,25 @@ describe('화면', () => {
   });
 
   it('질문 화면은 공통 여섯 응답을 라디오 버튼으로 보여 준다', () => {
-    const html = renderQuestion(wilds, 0, {});
+    const html = renderQuestion(testGame, 0, {});
     expect(html.match(/type="radio"/g)).toHaveLength(6);
     expect(html).toContain('전혀 그렇지 않다');
     expect(html).toContain('scale__end--low');
     expect(html).toContain('scale__end--high');
     expect(html).toContain('매우 그렇다');
     expect(html).toContain('disabled');
-    expect(renderQuestion(wilds, 0, { wilds_q001: 4 })).toContain('value="4" checked');
+    expect(renderQuestion(testGame, 0, { wilds_q001: 4 })).toContain('value="4" checked');
   });
 
   it('결과 화면은 측정하지 않은 기준을 0으로 표시하지 않는다', () => {
-    const html = renderResult(wilds, computeAxisTotals(wilds.questions, { wilds_q001: 5 }));
+    const html = renderResult(testGame, computeAxisTotals(testGame.questions, { wilds_q001: 5 }));
     expect(html).toContain('+60');
     expect(html).toContain('한방형 쪽');
     expect(html).toContain('측정하지 않았어요');
   });
 
   it('질문 문구의 HTML을 이스케이프한다', () => {
-    const game = { ...wilds, questions: [{ ...wilds.questions[0], question_text: '<b>x</b>' }] };
+    const game = { ...testGame, questions: [{ ...testGame.questions[0], question_text: '<b>x</b>' }] };
     expect(renderQuestion(game, 0, {})).toContain('&lt;b&gt;x&lt;/b&gt;');
   });
 });

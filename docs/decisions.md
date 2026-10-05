@@ -141,6 +141,18 @@
 - 관련 문서: README.md, docs/README.md, docs/project-plan.md, docs/test-design.md, docs/data-schema.md, docs/question-guide.md, AGENTS.md
 - 대체한 결정: 없음. DEC-003·DEC-015의 입문자 기준과 다축 구조를 질문 작성 기준으로 구체화한다.
 
+## 2026-10-05 — 버튼으로 시트 데이터 갱신 및 Pages 배포
+
+- ID: DEC-019
+- 상태: 구현 완료
+- 근거: 사용자가 GitHub Actions에서 버튼으로 데이터만 다시 반영할 수 있는 기능을 요청함.
+- 결정: `workflow_dispatch` 전용 **시트 데이터 갱신** 워크플로를 추가한다. `main`에서 최신 시트를 다운로드·검증·변환하고 테스트·빌드가 성공하면 무기·질문 JSON 두 파일만 커밋한 뒤 같은 실행에서 Pages에 배포한다.
+- 변경 판단: 다운로드·변환 시각만 달라진 경우 기존 파일을 유지한다. 데이터·원본·형식 버전의 변화는 반영하며 `reason` 메모는 사이트 데이터에 포함하지 않는다.
+- 이유: 시트 편집 후 터미널 작업 없이 배포할 수 있도록 한다. `GITHUB_TOKEN` 커밋이 다른 푸시 워크플로를 실행하지 않는 특성을 고려해 검증과 배포를 수동 워크플로에 포함한다.
+- 영향: 다운로드·검증·테스트·빌드 실패 시 커밋과 배포를 중단한다. 데이터 변경이 없으면 커밋 없이 다시 배포한다. 기존 배포와 동시 실행 그룹을 공유하고, 기존 배포도 실행 시점의 최신 `main`을 사용한다. 원본 시트의 공유 설정과 사이트의 응답·계산 규칙은 변경하지 않는다.
+- 관련 문서: README.md, docs/project-plan.md, docs/data-schema.md, docs/development.md, .github/workflows/refresh-data.yml, .github/workflows/deploy-pages.yml
+- 대체한 결정: 없음. DEC-013·DEC-016의 정적 JSON 배포 방식에 수동 버튼 실행을 추가한다.
+
 ## 보류 및 미정
 
 참고 자료의 세부 채택 범위, 실제 무기별 축 평가, 유형 구조, 실제 문항 수·문구, 추가 ‘잘 모르겠다’ 응답, 무기 추천 계산, 결과 및 공유 구성은 미정입니다.

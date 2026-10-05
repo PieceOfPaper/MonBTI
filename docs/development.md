@@ -12,6 +12,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | --- | --- |
 | `scripts/convert-sheet.js` | 원본 시트 XLSX를 읽어 작품별 JSON 생성 |
 | `scripts/sheet-converter.js` | 열 이름 매핑과 변환 오류 검증 |
+| `scripts/json-output.js` | 시각을 제외한 데이터 변경 판단 |
 | `src/data/<작품 ID>/` | 생성된 무기·질문 JSON. 직접 편집하지 않음 |
 | `src/games/index.js` | 작품 등록과 작품별 데이터 연결 |
 | `src/core/` | 기준 축, 공통 응답, 축별 합산 계산 |
@@ -52,9 +53,22 @@ npm run data:convert
 ## CI 및 GitHub Pages 배포
 
 - `.github/workflows/ci.yml`은 풀 리퀘스트와 `main` 브랜치 푸시에서 의존성을 고정 설치하고 테스트와 빌드를 실행합니다.
-- `.github/workflows/deploy-pages.yml`은 `main` 브랜치 푸시 또는 수동 실행에서 `dist/`를 GitHub Pages에 배포합니다.
+- `.github/workflows/deploy-pages.yml`은 `main` 브랜치 푸시 또는 수동 실행에서 최신 `main`을 빌드해 GitHub Pages에 배포합니다.
+- `.github/workflows/refresh-data.yml`은 **시트 데이터 갱신** 버튼으로 최신 원본을 내려받아 검증·변환하고, 테스트·빌드가 성공하면 데이터 두 파일만 `main`에 커밋한 뒤 같은 실행에서 Pages에 배포합니다. 두 배포 워크플로는 `pages` 동시 실행 그룹을 공유합니다.
 - GitHub 저장소의 **Settings → Pages → Build and deployment**에서 Source를 **GitHub Actions**로 한 번 선택해야 합니다. 이 설정은 워크플로 파일만으로 대신할 수 없습니다.
 - 정상 배포 주소는 `https://pieceofpaper.github.io/MonBTI/`입니다. 저장소 이름을 바꾸면 `vite.config.js`의 `base`도 같은 경로로 바꿉니다.
+
+## 버튼으로 시트 데이터 반영
+
+1. 원본 시트의 무기·질문을 편집합니다.
+2. [Actions → 시트 데이터 갱신](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data.yml)을 엽니다.
+3. **Run workflow**에서 브랜치를 **main**으로 선택하고 실행합니다. 별도 입력값은 없습니다.
+4. 실행의 `refresh`와 `deploy`가 모두 성공하면 [사이트](https://pieceofpaper.github.io/MonBTI/)에서 확인합니다.
+
+현재 시트는 로그인 없이 XLSX 다운로드가 가능하므로 별도 인증 Secret을 요구하지 않습니다. 시트 공유 설정은 변경하지 않습니다. 접근이 막히면 해당 단계에서 실패하며, 직접 내보낸 XLSX를 사용하는 로컬 절차로 반영할 수 있습니다.
+`--if-changed`로 변환하기 때문에 실제 데이터·원본·형식 버전이 같으면 파일을 다시 쓰거나 커밋하지 않고 현재 데이터로 다시 배포합니다. 무기 탭의 `reason` 메모는 JSON에 포함하지 않습니다.
+
+커밋에는 워크플로의 `GITHUB_TOKEN`을 사용합니다. 이 토큰으로 만든 푸시는 다른 `push` 워크플로를 실행하지 않으므로, 수동 워크플로 자체에서 테스트·빌드와 배포까지 수행합니다. 다운로드·검증·테스트·빌드에 실패하면 커밋과 배포를 진행하지 않습니다. 다른 작업으로 `main`이 먼저 변경되면 강제 푸시하지 않고 중단하므로 최신 상태에서 버튼을 다시 누릅니다. 커밋 후 배포 단계만 실패했다면 오류 해결 후 재실행할 수 있습니다.
 
 ## Codex와 Claude Code 시작 방법
 

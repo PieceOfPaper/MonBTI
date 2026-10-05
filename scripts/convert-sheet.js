@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import readExcelFile from 'read-excel-file/node';
 import { SheetConversionError, buildMeta, convertQuestions, convertWeapons } from './sheet-converter.js';
+import { sameSheetData } from './json-output.js';
 
 const SPREADSHEET_ID = '124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras';
 const EXPORT_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=xlsx`;
@@ -21,7 +22,7 @@ async function loadWorkbook(input) {
     const path = resolve(input);
     return { buffer: await readFile(path), exportedAt: (await stat(path)).mtime.toISOString() };
   }
-  const response = await fetch(EXPORT_URL);
+  const response = await fetch(EXPORT_URL, { signal: AbortSignal.timeout(60_000) });
   const type = response.headers.get('content-type') ?? '';
   if (!response.ok || !type.includes('spreadsheetml')) {
     throw new Error(`시트를 XLSX로 내려받지 못했습니다 (HTTP ${response.status}, ${type}). 시트에서 직접 내보낸 뒤 --input으로 지정하세요.`);
@@ -35,14 +36,29 @@ function sheetRows(sheets, name) {
   return found.data;
 }
 
-async function writeJson(path, data) {
+async function writeJson(path, data, ifChanged) {
+  if (ifChanged) {
+    let current;
+    try {
+      current = JSON.parse(await readFile(path, 'utf8'));
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+    if (current && sameSheetData(current, data)) {
+      console.log(`변경 없음: ${path.replace(`${ROOT}/`, '')}`);
+      return;
+    }
+  }
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, `${JSON.stringify(data, null, 2)}\n`);
   console.log(`생성: ${path.replace(`${ROOT}/`, '')}`);
 }
 
 async function main() {
-  const { values } = parseArgs({ options: { input: { type: 'string' } } });
+  const { values } = parseArgs({ options: {
+    input: { type: 'string' },
+    'if-changed': { type: 'boolean', default: false },
+  } });
   const { buffer, exportedAt } = await loadWorkbook(values.input);
   const sheets = await readExcelFile(buffer);
   const convertedAt = new Date().toISOString();
@@ -57,8 +73,8 @@ async function main() {
 
   for (const { game, weapons, questions, meta } of outputs) {
     const dir = resolve(ROOT, 'src/data', game.id);
-    await writeJson(resolve(dir, 'weapons.json'), { meta: meta(game.weaponSheet), weapons });
-    await writeJson(resolve(dir, 'questions.json'), { meta: meta(game.questionSheet), questions });
+    await writeJson(resolve(dir, 'weapons.json'), { meta: meta(game.weaponSheet), weapons }, values['if-changed']);
+    await writeJson(resolve(dir, 'questions.json'), { meta: meta(game.questionSheet), questions }, values['if-changed']);
     console.log(`${game.id}: 무기 ${weapons.length}개, 질문 ${questions.length}개`);
   }
 }

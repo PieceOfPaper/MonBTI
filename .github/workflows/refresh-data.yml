@@ -1,0 +1,72 @@
+name: 시트 데이터 갱신
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# 일반 Pages 배포와 같은 그룹에서 실행해 배포가 겹치지 않게 한다.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: main 브랜치 실행 확인
+        env:
+          SELECTED_REF: ${{ github.ref }}
+        run: |
+          if [ "$SELECTED_REF" != "refs/heads/main" ]; then
+            echo "::error::Run workflow에서 main 브랜치를 선택하세요."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: 최신 시트 검증 및 JSON 변환
+        run: npm run data:convert -- --if-changed
+      - run: npm test
+      - run: npm run build
+      - name: 데이터 변경만 커밋
+        run: |
+          git add -- src/data/wilds/weapons.json src/data/wilds/questions.json
+          if git diff --cached --quiet; then
+            echo "데이터 변경이 없습니다. 현재 데이터로 다시 배포합니다." >> "$GITHUB_STEP_SUMMARY"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m '시트의 최신 무기·질문 데이터 반영'
+            git push origin HEAD:main
+            echo "최신 시트 데이터 두 파일을 main에 반영했습니다." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  # GITHUB_TOKEN으로 만든 커밋은 push 워크플로를 실행하지 않으므로 직접 배포한다.
+  deploy:
+    needs: refresh
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - id: deployment
+        uses: actions/deploy-pages@v4
