@@ -28,9 +28,18 @@
 - 영향: 자료 ID, 등록일, 검토 상태, 부가 설명을 목록에서 제거하고 공통 작업 지침에 같은 형식을 명시함.
 - 관련 문서: README.md, docs/references.md, AGENTS.md, docs/project-plan.md, docs/README.md
 
+## 2026-10-05 — 로컬 개발·검증 및 Pages 배포 기반 설정
+
+- ID: DEC-010
+- 상태: 확정
+- 근거: 사용자가 Codex로 로컬 개발·테스트를 진행하고 저장소 푸시 뒤 배포할 수 있는 설정을 요청함.
+- 결정: Vite와 Vitest를 사용하고, `main` 브랜치 푸시에서 검증과 GitHub Pages 배포 워크플로를 실행한다. Vite의 기본 경로는 프로젝트 사이트 주소에 맞춰 `/MonBTI/`로 설정한다.
+- 영향: 로컬에서는 npm 명령으로 개발·테스트·빌드를 수행할 수 있고, GitHub Pages Source를 GitHub Actions로 선택하면 `main` 푸시가 배포로 이어진다.
+- 관련 문서: README.md, docs/project-plan.md, docs/development.md, package.json, vite.config.js, .github/workflows/ci.yml, .github/workflows/deploy-pages.yml
+
 ## 보류 및 미정
 
-참고 자료의 채택 범위, 성향 분류, 문항 수, 답변 형식, 점수 계산, 결과 및 공유 구성, 기술 스택은 미정입니다.
+참고 자료의 채택 범위, 성향 분류, 문항 수, 답변 형식, 점수 계산, 결과 및 공유 구성은 미정입니다.
 앞선 대화의 예시는 결정으로 승격하지 않습니다.
 
 ## 후속 기록 형식

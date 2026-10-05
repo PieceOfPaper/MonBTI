@@ -2,9 +2,41 @@
 
 ## 현재 상태
 
-저장소에는 프로젝트 소개, 기획 문서, AI 작업 지침과 기본 파일 설정이 있습니다.
-아직 웹 구현, 기술 스택, 패키지 관리 도구, 빌드·테스트 명령, Pages 배포 워크플로는 없습니다.
-따라서 현재 실행할 애플리케이션 명령이나 게시된 서비스 주소도 없습니다.
+저장소에는 작품 선택 화면, 기획 문서, AI 작업 지침 및 GitHub Pages 배포 기반이 있습니다.
+Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테스트에는 Vitest를 사용합니다.
+정적 산출물은 `dist/`에 생성되며 GitHub Pages에서 `/MonBTI/` 경로로 제공되도록 설정되어 있습니다.
+
+## 로컬 개발 및 검증
+
+Node.js 22 이상과 npm이 필요합니다. 저장소 루트에서 다음을 실행합니다.
+
+```sh
+npm install
+npm run dev
+```
+
+개발 서버 주소는 실행 결과에 표시됩니다. 배포 산출물을 로컬에서 확인하려면 다음을 사용합니다.
+
+```sh
+npm run build
+npm run preview
+```
+
+변경을 저장소에 올리기 전에는 아래 검증을 실행합니다.
+
+```sh
+npm test
+npm run build
+```
+
+`package-lock.json`은 재현 가능한 설치를 위해 커밋합니다. `node_modules/`, `dist/`, 테스트 산출물은 커밋하지 않습니다.
+
+## CI 및 GitHub Pages 배포
+
+- `.github/workflows/ci.yml`은 풀 리퀘스트와 `main` 브랜치 푸시에서 의존성을 고정 설치하고 테스트와 빌드를 실행합니다.
+- `.github/workflows/deploy-pages.yml`은 `main` 브랜치 푸시 또는 수동 실행에서 `dist/`를 GitHub Pages에 배포합니다.
+- GitHub 저장소의 **Settings → Pages → Build and deployment**에서 Source를 **GitHub Actions**로 한 번 선택해야 합니다. 이 설정은 워크플로 파일만으로 대신할 수 없습니다.
+- 정상 배포 주소는 `https://pieceofpaper.github.io/MonBTI/`입니다. 저장소 이름을 바꾸면 `vite.config.js`의 `base`도 같은 경로로 바꿉니다.
 
 ## Codex와 Claude Code 시작 방법
 
@@ -30,18 +62,14 @@ Codex를 설치·인증한 환경에서는 저장소 루트에서 `codex`를, Cl
 - 동시에 작업한다면 별도 브랜치 또는 worktree에서 작업하고 같은 파일의 동시 편집을 피합니다.
 - 개인 설정과 인증 정보는 로컬에 둡니다. 공통 규칙은 AGENTS.md에서만 수정합니다.
 
-## 구현을 시작할 때 정할 사항
+## 구현을 이어갈 때 정할 사항
 
-- 기술 스택과 선택 이유
 - 작품별 데이터 구조, 질문·결과·점수 계산의 구분
-- 의존성 설치, 개발 서버, 검증, 빌드 명령
-- GitHub Pages 배포 방식과 /MonBTI/ 기본 경로
 - 결과 URL과 새로고침 처리
 - 모바일 화면, 키보드 사용, 결과 공유
 - 데이터·계산 변경에 필요한 검증
 
-이 항목이 결정되면 이 문서에 실제 명령과 절차를 추가합니다.
-웹 구현 전에는 배포용 워크플로를 활성화하지 않습니다.
+이 항목이 결정되면 이 문서와 관련 기획을 함께 갱신합니다.
 
 ## 기본 파일 설정
 

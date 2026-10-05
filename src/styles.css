@@ -1,0 +1,16 @@
+:root { color: #f7f4ec; background: #18231e; font-family: Pretendard, "Noto Sans KR", system-ui, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button { font: inherit; }
+.hero { display: grid; align-content: center; min-height: 100dvh; max-width: 720px; margin: auto; padding: 2rem; }
+.eyebrow { margin: 0 0 .75rem; color: #c8da81; font-weight: 700; letter-spacing: .12em; }
+h1 { margin: 0; font-size: clamp(2rem, 8vw, 4.5rem); line-height: 1.15; }
+.hero > p:not(.eyebrow) { max-width: 40rem; color: #d5ddd7; font-size: 1.125rem; line-height: 1.7; }
+.game-list { margin: 2rem 0 0; padding: 0; list-style: none; }
+.game-card, .back-button { border: 1px solid #789151; border-radius: 1rem; padding: 1.5rem; color: inherit; background: #243529; text-align: left; cursor: pointer; }
+.game-card { width: 100%; }
+.game-card:hover, .game-card:focus-visible, .back-button:hover, .back-button:focus-visible { outline: 3px solid #d8ef86; outline-offset: 3px; background: #304535; }
+.game-card strong, .game-card span { display: block; }
+.game-card strong { margin: .35rem 0; font-size: 1.35rem; }
+.game-card__label { color: #c8da81; font-size: .875rem; font-weight: 700; }
+.back-button { width: fit-content; margin-top: 1rem; }
