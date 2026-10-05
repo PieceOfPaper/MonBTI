@@ -11,10 +11,15 @@
 | REF-002 | [몬BTI 참고 영상 2](https://youtu.be/H6VwKlf0sEM?si=PT2gZXIvy-vL2lh3) | 2026-10-05 | 사용자 설명상 월드 시기의 몬BTI 영상. 원문·자막 검토 대기 |
 | REF-003 | [몬BTI 참고 영상 3](https://youtu.be/W1PIL_u_oz4?si=sXscg0owIdyuO2hC) | 2026-10-05 | 사용자 설명상 월드 시기의 몬BTI 영상. 원문·자막 검토 대기 |
 | REF-004 | [An (almost) definitive guide to picking a weapon — Reddit](https://www.reddit.com/r/MonsterHunter/comments/1jj5hze/an_almost_definitive_guide_to_picking_a_weapon/?tl=ko) | 2026-10-05 | 본문·이미지·분류 검토 대기 |
+| REF-005 | [[MHW:IB] 무기를 고민하는 당신께, 무기추천 — 인벤](https://www.inven.co.kr/board/mhf/3749/9156) | 2026-10-05 | 월드·아이스본 기준. 제목·도입부 확인, 상세 내용과 와일즈 적용 여부 검토 대기 |
+| REF-006 | [몬스터 헌터 와일즈 입문, 초보 무기 고르는 법 2026 — 꿀잼픽](https://sideprofit.tistory.com/269) | 2026-10-05 | 와일즈 입문 무기 선택 글. 제목 확인, 상세 내용 검토 대기 |
+| REF-007 | [선브레이크 무기 퀴즈 — 몬스터헌터 공식 사이트](https://www.monsterhunter.com/content/sunbreak-weaponquiz/ko/) | 2026-10-05 | 선브레이크 무기 퀴즈 참고 후보. 페이지 내용 확인 실패, 질문·결과 구조 검토 대기 |
 
 영상 1~3의 표시는 자료를 식별하기 위한 임시 이름이며, 영상의 정식 제목을 확인한 것은 아닙니다.
 Reddit 자료 이름은 제공된 URL의 제목 부분을 바탕으로 등록했습니다.
-참고 자료의 채택 범위는 미정이며, 월드 시기의 설명을 와일즈에 그대로 적용하지 않습니다.
+REF-005·REF-006은 페이지 제목을 확인했으며, 내용 분석 및 채택 범위는 검토 대기입니다.
+REF-007의 이름은 공식 사이트 URL을 기준으로 등록한 표시 이름입니다. 페이지 내용을 확인하지 못했으므로 실제 질문·결과를 검토한 것으로 간주하지 않습니다.
+참고 자료의 채택 범위는 미정이며, 월드·아이스본 및 선브레이크의 설명을 와일즈에 그대로 적용하지 않습니다.
 
 ## 자료별 검토 기록에 포함할 항목
 
