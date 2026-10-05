@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "format_version": 3,
+    "source": {
+      "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
+      "sheet": "Wilds_Weapon"
+    },
+    "exported_at": "2026-10-05T12:34:47.428Z",
+    "converted_at": "2026-10-05T12:34:47.496Z"
+  },
+  "weapons": [
+    {
+      "weapon_id": "great_sword",
+      "weapon_name": "대검",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "long_sword",
+      "weapon_name": "태도",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "sword_and_shield",
+      "weapon_name": "한손검",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "dual_blades",
+      "weapon_name": "쌍검",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "hammer",
+      "weapon_name": "해머",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "hunting_horn",
+      "weapon_name": "수렵피리",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "lance",
+      "weapon_name": "랜스",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "gunlance",
+      "weapon_name": "건랜스",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "switch_axe",
+      "weapon_name": "슬래시액스",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "charge_blade",
+      "weapon_name": "차지액스",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "insect_glaive",
+      "weapon_name": "조충곤",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "light_bowgun",
+      "weapon_name": "라이트보우건",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "heavy_bowgun",
+      "weapon_name": "헤비보우건",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    },
+    {
+      "weapon_id": "bow",
+      "weapon_name": "활",
+      "attack": 50,
+      "freedom": 50,
+      "combo": 50,
+      "resource": 50,
+      "counter": 50
+    }
+  ]
+}

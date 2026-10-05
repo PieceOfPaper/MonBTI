@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "format_version": 3,
+    "source": {
+      "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
+      "sheet": "Wilds_Question"
+    },
+    "exported_at": "2026-10-05T12:34:47.428Z",
+    "converted_at": "2026-10-05T12:34:47.496Z"
+  },
+  "questions": [
+    {
+      "question_id": "wilds_q001",
+      "question_order": 1,
+      "question_text": "나는 공격 중 자유롭게 움직이면서, 기회를 잡아 모아 둔 힘으로 큰 대미지를 넣고 싶다.",
+      "attack": 100,
+      "freedom": 50,
+      "combo": 0,
+      "resource": 0,
+      "counter": 0
+    }
+  ]
+}
