@@ -5,7 +5,7 @@
 ## 작업 시작
 
 - README.md, docs/project-plan.md, docs/decisions.md를 읽고 현재 방향을 확인합니다.
-- 검사 관련 작업은 docs/test-design.md와 docs/references.md도 읽습니다.
+- 검사 관련 작업은 docs/test-design.md, docs/data-schema.md, docs/references.md도 읽습니다.
 - 실행 방법과 기술 상태는 docs/development.md에서 확인합니다.
 - 사용자의 현재 명시적 지시를 우선합니다. 제안이나 과거 대화를 확정 기획으로 간주하지 않습니다.
 
@@ -35,6 +35,7 @@
 - GitHub Pages에 배포할 수 있는 정적 웹사이트를 기본으로 설계합니다.
 - 저장소 하위 경로 /MonBTI/에서 자산 경로와 결과 링크가 동작하도록 고려합니다.
 - 질문, 무기 특성, 결과 문구와 점수 계산을 분리하고, 작품별 데이터가 섞이지 않게 구성합니다.
+- 무기·질문 원본은 MonBTI_테이블의 작품별 탭입니다. 기준 필드는 attack, freedom, combo, resource, counter로 통일하고 열 정의·빈칸·JSON 변환 규칙은 docs/data-schema.md를 따릅니다. 임시 여부를 구분하는 필드는 두지 않습니다.
 - 실제 명령과 의존성이 생긴 뒤 개발 문서에 실행·검증·빌드 명령을 기록합니다. 존재하지 않는 명령을 실행했다고 보고하지 않습니다.
 - 문서 변경은 내용 일관성, 상대 링크와 변경 내용을 확인합니다.
 - 계산 구현은 동점, 답변 수정, 미완료 답변을 확인합니다. 화면 구현은 모바일, 키보드 사용, 새로고침과 공유 링크를 확인합니다.
