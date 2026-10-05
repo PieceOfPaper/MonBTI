@@ -1,0 +1,29 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Secrets / local environment
+.env
+.env.*
+!.env.example
+*.log
+
+# AI local configuration
+CLAUDE.local.md
+.claude/settings.local.json
+.codex/config.toml
+.codex/auth.json
+
+# Dependencies / generated outputs
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.playwright/
+playwright-report/
+test-results/
