@@ -6,7 +6,6 @@ MonBTI의 기획서는 이 폴더 하위에 Markdown으로 관리합니다.
 | --- | --- |
 | [project-plan.md](project-plan.md) | 최신 제품 기획과 사용자 흐름 |
 | [test-design.md](test-design.md) | 검사·분류·추천 설계 |
-| [weapon-selection-factors.md](weapon-selection-factors.md) | 참고 자료에서 추출한 선택 기준과 설계 제안 |
 | [decisions.md](decisions.md) | 날짜별 확정 사항과 방향 변경 |
 | [references.md](references.md) | 참고 자료의 제목과 링크 목록 |
 | [development.md](development.md) | 개발 상태, 실행 방법, AI 협업 |

@@ -23,7 +23,6 @@ MBTI 검사처럼 질문에 답하는 경험을 제공하며, 기존 유저에�
 | [기획 문서 안내](docs/README.md) | 문서 구성과 관리 원칙 |
 | [프로젝트 기획](docs/project-plan.md) | 대상, 목적, 작품 선택 흐름, 범위 |
 | [검사 설계](docs/test-design.md) | 질문·분류·추천 설계와 미정 항목 |
-| [무기 선택 기준 분석](docs/weapon-selection-factors.md) | 참고 자료에서 추출한 기준과 설계 제안 |
 | [결정 기록](docs/decisions.md) | 확정 사항과 방향 변경 이력 |
 | [참고 자료](docs/references.md) | 참고 자료의 제목과 링크 목록 |
 | [개발 및 AI 협업](docs/development.md) | Codex·Claude 작업 방법과 개발 준비 |
