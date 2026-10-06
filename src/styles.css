@@ -54,7 +54,6 @@ legend { padding: 0; margin-bottom: 1.5rem; }
 .result h2 { margin: 0 0 1rem; font-size: 1.35rem; word-break: keep-all; }
 .result__section { padding-top: 1.25rem; border-top: 1px solid #304535; }
 .result__actions, .share { display: flex; flex-wrap: wrap; gap: .75rem; }
-.notice { margin: 0; color: #a9b8ad; font-size: .9rem; }
 
 /* 1~3순위. 1순위는 첫 줄 전체를 차지하고 가장 크게 보인다. */
 .ranking { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: .5rem 0 0; padding: 0; list-style: none; }

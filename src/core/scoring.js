@@ -47,12 +47,12 @@ export function computeAxisTotals(questions, answers) {
   return result;
 }
 
-// 임시 정규화: 합산값을 가능한 최대 크기로 나눠 -1~1로 만든 뒤 무기 기준값과 같은 0~100에 놓는다.
-// 50 + 50 × total / maxAbs. 미측정 축은 null로 둔다. 확정 공식이 정해지면 바꾼다(docs/test-design.md).
+// 사용자 점수 정규화: 합산값을 가능한 최대 크기로 나눠 -1~1로 만든 뒤 무기 기준값과 같은 0~100에 놓는다.
+// clamp(50 + 50 × total / maxAbs, 0, 100). 미측정 축은 null로 둔다(docs/test-design.md '사용자 점수 정규화').
 export function computeAxisProfile(totals) {
   return Object.fromEntries(AXIS_IDS.map((axis) => {
     const { total, maxAbs } = totals[axis];
     if (total === null || !maxAbs) return [axis, null];
-    return [axis, 50 + (50 * total) / maxAbs];
+    return [axis, Math.min(100, Math.max(0, 50 + (50 * total) / maxAbs))];
   }));
 }

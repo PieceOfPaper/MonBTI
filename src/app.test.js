@@ -125,7 +125,7 @@ describe('화면', () => {
   });
 });
 
-describe('임시 추천과 공유 링크', () => {
+describe('추천과 공유 링크', () => {
   it('와일즈 무기는 모두 아이콘과 소개 영상을 가진다', () => {
     for (const weapon of wilds.weapons) {
       expect(weapon.icon, weapon.weapon_id).toBeTruthy();
@@ -133,7 +133,7 @@ describe('임시 추천과 공유 링크', () => {
     }
   });
 
-  it('같은 답변은 같은 서로 다른 무기 세 개를 고르고, 답변을 바꾸면 다시 고른다', () => {
+  it('같은 답변은 같은 서로 다른 무기 세 개를 추천하고, 답변을 수정하면 현재 답변으로 다시 계산한다', () => {
     const answers = Object.fromEntries(wilds.questions.map(({ question_id }) => [question_id, 4]));
     const first = buildResult(wilds, answers);
     expect(buildResult(wilds, { ...answers }).weapons).toEqual(first.weapons);

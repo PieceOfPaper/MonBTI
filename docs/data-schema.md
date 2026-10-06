@@ -222,7 +222,7 @@ npm run data:convert -- --if-changed       # 실질 데이터가 바뀐 파일�
 무기 값은 같은 0~100 척도에서 비교합니다. `attack`·`counter`는 `|user - weapon|`, `freedom`은 `max(0, user - weapon)`, `combo`·`resource`는 `max(0, weapon - user)`를 불일치로 사용합니다. 축 적합도는 `100 - 불일치`이며 측정된 축의 동일 가중 평균이 무기별 최종 추천 점수입니다.
 
 질문의 영향 가중치와 최종 추천에서 축의 중요도는 별개입니다. 질문 수나 가중치 절댓값 합은 정규화 분모에도 함께 반영되므로 특정 축의 최종 비중을 자동으로 높이지 않습니다. 현재 추천 축 가중치는 모두 1입니다.
-현재 사이트의 `computeAxisProfile`은 위 정규화와 이미 같지만, 무기 추천은 아직 임시 무작위 구현입니다. 확정 공식을 구현할 때 추천 함수와 테스트를 교체합니다.
+사용자 점수는 `computeAxisProfile`(`src/core/scoring.js`), 무기 적합도와 순위는 `src/core/recommend.js`에서 계산합니다.
 
 ## 사이트 표시 자료
 

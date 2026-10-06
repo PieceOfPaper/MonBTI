@@ -91,7 +91,7 @@ describe('답변 관리', () => {
   });
 });
 
-describe('임시 0~100 환산', () => {
+describe('사용자 점수 정규화', () => {
   it('합산값을 가능한 최대 크기 기준으로 0~100에 놓고 미측정 축은 null로 둔다', () => {
     const questions = [q('a', 1, { attack: 100, freedom: -50 }), q('b', 2, { attack: 50 })];
     const profile = computeAxisProfile(computeAxisTotals(questions, { a: 6, b: 1 }));

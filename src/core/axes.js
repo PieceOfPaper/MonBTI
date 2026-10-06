@@ -5,7 +5,7 @@ export const AXES = [
   { id: 'freedom', name: '자유도', short: '자유' },
   { id: 'combo', name: '콤보 의존', short: '연계' },
   { id: 'resource', name: '자원 부담', short: '자원' },
-  { id: 'counter', name: '카운터 의존', short: '반격' },
+  { id: 'counter', name: '카운터 취향', short: '반격' },
 ];
 
 export const AXIS_IDS = AXES.map(({ id }) => id);

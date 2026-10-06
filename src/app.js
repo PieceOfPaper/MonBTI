@@ -2,7 +2,7 @@
 // 경로 대신 #/<작품 ID>, #/<작품 ID>/result, #/<작품 ID>/share/<코드> 형식을 사용한다.
 // 외부로 공유하는 링크만 ?r=<작품 ID>.<코드> 형식이며, 열면 내부 해시 주소로 바꾼다(core/share.js).
 import { AXIS_IDS } from './core/axes.js';
-import { answerSeed, pickTemporaryRecommendations } from './core/recommend.js';
+import { recommendWeapons } from './core/recommend.js';
 import {
   computeAxisProfile, computeAxisTotals, firstUnansweredIndex, isComplete, sanitizeAnswers, setAnswer,
 } from './core/scoring.js';
@@ -39,12 +39,10 @@ export function shareParamToHash(search) {
   return shared ? shareHash(shared.gameId, shared.code) : null;
 }
 
-// 완료한 답변으로 결과를 만든다. 무기 선택은 임시 무작위(core/recommend.js)다.
+// 완료한 답변으로 결과를 만든다. 무기 순위는 사용자 점수와 무기 기준값의 적합도로 정한다(core/recommend.js).
 export function buildResult(game, answers) {
-  return {
-    weapons: pickTemporaryRecommendations(game.weapons, answerSeed(game.questions, answers)),
-    profile: computeAxisProfile(computeAxisTotals(game.questions, answers)),
-  };
+  const profile = computeAxisProfile(computeAxisTotals(game.questions, answers));
+  return { weapons: recommendWeapons(game.weapons, profile), profile };
 }
 
 // 공유 링크. 축 값은 0~100 정수로 반올림해 담는다. # 없이 쿼리 하나만 써서 공유 과정의 변형을 피한다.

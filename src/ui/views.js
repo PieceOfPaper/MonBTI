@@ -147,7 +147,6 @@ export function renderResult(game, result, { selectedIndex = 0, shared = false }
     <h1 id="result-title" tabindex="-1">${shared ? '친구와 어울리는 무기' : '나와 어울리는 무기'}</h1>
     <ol class="ranking" aria-label="추천 무기 순위">${renderRanking(result.weapons, selectedIndex)}
     </ol>
-    <p class="notice" role="note">추천 방식을 준비하는 동안에는 무기를 무작위로 골라 보여 드려요.</p>
     ${renderComparison(result.profile, selected, shared ? '친구' : '나')}
     ${renderVideo(selected)}
     <section class="result__section" aria-labelledby="share-title">

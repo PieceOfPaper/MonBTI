@@ -17,7 +17,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `src/games/index.js` | 작품 등록과 작품별 데이터·표시 자료 연결 |
 | `src/games/<작품 ID>/media.js` | 무기별 아이콘·소개 영상 ID |
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
-| `src/core/` | 기준 축, 공통 응답, 축별 합산·임시 환산, 임시 추천(`recommend.js`), 공유 링크(`share.js`) |
+| `src/core/` | 기준 축, 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 공유 링크(`share.js`) |
 | `src/ui/views.js` | 화면 마크업 |
 | `src/ui/radar.js` | 오각형 방사형 차트 위치 계산과 SVG |
 | `src/ui/share-image.js` | 공유 이미지(캔버스). 공유할 때만 불러옴 |
@@ -100,9 +100,7 @@ Codex를 설치·인증한 환경에서는 저장소 루트에서 `codex`를, Cl
 
 ## 구현을 이어갈 때 정할 사항
 
-- 확정 추천 계산으로 `src/core/recommend.js`의 임시 무작위 선택 대체
-- `computeAxisProfile`의 현재 환산이 확정 정규화 공식과 일치하는지 회귀 테스트 추가
-- 추천 계산 도입 시 축별 비대칭 벌점, 동점, 답변 수정, 공유 링크 검증
+- 추천 이유 등 결과 설명 문구 데이터의 위치
 
 이 항목의 저장소 반영을 요청받으면 이 문서와 관련 기획을 함께 갱신합니다.
 

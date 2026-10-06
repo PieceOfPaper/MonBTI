@@ -5,8 +5,8 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_Question"
     },
-    "exported_at": "2026-10-06T07:18:04.823Z",
-    "converted_at": "2026-10-06T07:18:04.915Z"
+    "exported_at": "2026-10-06T15:18:50.249Z",
+    "converted_at": "2026-10-06T15:18:50.301Z"
   },
   "questions": [
     {
@@ -52,17 +52,17 @@
     {
       "question_id": "wilds_q005",
       "question_order": 5,
-      "question_text": "나는 누군가 던진 말에 딱 맞는 한마디를 돌려주는 게 재미있다.",
+      "question_text": "나는 상대가 한 행동을 그대로 이용해 되돌려주는 순간이 특히 통쾌하다.",
       "attack": 0,
       "freedom": 0,
       "combo": 0,
       "resource": 0,
-      "counter": 50
+      "counter": 25
     },
     {
       "question_id": "wilds_q006",
       "question_order": 6,
-      "question_text": "나는 내가 타이밍을 정하는 것보다, 주어진 신호에 맞춰 움직이는 게 편하다.",
+      "question_text": "나는 신호를 본 뒤 정해진 순간에 정확히 반응했을 때 큰 만족감을 느낀다.",
       "attack": 0,
       "freedom": 0,
       "combo": 0,
@@ -72,7 +72,7 @@
     {
       "question_id": "wilds_q007",
       "question_order": 7,
-      "question_text": "나는 문제를 만났을 때 가능한 답을 늘리기보다, 조건에 딱 맞는 답을 찾아내는 게 재미있다.",
+      "question_text": "나는 여러 방법이 모두 통하는 것보다, 상황에 딱 맞는 대응 하나를 성공시키는 편이 더 재미있다.",
       "attack": 0,
       "freedom": 0,
       "combo": 0,
@@ -104,7 +104,7 @@
       "question_order": 10,
       "question_text": "나는 미리 여러 상황을 생각해 두기보다, 눈앞의 상황에 맞춰 바로 움직이는 게 편하다.",
       "attack": 0,
-      "freedom": 50,
+      "freedom": 75,
       "combo": 0,
       "resource": 0,
       "counter": 0
@@ -123,7 +123,7 @@
       "question_id": "wilds_q012",
       "question_order": 12,
       "question_text": "나는 작은 성과를 자주 확인할 수 있을 때 일이 더 재미있다.",
-      "attack": -50,
+      "attack": -75,
       "freedom": 0,
       "combo": 0,
       "resource": 0,
@@ -252,12 +252,12 @@
     {
       "question_id": "wilds_q025",
       "question_order": 25,
-      "question_text": "나는 먼저 기회를 만들기보다 이미 나타난 기회에 정확히 대응하는 편이 좋다.",
+      "question_text": "나는 상대의 움직임을 기다리기보다 내가 먼저 흐름을 만드는 편이 더 좋다.",
       "attack": 0,
       "freedom": 0,
       "combo": 0,
       "resource": 0,
-      "counter": 75
+      "counter": -100
     }
   ]
 }
