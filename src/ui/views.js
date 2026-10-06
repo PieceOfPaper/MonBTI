@@ -86,6 +86,7 @@ export function renderResult(game, totals) {
     return `<li class="axis${measured ? '' : ' axis--unmeasured'}">
         <div class="axis__head"><strong>${axis.name}</strong><span class="axis__value">${value}</span></div>
         <p class="axis__direction">${direction}</p>
+        <p class="axis__description">${escapeHtml(axis.description)}</p>
         ${measured ? `<p class="axis__meta">${axis.low} ↔ ${axis.high} · 관련 질문 ${count}개</p>` : ''}
       </li>`;
   }).join('');

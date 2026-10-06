@@ -86,6 +86,12 @@ describe('화면', () => {
     expect(html).toContain('측정하지 않았어요');
   });
 
+  it('결과 화면은 다섯 기준마다 쉬운 설명을 보여 준다', () => {
+    const html = renderResult(testGame, computeAxisTotals(testGame.questions, { wilds_q001: 5 }));
+    expect(html.match(/class="axis__description"/g)).toHaveLength(5);
+    expect(html).not.toContain('공격 연계');
+  });
+
   it('질문 문구의 HTML을 이스케이프한다', () => {
     const game = { ...testGame, questions: [{ ...testGame.questions[0], question_text: '<b>x</b>' }] };
     expect(renderQuestion(game, 0, {})).toContain('&lt;b&gt;x&lt;/b&gt;');

@@ -56,6 +56,7 @@ legend { padding: 0; margin-bottom: 1.5rem; }
 .axis__head { display: flex; justify-content: space-between; gap: 1rem; font-size: 1.1rem; }
 .axis__value { color: #c8da81; font-weight: 700; font-variant-numeric: tabular-nums; }
 .axis__direction { margin: .35rem 0 0; }
+.axis__description { margin: .5rem 0 0; color: #d3ddd5; font-size: .925rem; line-height: 1.55; }
 .axis__meta { margin: .35rem 0 0; color: #a9b8ad; font-size: .875rem; }
 .notice { padding: 1rem 1.2rem; border-left: 4px solid #c8da81; border-radius: .5rem; background: #243529; line-height: 1.6; }
 .result__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }

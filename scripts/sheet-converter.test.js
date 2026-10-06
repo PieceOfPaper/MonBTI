@@ -23,6 +23,13 @@ describe('무기 탭 변환', () => {
     ]);
   });
 
+  it('reason 메모 열은 JSON에 포함하지 않는다', () => {
+    const rows = [[...WEAPON_HEADER, 'reason'], ['lance', '랜스', 30, 20, 40, 10, 60, '가드 중심']];
+    expect(convertWeapons(rows)).toEqual([
+      { weapon_id: 'lance', weapon_name: '랜스', attack: 30, freedom: 20, combo: 40, resource: 10, counter: 60 },
+    ]);
+  });
+
   it('누락·범위 밖·불리언 값과 ID 중복을 오류로 처리한다', () => {
     const rows = [
       WEAPON_HEADER,
@@ -54,6 +61,18 @@ describe('질문 탭 변환', () => {
     expect(convertQuestions(rows)).toEqual([
       { question_id: 'q1', question_order: 1, question_text: '첫 번째', attack: 100, freedom: 50, combo: 0, resource: 0, counter: 0 },
       { question_id: 'q2', question_order: 2, question_text: '두 번째', attack: 0, freedom: -40, combo: 0, resource: 0, counter: 0 },
+    ]);
+  });
+
+  it('분류1·분류2 메모 열은 JSON에 포함하지 않는다', () => {
+    const rows = [
+      [...QUESTION_HEADER, '분류1', '분류2'],
+      ['q1', 1, '가', 0, 0, 75, 0, 0, '숙련', null],
+      ['q2', 2, '나', 0, 0, 0, -100, 0, '상태 확인', '피로'],
+    ];
+    expect(convertQuestions(rows)).toEqual([
+      { question_id: 'q1', question_order: 1, question_text: '가', attack: 0, freedom: 0, combo: 75, resource: 0, counter: 0 },
+      { question_id: 'q2', question_order: 2, question_text: '나', attack: 0, freedom: 0, combo: 0, resource: -100, counter: 0 },
     ]);
   });
 
