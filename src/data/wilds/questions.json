@@ -5,15 +5,15 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_Question"
     },
-    "exported_at": "2026-10-05T14:07:41.053Z",
-    "converted_at": "2026-10-05T14:07:41.136Z"
+    "exported_at": "2026-10-06T07:18:04.823Z",
+    "converted_at": "2026-10-06T07:18:04.915Z"
   },
   "questions": [
     {
       "question_id": "wilds_q001",
       "question_order": 1,
       "question_text": "나는 결과가 한순간에 결정되는 일이라면, 그 순간을 기다리는 과정도 즐겁다.",
-      "attack": 80,
+      "attack": 75,
       "freedom": 0,
       "combo": 0,
       "resource": 0,
@@ -22,10 +22,10 @@
     {
       "question_id": "wilds_q002",
       "question_order": 2,
-      "question_text": "나는 각각 따로 끝나는 일보다, 앞에서 한 일이 다음 일로 이어지는 과정이 더 재미있다.",
+      "question_text": "나는 몇 가지 단순한 방법만 반복하기보다, 여러 동작을 알맞게 조합해야 하는 일이 더 흥미롭다.",
       "attack": 0,
       "freedom": 0,
-      "combo": 100,
+      "combo": 75,
       "resource": 0,
       "counter": 0
     },
@@ -42,22 +42,22 @@
     {
       "question_id": "wilds_q004",
       "question_order": 4,
-      "question_text": "나는 가진 것을 아껴 두었다가 쓸 순간을 고르는 게 재미있다.",
-      "attack": 40,
+      "question_text": "나는 한정된 양을 계속 확인하며, 사용할 때와 남겨둘 때를 판단하는 일이 재미있다.",
+      "attack": 0,
       "freedom": 0,
       "combo": 0,
-      "resource": 80,
+      "resource": 75,
       "counter": 0
     },
     {
       "question_id": "wilds_q005",
       "question_order": 5,
       "question_text": "나는 누군가 던진 말에 딱 맞는 한마디를 돌려주는 게 재미있다.",
-      "attack": 20,
+      "attack": 0,
       "freedom": 0,
       "combo": 0,
       "resource": 0,
-      "counter": 60
+      "counter": 50
     },
     {
       "question_id": "wilds_q006",
@@ -77,7 +77,7 @@
       "freedom": 0,
       "combo": 0,
       "resource": 0,
-      "counter": 40
+      "counter": 50
     },
     {
       "question_id": "wilds_q008",
@@ -85,7 +85,7 @@
       "question_text": "나는 상황이 바뀌면 하던 일을 바로 멈출 수 있어야 편하다.",
       "attack": 0,
       "freedom": 100,
-      "combo": -20,
+      "combo": 0,
       "resource": 0,
       "counter": 0
     },
@@ -104,10 +104,160 @@
       "question_order": 10,
       "question_text": "나는 미리 여러 상황을 생각해 두기보다, 눈앞의 상황에 맞춰 바로 움직이는 게 편하다.",
       "attack": 0,
-      "freedom": 60,
+      "freedom": 50,
       "combo": 0,
-      "resource": -20,
+      "resource": 0,
       "counter": 0
+    },
+    {
+      "question_id": "wilds_q011",
+      "question_order": 11,
+      "question_text": "나는 여러 번 잘해 온 것보다 결정적인 순간에 제대로 해내는 것이 더 만족스럽다.",
+      "attack": 75,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q012",
+      "question_order": 12,
+      "question_text": "나는 작은 성과를 자주 확인할 수 있을 때 일이 더 재미있다.",
+      "attack": -50,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q013",
+      "question_order": 13,
+      "question_text": "나는 중간 과정이 답답하더라도 마지막에 크게 보상받는 일을 좋아한다.",
+      "attack": 75,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q014",
+      "question_order": 14,
+      "question_text": "나는 한 번의 실수가 크게 남는 것보다 다음 시도로 금방 만회할 수 있는 편이 좋다.",
+      "attack": -75,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q015",
+      "question_order": 15,
+      "question_text": "나는 처음부터 정확히 결정해야 하는 것보다 움직이면서 고칠 수 있는 편이 좋다.",
+      "attack": 0,
+      "freedom": 75,
+      "combo": 0,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q016",
+      "question_order": 16,
+      "question_text": "나는 처음에는 다루기 어렵더라도 익히는 과정이 재미있으면 괜찮다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 75,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q017",
+      "question_order": 17,
+      "question_text": "나는 원하는 결과를 내려면 여러 동작을 익혀야 하는 것도 괜찮다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 75,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q018",
+      "question_order": 18,
+      "question_text": "나는 익숙해진 뒤에도 조작에 계속 신경 써야 하는 것보다 자연스럽게 사용할 수 있는 것이 좋다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": -75,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q019",
+      "question_order": 19,
+      "question_text": "나는 일부 동작을 놓치면 결과가 아쉬워지는 구조도 받아들일 수 있다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 75,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q020",
+      "question_order": 20,
+      "question_text": "나는 익숙하지 않아도 기본적인 역할은 충분히 할 수 있는 것이 좋다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": -75,
+      "resource": 0,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q021",
+      "question_order": 21,
+      "question_text": "나는 여러 가지 상태를 동시에 확인하면서 조절하는 일도 꽤 재미있다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 75,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q022",
+      "question_order": 22,
+      "question_text": "나는 좋은 상태를 유지하려면 계속 관리해야 하는 것보다 언제나 비슷하게 작동하는 것이 좋다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 0,
+      "resource": -75,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q023",
+      "question_order": 23,
+      "question_text": "나는 무언가를 사용할 때마다 다시 보충해야 한다면 번거롭게 느낀다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 0,
+      "resource": -75,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q024",
+      "question_order": 24,
+      "question_text": "나는 좋은 상태를 유지하기 위해 중간중간 손을 보는 과정도 다루는 재미의 일부라고 느낀다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 75,
+      "counter": 0
+    },
+    {
+      "question_id": "wilds_q025",
+      "question_order": 25,
+      "question_text": "나는 먼저 기회를 만들기보다 이미 나타난 기회에 정확히 대응하는 편이 좋다.",
+      "attack": 0,
+      "freedom": 0,
+      "combo": 0,
+      "resource": 0,
+      "counter": 75
     }
   ]
 }

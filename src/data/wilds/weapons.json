@@ -5,8 +5,8 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_Weapon"
     },
-    "exported_at": "2026-10-05T14:07:41.053Z",
-    "converted_at": "2026-10-05T14:07:41.136Z"
+    "exported_at": "2026-10-06T07:18:04.823Z",
+    "converted_at": "2026-10-06T07:18:04.915Z"
   },
   "weapons": [
     {
@@ -113,7 +113,7 @@
       "weapon_name": "라이트보우건",
       "attack": 20,
       "freedom": 80,
-      "combo": 10,
+      "combo": 0,
       "resource": 20,
       "counter": 0
     },
@@ -122,7 +122,7 @@
       "weapon_name": "헤비보우건",
       "attack": 50,
       "freedom": 40,
-      "combo": 10,
+      "combo": 0,
       "resource": 20,
       "counter": 10
     },
@@ -131,7 +131,7 @@
       "weapon_name": "활",
       "attack": 30,
       "freedom": 90,
-      "combo": 10,
+      "combo": 0,
       "resource": 50,
       "counter": 20
     }
