@@ -1,6 +1,7 @@
 // 화면 마크업. 상태를 받아 문자열을 돌려주며 이벤트 연결은 app.js가 맡는다.
 import { AXES } from '../core/axes.js';
 import { RESPONSES } from '../core/responses.js';
+import { renderRadarSvg } from './radar.js';
 
 export function escapeHtml(value) {
   return String(value)
@@ -65,41 +66,100 @@ export function renderQuestion(game, index, answers) {
   </section>`;
 }
 
-function formatTotal(total) {
-  // 표시할 때만 소수 첫째 자리로 반올림한다. 계산값은 그대로 둔다.
-  const rounded = Math.round(total * 10) / 10 || 0;
-  return rounded > 0 ? `+${rounded}` : String(rounded);
+const RANK_LABELS = ['1순위', '2순위', '3순위'];
+
+function weaponIcon(weapon, className) {
+  return weapon.icon
+    ? `<img class="${className}" src="${escapeHtml(weapon.icon)}" alt="" width="100" height="100" />`
+    : `<span class="${className} ${className}--text" aria-hidden="true">${escapeHtml(weapon.weapon_name.slice(0, 1))}</span>`;
 }
 
-function describeAxis(axis, { total, count }) {
-  if (total === null) return { value: '—', direction: '이번 질문에서는 측정하지 않았어요.' };
-  const value = formatTotal(total);
-  if (total > 0) return { value, direction: `${axis.high} 쪽`, count };
-  if (total < 0) return { value, direction: `${axis.low} 쪽`, count };
-  return { value, direction: '어느 한쪽으로 기울지 않음', count };
+function renderRanking(weapons, selectedIndex) {
+  return weapons.map((weapon, index) => `
+      <li class="rank rank--${index + 1}">
+        <button class="rank__button" type="button" data-select="${index}" aria-pressed="${index === selectedIndex}">
+          <span class="rank__label">${RANK_LABELS[index]}</span>
+          ${weaponIcon(weapon, 'rank__icon')}
+          <strong class="rank__name">${escapeHtml(weapon.weapon_name)}</strong>
+        </button>
+      </li>`).join('');
 }
 
-export function renderResult(game, totals) {
-  const rows = AXES.map((axis) => {
-    const { value, direction, count } = describeAxis(axis, totals[axis.id]);
-    const measured = totals[axis.id].total !== null;
-    return `<li class="axis${measured ? '' : ' axis--unmeasured'}">
-        <div class="axis__head"><strong>${axis.name}</strong><span class="axis__value">${value}</span></div>
-        <p class="axis__direction">${direction}</p>
-        <p class="axis__description">${escapeHtml(axis.description)}</p>
-        ${measured ? `<p class="axis__meta">${axis.low} ↔ ${axis.high} · 관련 질문 ${count}개</p>` : ''}
-      </li>`;
-  }).join('');
+const formatValue = (value) => (value === null ? '측정 안 됨' : String(Math.round(value)));
+
+function renderComparison(profile, weapon, who) {
+  const chart = renderRadarSvg(
+    [{ values: weapon, className: 'radar__series--weapon' }, { values: profile, className: 'radar__series--me' }],
+    { label: `${who}와 ${escapeHtml(weapon.weapon_name)}의 기준 비교` },
+  );
+  const rows = AXES.map(({ id, short }) => `
+          <tr><th scope="row">${short}</th><td>${formatValue(profile[id])}</td><td>${formatValue(weapon[id])}</td></tr>`).join('');
+  return `<section class="result__section" aria-labelledby="compare-title">
+      <h2 id="compare-title">${who} vs ${escapeHtml(weapon.weapon_name)}</h2>
+      <div class="compare">
+        <figure class="compare__chart">${chart}
+          <figcaption class="legend">
+            <span class="legend__item legend__item--me">${who}</span>
+            <span class="legend__item legend__item--weapon">${escapeHtml(weapon.weapon_name)}</span>
+          </figcaption>
+        </figure>
+        <table class="compare__table">
+          <thead><tr><th scope="col">기준</th><th scope="col">${who}</th><th scope="col">${escapeHtml(weapon.weapon_name)}</th></tr></thead>
+          <tbody>${rows}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
+function renderVideo(weapon) {
+  if (!weapon.videoId) return '';
+  const id = escapeHtml(weapon.videoId);
+  // 처음에는 미리보기 이미지만 보여 주고, 누르면 그 자리에서 영상을 바로 재생한다.
+  return `<section class="result__section" aria-labelledby="video-title">
+      <h2 id="video-title">${escapeHtml(weapon.weapon_name)} 소개 영상</h2>
+      <div class="video" data-video-id="${id}">
+        <button class="video__play" type="button" data-action="play-video" aria-label="${escapeHtml(weapon.weapon_name)} 소개 영상 재생">
+          <img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy" />
+          <span class="video__icon" aria-hidden="true"></span>
+        </button>
+      </div>
+      <p class="video__credit">출처: 캡콤아시아 공식 유튜브</p>
+    </section>`;
+}
+
+export function renderVideoPlayer(videoId, title) {
+  const src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&rel=0&playsinline=1`;
+  return `<iframe src="${src}" title="${escapeHtml(title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+}
+
+// result: { weapons: [1~3순위], profile: { 축: 0~100 | null } }
+// shared가 참이면 공유 링크로 연 결과이며 답변 수정 대신 검사 시작을 안내한다.
+export function renderResult(game, result, { selectedIndex = 0, shared = false } = {}) {
+  const selected = result.weapons[selectedIndex];
+  const actions = shared
+    ? `<a class="button" href="#/${game.id}" data-action="start">나도 검사하기</a>`
+    : `<a class="button button--ghost" href="#/${game.id}" data-action="review">답변 수정하기</a>
+      <button class="button button--ghost" type="button" data-action="restart">처음부터 다시 하기</button>`;
 
   return `<section class="result" aria-labelledby="result-title">
     <p class="eyebrow">${escapeHtml(game.name)}</p>
-    <h1 id="result-title" tabindex="-1">나의 플레이 취향</h1>
-    <p class="result__lead">답변을 기준별로 더한 값입니다. 양수는 오른쪽 특성, 음수는 왼쪽 특성에 가깝다는 뜻이에요.</p>
-    <ul class="axes">${rows}</ul>
-    <p class="notice" role="note">무기 추천은 아직 준비 중이에요. 추천 방식이 정해지면 이 화면에서 어울리는 무기를 알려 드릴게요.</p>
+    <h1 id="result-title" tabindex="-1">${shared ? '친구와 어울리는 무기' : '나와 어울리는 무기'}</h1>
+    <ol class="ranking" aria-label="추천 무기 순위">${renderRanking(result.weapons, selectedIndex)}
+    </ol>
+    <p class="notice" role="note">추천 방식을 준비하는 동안에는 무기를 무작위로 골라 보여 드려요.</p>
+    ${renderComparison(result.profile, selected, shared ? '친구' : '나')}
+    ${renderVideo(selected)}
+    <section class="result__section" aria-labelledby="share-title">
+      <h2 id="share-title">결과 공유하기</h2>
+      <div class="share">
+        <button class="button" type="button" data-action="share-image">이미지로 공유</button>
+        <button class="button" type="button" data-action="share-link">링크 공유</button>
+      </div>
+      <p class="share__status" role="status" aria-live="polite"></p>
+    </section>
     <div class="result__actions">
-      <a class="button" href="#/${game.id}" data-action="review">답변 수정하기</a>
-      <button class="button button--ghost" type="button" data-action="restart">처음부터 다시 하기</button>
+      ${actions}
       <a class="button button--ghost" href="#/">작품 선택으로</a>
     </div>
   </section>`;

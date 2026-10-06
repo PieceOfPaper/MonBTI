@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { contribution, responseCoefficient } from './responses.js';
-import { computeAxisTotals, firstUnansweredIndex, isComplete, sanitizeAnswers, setAnswer } from './scoring.js';
+import { computeAxisProfile, computeAxisTotals, firstUnansweredIndex, isComplete, sanitizeAnswers, setAnswer } from './scoring.js';
 
 const q = (id, order, weights) => ({
   question_id: id, question_order: order, question_text: id,
@@ -30,8 +30,8 @@ describe('축별 합산', () => {
 
   it('예시 질문은 attack·freedom만 측정하고 나머지는 null이다', () => {
     const totals = computeAxisTotals([sample], { wilds_q001: 6 });
-    expect(totals.attack).toEqual({ total: 100, count: 1 });
-    expect(totals.freedom).toEqual({ total: 50, count: 1 });
+    expect(totals.attack).toEqual({ total: 100, count: 1, maxAbs: 100 });
+    expect(totals.freedom).toEqual({ total: 50, count: 1, maxAbs: 50 });
     expect(totals.combo.total).toBeNull();
     expect(totals.resource.total).toBeNull();
     expect(totals.counter.total).toBeNull();
@@ -46,12 +46,12 @@ describe('축별 합산', () => {
   it('상쇄된 합계 0은 null이 아닌 유효한 값이다', () => {
     const questions = [q('a', 1, { combo: 60 }), q('b', 2, { combo: -60 })];
     const totals = computeAxisTotals(questions, { a: 6, b: 6 });
-    expect(totals.combo).toEqual({ total: 0, count: 2 });
+    expect(totals.combo).toEqual({ total: 0, count: 2, maxAbs: 120 });
   });
 
   it('무응답 문항은 합산에서 제외하며 응답 1과 다르다', () => {
     const questions = [q('a', 1, { counter: 80 }), q('b', 2, { counter: 40 })];
-    expect(computeAxisTotals(questions, { a: 5 }).counter).toEqual({ total: 48, count: 1 });
+    expect(computeAxisTotals(questions, { a: 5 }).counter).toEqual({ total: 48, count: 1, maxAbs: 80 });
     expect(computeAxisTotals(questions, {}).counter.total).toBeNull();
   });
 
@@ -88,5 +88,22 @@ describe('답변 관리', () => {
   it('저장된 답변에서 알 수 없는 질문과 잘못된 응답을 버린다', () => {
     expect(sanitizeAnswers({ a: 4, b: '5', c: 2, d: 9 }, questions)).toEqual({ a: 4 });
     expect(sanitizeAnswers(null, questions)).toEqual({});
+  });
+});
+
+describe('임시 0~100 환산', () => {
+  it('합산값을 가능한 최대 크기 기준으로 0~100에 놓고 미측정 축은 null로 둔다', () => {
+    const questions = [q('a', 1, { attack: 100, freedom: -50 }), q('b', 2, { attack: 50 })];
+    const profile = computeAxisProfile(computeAxisTotals(questions, { a: 6, b: 1 }));
+    // attack: (100 - 50) / 150 → 50 + 50 × 1/3
+    expect(profile.attack).toBeCloseTo(50 + 50 / 3);
+    expect(profile.freedom).toBe(0);
+    expect(profile.combo).toBeNull();
+  });
+
+  it('모두 매우 그렇다면 100, 상쇄되면 50이다', () => {
+    const questions = [q('a', 1, { counter: 60 }), q('b', 2, { counter: -60 })];
+    expect(computeAxisProfile(computeAxisTotals(questions, { a: 6, b: 1 })).counter).toBe(100);
+    expect(computeAxisProfile(computeAxisTotals(questions, { a: 6, b: 6 })).counter).toBe(50);
   });
 });

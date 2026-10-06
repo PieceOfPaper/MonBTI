@@ -49,21 +49,68 @@ legend { padding: 0; margin-bottom: 1.5rem; }
 .scale__selected { min-height: 1.5rem; margin: 1rem 0 0; color: #d5ddd7; font-weight: 700; text-align: center; }
 .quiz__nav { display: flex; justify-content: space-between; gap: .75rem; margin-top: 1.5rem; }
 
+.result { display: grid; gap: 1.25rem; }
 .result h1 { font-size: clamp(2rem, 7vw, 3.25rem); }
-.axes { display: grid; gap: .75rem; margin: 1.5rem 0; padding: 0; list-style: none; }
-.axis { padding: 1rem 1.2rem; border: 1px solid #3f5a43; border-radius: .85rem; background: #1f2d25; }
-.axis--unmeasured { opacity: .6; }
-.axis__head { display: flex; justify-content: space-between; gap: 1rem; font-size: 1.1rem; }
-.axis__value { color: #c8da81; font-weight: 700; font-variant-numeric: tabular-nums; }
-.axis__direction { margin: .35rem 0 0; }
-.axis__description { margin: .5rem 0 0; color: #d3ddd5; font-size: .925rem; line-height: 1.55; }
-.axis__meta { margin: .35rem 0 0; color: #a9b8ad; font-size: .875rem; }
-.notice { padding: 1rem 1.2rem; border-left: 4px solid #c8da81; border-radius: .5rem; background: #243529; line-height: 1.6; }
-.result__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+.result h2 { margin: 0 0 1rem; font-size: 1.35rem; word-break: keep-all; }
+.result__section { padding-top: 1.25rem; border-top: 1px solid #304535; }
+.result__actions, .share { display: flex; flex-wrap: wrap; gap: .75rem; }
+.notice { margin: 0; color: #a9b8ad; font-size: .9rem; }
+
+/* 1~3순위. 1순위는 첫 줄 전체를 차지하고 가장 크게 보인다. */
+.ranking { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.rank--1 { grid-column: 1 / -1; }
+.rank__button { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "icon label" "icon name"; align-items: center; column-gap: 1rem; width: 100%; padding: .9rem 1rem; border: 1px solid #3f5a43; border-radius: 1rem; color: inherit; background: #1f2d25; text-align: left; cursor: pointer; }
+.rank__button:hover, .rank__button:focus-visible { outline: 3px solid #d8ef86; outline-offset: 3px; }
+.rank__button[aria-pressed="true"] { border-color: #c8da81; background: #2a3d2e; }
+.rank__label { grid-area: label; align-self: end; color: #a9b8ad; font-size: .875rem; font-weight: 700; }
+.rank__name { grid-area: name; align-self: start; font-size: 1.25rem; word-break: keep-all; }
+.rank__icon { grid-area: icon; width: 3.5rem; height: 3.5rem; object-fit: contain; }
+.rank__icon--text { display: grid; place-items: center; border-radius: 50%; background: #304535; font-weight: 800; }
+.rank--1 .rank__button { padding: 1.4rem 1.5rem; border: 2px solid #c8da81; background: linear-gradient(135deg, #34502f, #22332a); }
+.rank--1 .rank__icon { width: clamp(5.5rem, 22vw, 8rem); height: clamp(5.5rem, 22vw, 8rem); }
+.rank--1 .rank__label { color: #c8da81; font-size: 1.05rem; }
+.rank--1 .rank__name { font-size: clamp(2rem, 9vw, 3rem); }
+
+/* 기준 비교 */
+.compare { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: center; gap: 1.5rem; }
+.compare__chart { margin: 0; }
+.radar { display: block; width: 100%; max-width: 360px; margin: auto; overflow: visible; }
+.radar__ring, .radar__spoke { fill: none; stroke: #3f5a43; stroke-width: 1; }
+.radar__label { fill: #f7f4ec; font-size: 15px; font-weight: 700; }
+.radar__series polygon { stroke-width: 2.5; fill-opacity: .25; }
+.radar__series--weapon { fill: #c8da81; stroke: #c8da81; }
+.radar__series--me { fill: #e3a68a; stroke: #e3a68a; }
+.legend { display: flex; justify-content: center; gap: 1.25rem; margin-top: .75rem; font-weight: 700; }
+.legend__item::before { content: ""; display: inline-block; width: 1.1rem; height: .6rem; margin-right: .4rem; border-radius: .2rem; background: var(--tone); }
+.legend__item--me { --tone: #e3a68a; }
+.legend__item--weapon { --tone: #c8da81; }
+.compare__table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.compare__table th, .compare__table td { padding: .55rem .4rem; border-bottom: 1px solid #304535; text-align: right; }
+.compare__table th[scope="row"], .compare__table thead th:first-child { text-align: left; }
+.compare__table thead th { color: #a9b8ad; font-size: .85rem; }
+.compare__table td:nth-child(2) { color: #e3a68a; font-weight: 700; }
+.compare__table td:nth-child(3) { color: #c8da81; font-weight: 700; }
+
+/* 소개 영상: 누르면 그 자리에서 재생 */
+.video { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 1rem; background: #000; }
+.video iframe, .video__play, .video__play img { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video__play { padding: 0; background: none; cursor: pointer; }
+.video__play img { object-fit: cover; }
+.video__play:focus-visible { outline: 3px solid #d8ef86; outline-offset: -3px; }
+.video__icon { position: absolute; top: 50%; left: 50%; width: 4.5rem; height: 3.2rem; border-radius: .9rem; background: rgb(0 0 0 / .72); transform: translate(-50%, -50%); transition: background .15s; }
+.video__icon::after { content: ""; position: absolute; top: 50%; left: 54%; border-style: solid; border-width: .75rem 0 .75rem 1.25rem; border-color: transparent transparent transparent #fff; transform: translate(-50%, -50%); }
+.video__play:hover .video__icon { background: #c4302b; }
+.video__credit { margin: .5rem 0 0; color: #a9b8ad; font-size: .8rem; }
+.share__status { min-height: 1.5rem; margin: .75rem 0 0; color: #d5ddd7; word-break: break-all; }
 
 @media (max-width: 560px) {
   .scale { grid-template-columns: 1fr 1fr; grid-template-areas: "cells cells" "low high"; gap: .6rem; }
   .scale__end--high { text-align: right; }
+  .compare { grid-template-columns: 1fr; }
+  .rank__button { column-gap: .65rem; padding: .75rem; }
+  .rank__icon { width: 2.75rem; height: 2.75rem; }
+  .rank__name { font-size: 1.05rem; }
+  .result__actions .button, .share .button { flex: 1 1 auto; }
 }
 @media (max-width: 480px) {
   .quiz__nav .button { flex: 1; }

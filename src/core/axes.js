@@ -1,41 +1,11 @@
 // 무기 선택 기준 다섯 축. 정의는 docs/test-design.md를 따른다.
-// description은 게임 지식 없이 이해할 수 있는 결과 화면용 설명이다.
+// short는 결과 화면·차트에 쓰는 짧은 표기다. attack은 값이 높을수록 한방형이다.
 export const AXES = [
-  {
-    id: 'attack',
-    name: '공격 성향',
-    low: '지속형',
-    high: '한방형',
-    description: '자주 공격해 대미지를 조금씩 쌓는지, 준비한 기회에 큰 대미지를 한 번에 몰아넣는지를 봐요. 공격 속도와는 다른 기준이에요.',
-  },
-  {
-    id: 'freedom',
-    name: '자유도',
-    low: '행동이 정해지는 편',
-    high: '행동 중 전환이 자유로운 편',
-    description: '공격하는 도중에도 움직이거나 방향을 바꾸고, 멈추고 피하거나 막는 등 다른 대응으로 바로 넘어갈 수 있는 정도예요.',
-  },
-  {
-    id: 'combo',
-    name: '콤보 의존',
-    low: '기본 동작 위주',
-    high: '여러 동작의 숙련이 중요',
-    description: '제 실력을 내려면 여러 동작과 운용 방법을 익히고 흐름을 유지해야 하는 정도예요. 동작이 이어지는 것 자체를 좋아하는지와는 달라요.',
-  },
-  {
-    id: 'resource',
-    name: '자원 부담',
-    low: '관리 부담이 적음',
-    high: '전투 중 상태 관리가 많음',
-    description: '싸우는 동안 남은 양이나 지속 시간 같은 상태를 계속 확인하고 유지·보충해야 하는 정도예요. 모으는 걸 좋아하는지와는 달라요.',
-  },
-  {
-    id: 'counter',
-    name: '카운터 의존',
-    low: '받아치기 없이도 충분',
-    high: '받아치기 성공이 핵심',
-    description: '몬스터의 공격 타이밍에 맞춰 받아치는 기술(카운터)을 성공시키는 것이 주된 플레이가 되는 정도예요.',
-  },
+  { id: 'attack', name: '공격 성향', short: '한방' },
+  { id: 'freedom', name: '자유도', short: '자유' },
+  { id: 'combo', name: '콤보 의존', short: '연계' },
+  { id: 'resource', name: '자원 부담', short: '자원' },
+  { id: 'counter', name: '카운터 의존', short: '반격' },
 ];
 
 export const AXIS_IDS = AXES.map(({ id }) => id);

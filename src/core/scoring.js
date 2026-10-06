@@ -27,10 +27,11 @@ export function firstUnansweredIndex(answers, questions) {
   return index === -1 ? questions.length : index;
 }
 
-// 축별 { total, count }. 0이 아닌 가중치가 있는 답변 문항이 없으면 total은 null이다.
+// 축별 { total, count, maxAbs }. 0이 아닌 가중치가 있는 답변 문항이 없으면 total은 null이다.
+// maxAbs는 답변 문항의 가중치 절댓값 합으로, total이 가질 수 있는 최대 크기다.
 // 계산은 매번 현재 답변 전체에서 다시 하므로 답변 수정이 중복 누적되지 않는다.
 export function computeAxisTotals(questions, answers) {
-  const result = Object.fromEntries(AXIS_IDS.map((axis) => [axis, { total: null, count: 0 }]));
+  const result = Object.fromEntries(AXIS_IDS.map((axis) => [axis, { total: null, count: 0, maxAbs: 0 }]));
   for (const question of questions) {
     const response = answers[question.question_id];
     if (!isValidResponse(response)) continue;
@@ -40,7 +41,18 @@ export function computeAxisTotals(questions, answers) {
       const entry = result[axis];
       entry.total = (entry.total ?? 0) + contribution(weight, response);
       entry.count += 1;
+      entry.maxAbs += Math.abs(weight);
     }
   }
   return result;
+}
+
+// 임시 정규화: 합산값을 가능한 최대 크기로 나눠 -1~1로 만든 뒤 무기 기준값과 같은 0~100에 놓는다.
+// 50 + 50 × total / maxAbs. 미측정 축은 null로 둔다. 확정 공식이 정해지면 바꾼다(docs/test-design.md).
+export function computeAxisProfile(totals) {
+  return Object.fromEntries(AXIS_IDS.map((axis) => {
+    const { total, maxAbs } = totals[axis];
+    if (total === null || !maxAbs) return [axis, null];
+    return [axis, 50 + (50 * total) / maxAbs];
+  }));
 }
