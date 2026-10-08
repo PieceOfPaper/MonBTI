@@ -15,7 +15,7 @@ h1 { margin: 0; font-size: clamp(2rem, 8vw, 4.5rem); line-height: 1.15; word-bre
 .game-card strong, .game-card span { display: block; }
 .game-card strong { margin: .35rem 0; font-size: 1.35rem; }
 .game-card__label { color: #c8da81; font-size: .875rem; font-weight: 700; }
-.game-card__logo { display: block; width: min(100%, 22rem); height: auto; margin: .5rem 0; }
+.game-card__logo { display: block; width: min(100%, 22rem); height: auto; margin: .5rem auto; }
 
 .button { width: fit-content; padding: .85rem 1.25rem; border-radius: .75rem; background: #3d5a2f; font-weight: 700; text-align: center; }
 .button:disabled { opacity: .45; cursor: not-allowed; }
