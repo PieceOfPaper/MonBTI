@@ -5,14 +5,14 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_Question"
     },
-    "exported_at": "2026-10-08T13:21:39.174Z",
-    "converted_at": "2026-10-08T13:21:39.226Z"
+    "exported_at": "2026-10-08T15:05:44.510Z",
+    "converted_at": "2026-10-08T15:05:44.596Z"
   },
   "questions": [
     {
       "question_id": "wilds_q001",
       "question_order": 1,
-      "question_text": "나는 결과가 한순간에 결정되는 일이라면, 그 순간을 기다리는 과정도 즐겁다.",
+      "question_text": "나는 작은 변화가 계속 생기는 것보다, 한 번의 행동으로 큰 변화를 만들어내는 편이 더 만족스럽다.",
       "attack": 75,
       "freedom": 0,
       "complexity": 0,
@@ -32,7 +32,7 @@
     {
       "question_id": "wilds_q003",
       "question_order": 3,
-      "question_text": "나는 잔고나 배터리처럼 계속 확인해야 하는 숫자가 늘어나면 피곤하다.",
+      "question_text": "나는 한 가지 일에 집중하는 중에도 여러 상태를 계속 확인해야 하면 금방 피곤해진다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
@@ -42,11 +42,11 @@
     {
       "question_id": "wilds_q004",
       "question_order": 4,
-      "question_text": "나는 한정된 양을 계속 확인하며, 사용할 때와 남겨둘 때를 판단하는 일이 재미있다.",
+      "question_text": "나는 한번 시작한 행동은 중간에 바꾸기 어렵더라도, 끝까지 이어지는 편이 오히려 편하다.",
       "attack": 0,
-      "freedom": 0,
+      "freedom": -75,
       "complexity": 0,
-      "management": 75,
+      "management": 0,
       "counter": 0
     },
     {
@@ -72,12 +72,12 @@
     {
       "question_id": "wilds_q007",
       "question_order": 7,
-      "question_text": "나는 여러 방법이 모두 통하는 것보다, 상황에 딱 맞는 대응 하나를 성공시키는 편이 더 재미있다.",
+      "question_text": "나는 내 계획을 그대로 이어가기보다, 상대가 하는 행동에 맞춰 대응을 바꾸는 편이 더 재미있다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
       "management": 0,
-      "counter": 50
+      "counter": 75
     },
     {
       "question_id": "wilds_q008",
@@ -92,9 +92,9 @@
     {
       "question_id": "wilds_q009",
       "question_order": 9,
-      "question_text": "나는 기다리는 시간보다, 그동안 아무것도 할 수 없는 상황이 더 답답하다.",
+      "question_text": "나는 한 번 시작하면 오래 이어지는 일보다, 짧게 끊어서 다음 행동을 다시 고를 수 있는 편이 좋다.",
       "attack": 0,
-      "freedom": 100,
+      "freedom": 75,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -162,30 +162,30 @@
     {
       "question_id": "wilds_q016",
       "question_order": 16,
-      "question_text": "나는 처음에는 다루기 어렵더라도 익히는 과정이 재미있으면 괜찮다.",
+      "question_text": "나는 상대가 먼저 움직일 때까지 잠시 기다려야 해도, 그 행동에 맞춰 대응하는 편이 좋다.",
       "attack": 0,
       "freedom": 0,
-      "complexity": 50,
+      "complexity": 0,
       "management": 0,
-      "counter": 0
+      "counter": 75
     },
     {
       "question_id": "wilds_q017",
       "question_order": 17,
-      "question_text": "나는 원하는 결과를 내려면 여러 동작을 익혀야 하는 것도 괜찮다.",
+      "question_text": "나는 같은 방법을 반복하기보다, 상황에 따라 다음 단계를 다르게 골라야 하는 일이 더 흥미롭다.",
       "attack": 0,
       "freedom": 0,
-      "complexity": 50,
+      "complexity": 75,
       "management": 0,
       "counter": 0
     },
     {
       "question_id": "wilds_q018",
       "question_order": 18,
-      "question_text": "나는 익숙해진 뒤에도 조작에 계속 신경 써야 하는 것보다 자연스럽게 사용할 수 있는 것이 좋다.",
+      "question_text": "나는 익숙해진 뒤에도 매번 다음 행동을 따져야 하는 방식보다, 몸에 익으면 자연스럽게 이어지는 방식이 좋다.",
       "attack": 0,
       "freedom": 0,
-      "complexity": -50,
+      "complexity": -75,
       "management": 0,
       "counter": 0
     },
