@@ -17,11 +17,11 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `src/games/index.js` | 작품 등록과 작품별 데이터·표시 자료 연결 |
 | `src/games/<작품 ID>/media.js` | 무기별 아이콘·소개 영상 ID |
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
-| `src/core/` | 기준 축, 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 공유 링크(`share.js`) |
+| `src/core/` | 기준 축, 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 질문 순서 섞기(`order.js`), 공유 링크(`share.js`) |
 | `src/ui/views.js` | 화면 마크업 |
 | `src/ui/radar.js` | 오각형 방사형 차트 위치 계산과 SVG |
 | `src/ui/share-image.js` | 공유 이미지(캔버스). 공유할 때만 불러옴 |
-| `src/app.js` | 해시 라우팅, 답변 상태와 세션 저장, 결과·공유 동작 |
+| `src/app.js` | 해시 라우팅, 답변·질문 순서 상태와 세션 저장, 결과·공유 동작 |
 
 ## 로컬 개발 및 검증
 

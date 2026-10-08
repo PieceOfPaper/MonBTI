@@ -21,7 +21,7 @@ describe('작품 데이터', () => {
     expect(supportedGames.map(({ id }) => id)).toEqual(['wilds']);
   });
 
-  it('와일즈 질문은 표시 순서대로 정렬되어 있고 무기 기준값은 0~100이다', () => {
+  it('와일즈 질문 JSON은 question_order로 정렬되어 있고 무기 기준값은 0~100이다', () => {
     const orders = wilds.questions.map(({ question_order }) => question_order);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
     for (const weapon of wilds.weapons) {
@@ -58,6 +58,18 @@ describe('답변 저장', () => {
     expect(store.load(testGame)).toEqual({ wilds_q001: 5 });
     store.clear(testGame);
     expect(store.load(testGame)).toEqual({});
+  });
+
+  it('질문 순서를 한 번 섞어 저장하고, 초기화하면 새로 섞는다', () => {
+    const storage = memory();
+    const game = { ...testGame, questions: ['a', 'b', 'c'].map((question_id) => ({ question_id })) };
+    const first = createAnswerStore(storage, () => 0).loadOrder(game);
+    expect(first).toEqual(['b', 'c', 'a']);
+    // 새로고침 뒤에는 다른 난수에서도 저장한 순서를 유지한다.
+    expect(createAnswerStore(storage, () => 0.99).loadOrder(game)).toEqual(first);
+    const store = createAnswerStore(storage, () => 0.99);
+    store.clear(game);
+    expect(store.loadOrder(game)).toEqual(['a', 'b', 'c']);
   });
 
   it('저장소가 없거나 오류가 나도 빈 답변으로 진행한다', () => {

@@ -6,6 +6,7 @@ import { recommendWeapons } from './core/recommend.js';
 import {
   computeAxisProfile, computeAxisTotals, firstUnansweredIndex, isComplete, sanitizeAnswers, setAnswer,
 } from './core/scoring.js';
+import { orderQuestions, resolveQuestionOrder } from './core/order.js';
 import {
   SHARE_PARAM, decodeShareCode, encodeShareCode, parseShareParam, shareHash,
 } from './core/share.js';
@@ -55,27 +56,43 @@ export function shareUrl(game, result, base = `${location.origin}${location.path
 }
 
 const storageKey = (gameId) => `monbti:answers:${gameId}`;
+const orderKey = (gameId) => `monbti:order:${gameId}`;
 
-// 진행 중인 답변은 새로고침 후에도 이어 하도록 세션 저장소에 둔다. 저장소를 쓸 수 없어도 검사는 진행된다.
-export function createAnswerStore(storage) {
+// 진행 중인 답변과 질문 표시 순서는 새로고침 후에도 이어 하도록 세션 저장소에 둔다.
+// 저장소를 쓸 수 없어도 검사는 진행된다.
+export function createAnswerStore(storage, random = Math.random) {
+  const read = (key) => {
+    try {
+      return JSON.parse(storage?.getItem(key) ?? 'null');
+    } catch {
+      return null;
+    }
+  };
+  const write = (key, value) => {
+    try {
+      storage?.setItem(key, JSON.stringify(value));
+    } catch {
+      // 저장 실패는 무시한다.
+    }
+  };
   return {
     load(game) {
-      try {
-        return sanitizeAnswers(JSON.parse(storage?.getItem(storageKey(game.id)) ?? 'null'), game.questions);
-      } catch {
-        return {};
-      }
+      return sanitizeAnswers(read(storageKey(game.id)), game.questions);
     },
     save(game, answers) {
-      try {
-        storage?.setItem(storageKey(game.id), JSON.stringify(answers));
-      } catch {
-        // 저장 실패는 무시한다.
-      }
+      write(storageKey(game.id), answers);
+    },
+    // 저장한 순서가 현재 질문 집합과 맞지 않으면 새로 섞어 저장한다.
+    loadOrder(game) {
+      const saved = read(orderKey(game.id));
+      const order = resolveQuestionOrder(saved, game.questions, random);
+      if (order !== saved) write(orderKey(game.id), order);
+      return order;
     },
     clear(game) {
       try {
         storage?.removeItem(storageKey(game.id));
+        storage?.removeItem(orderKey(game.id));
       } catch {
         // 삭제 실패는 무시한다.
       }
@@ -91,19 +108,22 @@ function safeSessionStorage() {
   }
 }
 
-export function startApp(root, { games = supportedGames, storage = safeSessionStorage() } = {}) {
-  const store = createAnswerStore(storage);
-  const state = { gameId: null, answers: {}, index: 0, startFromFirst: false };
+export function startApp(root, { games = supportedGames, storage = safeSessionStorage(), random = Math.random } = {}) {
+  const store = createAnswerStore(storage, random);
+  // quiz는 질문을 표시 순서로 정렬한 작품 데이터다. 점수 계산은 순서와 관계없다.
+  const state = { gameId: null, quiz: null, answers: {}, index: 0, startFromFirst: false };
 
   const focusHeading = () => root.querySelector('h1')?.focus({ preventScroll: false });
 
   function enterGame(game) {
     if (state.gameId === game.id) return;
     state.gameId = game.id;
+    state.quiz = { ...game, questions: orderQuestions(game.questions, store.loadOrder(game)) };
     state.answers = store.load(game);
-    state.index = Math.min(firstUnansweredIndex(state.answers, game.questions), game.questions.length - 1);
+    state.index = Math.min(firstUnansweredIndex(state.answers, state.quiz.questions), game.questions.length - 1);
   }
 
+  // game에는 표시 순서로 정렬한 state.quiz를 넘긴다.
   function showQuestion(game) {
     root.innerHTML = renderQuestion(game, state.index, state.answers);
     const form = root.querySelector('form');
@@ -214,7 +234,8 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
     });
     root.querySelector('[data-action="restart"]').addEventListener('click', () => {
       store.clear(game);
-      state.answers = {};
+      // 다음 검사에서 질문 순서를 새로 섞는다.
+      state.gameId = null;
       state.startFromFirst = true;
       location.hash = `#/${game.id}`;
     });
@@ -245,8 +266,8 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
       if (route.name === 'result') {
         if (!isComplete(state.answers, game.questions)) {
           history.replaceState(null, '', `#/${game.id}`);
-          state.index = firstUnansweredIndex(state.answers, game.questions);
-          showQuestion(game);
+          state.index = firstUnansweredIndex(state.answers, state.quiz.questions);
+          showQuestion(state.quiz);
         } else {
           showResult(game, buildResult(game, state.answers));
         }
@@ -255,7 +276,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
           state.index = 0;
           state.startFromFirst = false;
         }
-        showQuestion(game);
+        showQuestion(state.quiz);
       }
     }
     focusHeading();
