@@ -1,5 +1,5 @@
 // 해시 라우팅과 화면 상태. GitHub Pages 하위 경로(/MonBTI/)에서도 새로고침이 동작하도록
-// 경로 대신 #/<작품 ID>, #/<작품 ID>/result, #/<작품 ID>/share/<코드> 형식을 사용한다.
+// 경로 대신 #/<작품 ID>, #/<작품 ID>/guide, #/<작품 ID>/result, #/<작품 ID>/share/<코드> 형식을 사용한다.
 // 외부로 공유하는 링크만 ?r=<작품 ID>.<코드> 형식이며, 열면 내부 해시 주소로 바꾼다(core/share.js).
 import { AXIS_IDS } from './core/axes.js';
 import { recommendWeapons } from './core/recommend.js';
@@ -12,7 +12,7 @@ import {
 } from './core/share.js';
 import { findGame, supportedGames } from './games/index.js';
 import {
-  renderEmpty, renderGameSelection, renderQuestion, renderResult, renderVideoPlayer,
+  renderEmpty, renderGameSelection, renderGuide, renderQuestion, renderResult, renderVideoPlayer,
 } from './ui/views.js';
 
 function safeDecode(text) {
@@ -31,6 +31,7 @@ export function parseRoute(hash) {
   if (rest.length) return { name: 'unknown' };
   if (!page) return { name: 'quiz', gameId };
   if (page === 'result') return { name: 'result', gameId };
+  if (page === 'guide') return { name: 'guide', gameId };
   return { name: 'unknown' };
 }
 
@@ -249,6 +250,8 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
       if (route.name !== 'home') history.replaceState(null, '', '#/');
       state.gameId = null;
       root.innerHTML = renderGameSelection(games);
+    } else if (route.name === 'guide') {
+      root.innerHTML = renderGuide(game);
     } else if (route.name === 'share') {
       const shared = decodeShareCode(route.code, game.weapons);
       if (shared) {

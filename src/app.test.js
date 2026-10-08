@@ -3,7 +3,7 @@ import {
   buildResult, createAnswerStore, parseRoute, shareParamToHash, shareUrl,
 } from './app.js';
 import { supportedGames } from './games/index.js';
-import { renderGameSelection, renderQuestion, renderResult } from './ui/views.js';
+import { renderGameSelection, renderGuide, renderQuestion, renderResult } from './ui/views.js';
 import { decodeShareCode } from './core/share.js';
 
 const wilds = supportedGames[0];
@@ -39,6 +39,8 @@ describe('라우팅', () => {
     expect(parseRoute('#/')).toEqual({ name: 'home' });
     expect(parseRoute('#/wilds')).toEqual({ name: 'quiz', gameId: 'wilds' });
     expect(parseRoute('#/wilds/result')).toEqual({ name: 'result', gameId: 'wilds' });
+    expect(parseRoute('#/wilds/guide')).toEqual({ name: 'guide', gameId: 'wilds' });
+    expect(parseRoute('#/wilds/guide/x')).toEqual({ name: 'unknown' });
     expect(parseRoute('#/wilds/share/a.b.c.1.2.3.4.5')).toEqual({ name: 'share', gameId: 'wilds', code: 'a.b.c.1.2.3.4.5' });
     expect(parseRoute('#/wilds/share')).toEqual({ name: 'unknown' });
     expect(parseRoute('#/wilds/zzz')).toEqual({ name: 'unknown' });
@@ -83,6 +85,20 @@ describe('답변 저장', () => {
 describe('화면', () => {
   it('작품 선택 화면은 와일즈 검사 링크를 제공한다', () => {
     expect(renderGameSelection(supportedGames)).toContain('href="#/wilds"');
+  });
+
+  it('작품 선택 화면은 검사 옆에 검사 설명 링크를 제공한다', () => {
+    expect(renderGameSelection(supportedGames)).toContain('href="#/wilds/guide"');
+  });
+
+  it('검사 설명 화면은 대상, 진행 방식, 다섯 기준과 검사 시작 링크를 보여 준다', () => {
+    const html = renderGuide(wilds);
+    expect(html).toContain('누구를 위한 검사인가요?');
+    expect(html).toContain(`질문 ${wilds.questions.length}개`);
+    expect(html).toContain(`${wilds.weapons.length}가지 무기`);
+    for (const short of ['한방', '자유', '복잡', '관리', '반격']) expect(html).toContain(`<span class="guide__short">${short}</span>`);
+    expect(html).toContain('href="#/wilds"');
+    expect(html).toContain('href="#/"');
   });
 
   it('작품 선택 화면은 작품 이름 대신 로고를 보여 주고 이름은 대체 텍스트로 남긴다', () => {

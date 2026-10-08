@@ -9,6 +9,8 @@ h1:focus { outline: none; }
 h1 { margin: 0; font-size: clamp(2rem, 8vw, 4.5rem); line-height: 1.15; word-break: keep-all; }
 .hero > p:not(.eyebrow), .result__lead { max-width: 40rem; color: #d5ddd7; font-size: 1.125rem; line-height: 1.7; }
 .game-list { margin: 2rem 0 0; padding: 0; list-style: none; }
+.game-list > li { display: grid; gap: .75rem; }
+.button.game-guide { width: 100%; }
 .game-card, .button { display: block; border: 1px solid #789151; border-radius: 1rem; padding: 1.5rem; color: inherit; background: #243529; text-align: left; text-decoration: none; cursor: pointer; }
 .game-card { width: 100%; }
 .game-card:hover, .game-card:focus-visible, .button:hover:not(:disabled), .button:focus-visible { outline: 3px solid #d8ef86; outline-offset: 3px; background: #304535; }
@@ -51,6 +53,22 @@ legend { padding: 0; margin-bottom: 1.5rem; }
 .quiz__nav { display: flex; justify-content: space-between; gap: .75rem; margin-top: 1.5rem; }
 
 .result { display: grid; gap: 1.25rem; }
+
+/* 검사 설명 */
+.guide { display: grid; gap: 2rem; max-width: 720px; margin: auto; padding: 3rem 1rem; }
+.guide h1 { font-size: clamp(2rem, 7vw, 3.25rem); word-break: keep-all; }
+.guide h2 { margin: 0 0 .75rem; font-size: 1.35rem; word-break: keep-all; }
+.guide p, .guide li { color: #d5ddd7; line-height: 1.7; word-break: keep-all; }
+.guide p { margin: 0 0 .5rem; }
+.guide strong { color: #f7f4ec; }
+.guide__list { margin: 0; padding-left: 1.25rem; }
+.guide__axes { display: grid; gap: .75rem; margin: 1rem 0; padding: 0; list-style: none; }
+.guide__axis { padding: 1rem 1.25rem; border: 1px solid #3f5640; border-radius: 1rem; background: #243529; }
+.guide__axis h3 { margin: 0 0 .4rem; font-size: 1.05rem; }
+.guide__short { margin-right: .35rem; padding: .1rem .5rem; border-radius: .5rem; background: #3d5a2f; color: #d8ef86; font-size: .9rem; }
+.guide__axis p { margin: 0; }
+.guide__axis .guide__fit { margin-top: .4rem; color: #c8da81; font-size: .95rem; }
+.guide__note { color: #a9b8ad; font-size: .95rem; }
 .result h1 { font-size: clamp(2rem, 7vw, 3.25rem); }
 .result h2 { margin: 0 0 1rem; font-size: 1.35rem; word-break: keep-all; }
 .result__section { padding-top: 1.25rem; border-top: 1px solid #304535; }

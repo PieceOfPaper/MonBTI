@@ -20,7 +20,7 @@ export function renderGameSelection(games) {
         ${logo
           ? `<img class="game-card__logo" src="${escapeHtml(logo)}" alt="${escapeHtml(name)}" />`
           : `<strong>${escapeHtml(name)}</strong>`}<span>${escapeHtml(description)}</span>
-      </a></li>`)
+      </a><a class="button button--ghost game-guide" href="#/${id}/guide" aria-label="${escapeHtml(name)} 검사 설명">검사 설명</a></li>`)
     .join('');
 
   return `<section class="hero" aria-labelledby="page-title">
@@ -161,6 +161,58 @@ export function renderResult(game, result, { selectedIndex = 0, shared = false }
     </section>
     <div class="result__actions">
       ${actions}
+      <a class="button button--ghost" href="#/">작품 선택으로</a>
+    </div>
+  </section>`;
+}
+
+// 검사 설명. 누구를 위한 검사인지, 어떻게 답하고 어떤 기준으로 무기를 고르는지 게임 지식 없이 읽을 수 있게 쓴다.
+export function renderGuide(game) {
+  const axes = AXES.map(({ short, name, guide, fit }) => `
+      <li class="guide__axis">
+        <h3><span class="guide__short">${short}</span> ${name}</h3>
+        <p>${guide}</p>
+        <p class="guide__fit">${fit}</p>
+      </li>`).join('');
+  const questionCount = game.questions.length;
+  const weaponCount = game.weapons.length;
+
+  return `<section class="guide" aria-labelledby="guide-title">
+    <p class="eyebrow">${escapeHtml(game.name)}</p>
+    <h1 id="guide-title" tabindex="-1">몬BTI는 어떤 검사인가요?</h1>
+    <section aria-labelledby="guide-who">
+      <h2 id="guide-who">누구를 위한 검사인가요?</h2>
+      <p>몬스터헌터를 처음 시작해서 <strong>어떤 무기를 골라야 할지 고민하는 분</strong>을 위해 만들었어요. 게임을 몰라도 답할 수 있도록 게임 용어 대신 일상적인 상황과 취향을 물어봅니다.</p>
+      <p>이미 게임을 즐기고 있는 분이라면 내 취향과 지금 쓰는 무기가 얼마나 닮았는지 재미로 확인해 보세요.</p>
+    </section>
+    <section aria-labelledby="guide-how">
+      <h2 id="guide-how">어떻게 진행되나요?</h2>
+      <ul class="guide__list">
+        <li>질문 ${questionCount}개에 답해요. 질문 순서는 검사할 때마다 섞여요.</li>
+        <li>각 질문에 ‘전혀 그렇지 않다’부터 ‘매우 그렇다’까지 여섯 단계 중 하나를 골라요. 가운데 답은 없으니 조금이라도 더 가까운 쪽을 고르면 돼요.</li>
+        <li>정답은 없어요. 잘하는 것보다 <strong>하고 싶은 것</strong>을 기준으로 답해 주세요.</li>
+        <li>답을 마치면 ${weaponCount}가지 무기 중 나와 잘 맞는 무기 세 가지를 순서대로 보여 줘요.</li>
+      </ul>
+    </section>
+    <section aria-labelledby="guide-axes">
+      <h2 id="guide-axes">어떤 기준으로 보나요?</h2>
+      <p>답변으로 다섯 가지 기준마다 나의 점수를 0~100으로 매기고, 무기마다 정해 둔 같은 기준의 값과 비교해요.</p>
+      <ul class="guide__axes">${axes}
+      </ul>
+      <p>다섯 기준을 똑같은 비중으로 합쳐서 가장 잘 맞는 무기부터 순위를 정해요.</p>
+    </section>
+    <section aria-labelledby="guide-not">
+      <h2 id="guide-not">이런 것은 보지 않아요</h2>
+      <ul class="guide__list">
+        <li>무기가 멋있는지, 겉모습이 어떤지</li>
+        <li>무기가 얼마나 강한지, 내 실력이 어느 정도인지</li>
+        <li>버튼을 누르는 순서처럼 조작 입력이 어려운지</li>
+        <li>몬스터의 움직임을 익히는 것처럼 모든 무기에 똑같이 필요한 것</li>
+      </ul>
+      <p class="guide__note">무기별 값은 테스트하면서 계속 다듬고 있어요. 결과는 첫 무기를 고르는 참고로 삼고, 마음에 드는 무기는 직접 써 보는 것을 추천해요.</p>
+    </section>
+    <div class="result__actions">
+      <a class="button" href="#/${game.id}">검사 시작하기</a>
       <a class="button button--ghost" href="#/">작품 선택으로</a>
     </div>
   </section>`;
