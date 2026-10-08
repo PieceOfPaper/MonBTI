@@ -85,6 +85,13 @@ describe('화면', () => {
     expect(renderGameSelection(supportedGames)).toContain('href="#/wilds"');
   });
 
+  it('작품 선택 화면은 작품 이름 대신 로고를 보여 주고 이름은 대체 텍스트로 남긴다', () => {
+    const html = renderGameSelection(supportedGames);
+    expect(html).toMatch(/<img class="game-card__logo" src="[^"]*logo[^"]*\.webp" alt="몬스터헌터 와일즈"/);
+    expect(html).not.toContain('<strong>몬스터헌터 와일즈</strong>');
+    expect(renderGameSelection([{ id: 'x', name: '이름', description: '설명' }])).toContain('<strong>이름</strong>');
+  });
+
   it('질문 화면은 공통 여섯 응답을 라디오 버튼으로 보여 준다', () => {
     const html = renderQuestion(testGame, 0, {});
     expect(html.match(/type="radio"/g)).toHaveLength(6);

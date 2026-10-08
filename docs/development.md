@@ -15,7 +15,8 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `scripts/json-output.js` | 시각을 제외한 데이터 변경 판단 |
 | `src/data/<작품 ID>/` | 생성된 무기·질문 JSON. 직접 편집하지 않음 |
 | `src/games/index.js` | 작품 등록과 작품별 데이터·표시 자료 연결 |
-| `src/games/<작품 ID>/media.js` | 무기별 아이콘·소개 영상 ID |
+| `src/games/<작품 ID>/media.js` | 작품 로고, 무기별 아이콘·소개 영상 ID |
+| `src/assets/games/<작품 ID>/` | 작품 로고 파일 |
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
 | `src/core/` | 기준 축, 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 질문 순서 섞기(`order.js`), 공유 링크(`share.js`) |
 | `src/ui/views.js` | 화면 마크업 |

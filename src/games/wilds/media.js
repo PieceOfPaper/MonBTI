@@ -1,6 +1,11 @@
 // 와일즈 무기별 아이콘과 소개 영상. 사이트에서만 쓰는 표시 자료라 원본 시트 대신 여기서 관리한다.
 // 아이콘: 나무위키 '분류:몬스터 헌터 시리즈/무기'의 무기 아이콘을 내려받아 src/assets/weapons/wilds/<weapon_id>.webp로 저장
+// 로고: 나무위키 '파일:와일즈로고.png'를 내려받아 src/assets/games/wilds/logo.webp로 저장
 // 영상: 캡콤아시아 '몬스터헌터 와일즈 무기/액션 소개 시리즈' 재생목록의 무기별 소개 영상 ID
+import logo from '../../assets/games/wilds/logo.webp';
+
+export const wildsLogo = logo;
+
 const icons = import.meta.glob('../../assets/weapons/wilds/*.webp', { eager: true, query: '?no-inline', import: 'default' });
 
 export const WILDS_VIDEOS = {

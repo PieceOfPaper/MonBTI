@@ -14,10 +14,12 @@ export function escapeHtml(value) {
 
 export function renderGameSelection(games) {
   const choices = games
-    .map(({ id, name, description }) => `
+    .map(({ id, name, logo, description }) => `
       <li><a class="game-card" href="#/${id}" data-game-id="${id}">
         <span class="game-card__label">현재 검사 가능</span>
-        <strong>${escapeHtml(name)}</strong><span>${escapeHtml(description)}</span>
+        ${logo
+          ? `<img class="game-card__logo" src="${escapeHtml(logo)}" alt="${escapeHtml(name)}" />`
+          : `<strong>${escapeHtml(name)}</strong>`}<span>${escapeHtml(description)}</span>
       </a></li>`)
     .join('');
 
