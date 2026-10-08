@@ -1,6 +1,6 @@
 {
   "meta": {
-    "format_version": 3,
+    "format_version": 4,
     "source": {
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_Weapon"
@@ -15,7 +15,7 @@
       "attack": 75,
       "freedom": 25,
       "combo": 50,
-      "resource": 0,
+      "management": 0,
       "counter": 75
     },
     {
@@ -24,7 +24,7 @@
       "attack": 50,
       "freedom": 75,
       "combo": 75,
-      "resource": 50,
+      "management": 75,
       "counter": 100
     },
     {
@@ -33,7 +33,7 @@
       "attack": 25,
       "freedom": 100,
       "combo": 50,
-      "resource": 0,
+      "management": 0,
       "counter": 50
     },
     {
@@ -42,7 +42,7 @@
       "attack": 0,
       "freedom": 100,
       "combo": 50,
-      "resource": 75,
+      "management": 75,
       "counter": 0
     },
     {
@@ -51,7 +51,7 @@
       "attack": 75,
       "freedom": 50,
       "combo": 50,
-      "resource": 0,
+      "management": 25,
       "counter": 50
     },
     {
@@ -60,7 +60,7 @@
       "attack": 50,
       "freedom": 75,
       "combo": 50,
-      "resource": 75,
+      "management": 100,
       "counter": 25
     },
     {
@@ -69,7 +69,7 @@
       "attack": 25,
       "freedom": 25,
       "combo": 25,
-      "resource": 0,
+      "management": 0,
       "counter": 100
     },
     {
@@ -78,7 +78,7 @@
       "attack": 75,
       "freedom": 25,
       "combo": 75,
-      "resource": 50,
+      "management": 75,
       "counter": 25
     },
     {
@@ -87,7 +87,7 @@
       "attack": 75,
       "freedom": 50,
       "combo": 75,
-      "resource": 75,
+      "management": 100,
       "counter": 75
     },
     {
@@ -96,7 +96,7 @@
       "attack": 100,
       "freedom": 25,
       "combo": 100,
-      "resource": 100,
+      "management": 100,
       "counter": 75
     },
     {
@@ -105,7 +105,7 @@
       "attack": 50,
       "freedom": 75,
       "combo": 75,
-      "resource": 100,
+      "management": 100,
       "counter": 0
     },
     {
@@ -114,7 +114,7 @@
       "attack": 25,
       "freedom": 75,
       "combo": 25,
-      "resource": 50,
+      "management": 50,
       "counter": 0
     },
     {
@@ -123,7 +123,7 @@
       "attack": 50,
       "freedom": 25,
       "combo": 25,
-      "resource": 50,
+      "management": 75,
       "counter": 0
     },
     {
@@ -132,7 +132,7 @@
       "attack": 25,
       "freedom": 75,
       "combo": 25,
-      "resource": 75,
+      "management": 75,
       "counter": 0
     }
   ]

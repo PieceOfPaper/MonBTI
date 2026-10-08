@@ -3,7 +3,7 @@ import { sameSheetData } from './json-output.js';
 
 const original = {
   meta: {
-    format_version: 3,
+    format_version: 4,
     source: { spreadsheet_id: 'sheet', sheet: 'Wilds_Question' },
     exported_at: '2026-10-05T00:00:00Z',
     converted_at: '2026-10-05T00:01:00Z',
@@ -28,7 +28,7 @@ describe('시트 데이터 변경 판단', () => {
 
   it('문항 삭제와 형식 버전·원본 변경을 반영한다', () => {
     expect(sameSheetData(original, { ...original, questions: [] })).toBe(false);
-    expect(sameSheetData(original, { ...original, meta: { ...original.meta, format_version: 4 } })).toBe(false);
+    expect(sameSheetData(original, { ...original, meta: { ...original.meta, format_version: 5 } })).toBe(false);
     expect(sameSheetData(original, { ...original, meta: { ...original.meta, source: { sheet: '다른 탭' } } })).toBe(false);
   });
 

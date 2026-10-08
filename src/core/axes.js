@@ -4,7 +4,7 @@ export const AXES = [
   { id: 'attack', name: '공격 성향', short: '한방' },
   { id: 'freedom', name: '자유도', short: '자유' },
   { id: 'combo', name: '콤보 의존', short: '연계' },
-  { id: 'resource', name: '자원 부담', short: '자원' },
+  { id: 'management', name: '관리 부담', short: '관리' },
   { id: 'counter', name: '카운터 취향', short: '반격' },
 ];
 

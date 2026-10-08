@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { SheetConversionError, convertQuestions, convertWeapons } from './sheet-converter.js';
 
-const WEAPON_HEADER = ['weapon_id', 'weapon_name', 'attack', 'freedom', 'combo', 'resource', 'counter'];
-const QUESTION_HEADER = ['question_id', 'question_order', 'question_text', 'attack', 'freedom', 'combo', 'resource', 'counter'];
+const WEAPON_HEADER = ['weapon_id', 'weapon_name', 'attack', 'freedom', 'combo', 'management', 'counter'];
+const QUESTION_HEADER = ['question_id', 'question_order', 'question_text', 'attack', 'freedom', 'combo', 'management', 'counter'];
 
 const errorsOf = (fn) => {
   try {
@@ -16,17 +16,17 @@ const errorsOf = (fn) => {
 
 describe('무기 탭 변환', () => {
   it('열 이름으로 읽어 다섯 기준값을 숫자로 보존한다', () => {
-    const header = ['weapon_name', 'counter', 'weapon_id', 'attack', 'freedom', 'combo', 'resource'];
+    const header = ['weapon_name', 'counter', 'weapon_id', 'attack', 'freedom', 'combo', 'management'];
     const rows = [header, ['대검', 10, 'great_sword', 90.5, 20, 30, 40], [null, null, null], []];
     expect(convertWeapons(rows)).toEqual([
-      { weapon_id: 'great_sword', weapon_name: '대검', attack: 90.5, freedom: 20, combo: 30, resource: 40, counter: 10 },
+      { weapon_id: 'great_sword', weapon_name: '대검', attack: 90.5, freedom: 20, combo: 30, management: 40, counter: 10 },
     ]);
   });
 
   it('reason 메모 열은 JSON에 포함하지 않는다', () => {
     const rows = [[...WEAPON_HEADER, 'reason'], ['lance', '랜스', 30, 20, 40, 10, 60, '가드 중심']];
     expect(convertWeapons(rows)).toEqual([
-      { weapon_id: 'lance', weapon_name: '랜스', attack: 30, freedom: 20, combo: 40, resource: 10, counter: 60 },
+      { weapon_id: 'lance', weapon_name: '랜스', attack: 30, freedom: 20, combo: 40, management: 10, counter: 60 },
     ]);
   });
 
@@ -59,8 +59,8 @@ describe('질문 탭 변환', () => {
       [null, null, null, 0, null, 0, null, null],
     ];
     expect(convertQuestions(rows)).toEqual([
-      { question_id: 'q1', question_order: 1, question_text: '첫 번째', attack: 100, freedom: 50, combo: 0, resource: 0, counter: 0 },
-      { question_id: 'q2', question_order: 2, question_text: '두 번째', attack: 0, freedom: -40, combo: 0, resource: 0, counter: 0 },
+      { question_id: 'q1', question_order: 1, question_text: '첫 번째', attack: 100, freedom: 50, combo: 0, management: 0, counter: 0 },
+      { question_id: 'q2', question_order: 2, question_text: '두 번째', attack: 0, freedom: -40, combo: 0, management: 0, counter: 0 },
     ]);
   });
 
@@ -71,8 +71,8 @@ describe('질문 탭 변환', () => {
       ['q2', 2, '나', 0, 0, 0, -100, 0, '상태 확인', '피로'],
     ];
     expect(convertQuestions(rows)).toEqual([
-      { question_id: 'q1', question_order: 1, question_text: '가', attack: 0, freedom: 0, combo: 75, resource: 0, counter: 0 },
-      { question_id: 'q2', question_order: 2, question_text: '나', attack: 0, freedom: 0, combo: 0, resource: -100, counter: 0 },
+      { question_id: 'q1', question_order: 1, question_text: '가', attack: 0, freedom: 0, combo: 75, management: 0, counter: 0 },
+      { question_id: 'q2', question_order: 2, question_text: '나', attack: 0, freedom: 0, combo: 0, management: -100, counter: 0 },
     ]);
   });
 

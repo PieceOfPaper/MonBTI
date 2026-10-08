@@ -4,7 +4,7 @@ import { computeAxisProfile, computeAxisTotals, firstUnansweredIndex, isComplete
 
 const q = (id, order, weights) => ({
   question_id: id, question_order: order, question_text: id,
-  attack: 0, freedom: 0, combo: 0, resource: 0, counter: 0, ...weights,
+  attack: 0, freedom: 0, combo: 0, management: 0, counter: 0, ...weights,
 });
 
 describe('응답 계수', () => {
@@ -33,7 +33,7 @@ describe('축별 합산', () => {
     expect(totals.attack).toEqual({ total: 100, count: 1, maxAbs: 100 });
     expect(totals.freedom).toEqual({ total: 50, count: 1, maxAbs: 50 });
     expect(totals.combo.total).toBeNull();
-    expect(totals.resource.total).toBeNull();
+    expect(totals.management.total).toBeNull();
     expect(totals.counter.total).toBeNull();
   });
 
@@ -56,9 +56,9 @@ describe('축별 합산', () => {
   });
 
   it('여러 문항의 소수 가중치를 반올림 없이 더한다', () => {
-    const questions = [q('a', 1, { resource: 33.3 }), q('b', 2, { resource: -12.5 })];
+    const questions = [q('a', 1, { management: 33.3 }), q('b', 2, { management: -12.5 })];
     const totals = computeAxisTotals(questions, { a: 5, b: 2 });
-    expect(totals.resource.total).toBeCloseTo(33.3 * 0.6 + 12.5 * 0.6, 10);
+    expect(totals.management.total).toBeCloseTo(33.3 * 0.6 + 12.5 * 0.6, 10);
   });
 });
 
