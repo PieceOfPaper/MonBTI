@@ -1,139 +1,139 @@
 {
   "meta": {
-    "format_version": 4,
+    "format_version": 5,
     "source": {
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_Weapon"
     },
-    "exported_at": "2026-10-06T15:18:50.249Z",
-    "converted_at": "2026-10-06T15:18:50.301Z"
+    "exported_at": "2026-10-08T13:21:39.174Z",
+    "converted_at": "2026-10-08T13:21:39.226Z"
   },
   "weapons": [
     {
       "weapon_id": "great_sword",
       "weapon_name": "대검",
-      "attack": 75,
-      "freedom": 25,
-      "combo": 50,
-      "management": 0,
-      "counter": 75
+      "attack": 100,
+      "freedom": 30,
+      "complexity": 30,
+      "management": 5,
+      "counter": 30
     },
     {
       "weapon_id": "long_sword",
       "weapon_name": "태도",
-      "attack": 50,
-      "freedom": 75,
-      "combo": 75,
+      "attack": 55,
+      "freedom": 55,
+      "complexity": 75,
       "management": 75,
-      "counter": 100
+      "counter": 95
     },
     {
       "weapon_id": "sword_and_shield",
       "weapon_name": "한손검",
       "attack": 25,
-      "freedom": 100,
-      "combo": 50,
-      "management": 0,
-      "counter": 50
+      "freedom": 95,
+      "complexity": 40,
+      "management": 5,
+      "counter": 30
     },
     {
       "weapon_id": "dual_blades",
       "weapon_name": "쌍검",
-      "attack": 0,
-      "freedom": 100,
-      "combo": 50,
-      "management": 75,
-      "counter": 0
+      "attack": 10,
+      "freedom": 95,
+      "complexity": 35,
+      "management": 70,
+      "counter": 55
     },
     {
       "weapon_id": "hammer",
       "weapon_name": "해머",
-      "attack": 75,
-      "freedom": 50,
-      "combo": 50,
-      "management": 25,
-      "counter": 50
+      "attack": 85,
+      "freedom": 75,
+      "complexity": 30,
+      "management": 15,
+      "counter": 35
     },
     {
       "weapon_id": "hunting_horn",
       "weapon_name": "수렵피리",
-      "attack": 50,
-      "freedom": 75,
-      "combo": 50,
-      "management": 100,
-      "counter": 25
+      "attack": 60,
+      "freedom": 50,
+      "complexity": 75,
+      "management": 90,
+      "counter": 30
     },
     {
       "weapon_id": "lance",
       "weapon_name": "랜스",
-      "attack": 25,
-      "freedom": 25,
-      "combo": 25,
-      "management": 0,
+      "attack": 20,
+      "freedom": 65,
+      "complexity": 35,
+      "management": 10,
       "counter": 100
     },
     {
       "weapon_id": "gunlance",
       "weapon_name": "건랜스",
-      "attack": 75,
-      "freedom": 25,
-      "combo": 75,
-      "management": 75,
-      "counter": 25
+      "attack": 80,
+      "freedom": 35,
+      "complexity": 70,
+      "management": 70,
+      "counter": 55
     },
     {
       "weapon_id": "switch_axe",
       "weapon_name": "슬래시액스",
       "attack": 75,
-      "freedom": 50,
-      "combo": 75,
-      "management": 100,
+      "freedom": 35,
+      "complexity": 70,
+      "management": 90,
       "counter": 75
     },
     {
       "weapon_id": "charge_blade",
       "weapon_name": "차지액스",
-      "attack": 100,
-      "freedom": 25,
-      "combo": 100,
+      "attack": 90,
+      "freedom": 40,
+      "complexity": 100,
       "management": 100,
-      "counter": 75
+      "counter": 80
     },
     {
       "weapon_id": "insect_glaive",
       "weapon_name": "조충곤",
-      "attack": 50,
-      "freedom": 75,
-      "combo": 75,
-      "management": 100,
-      "counter": 0
+      "attack": 45,
+      "freedom": 80,
+      "complexity": 75,
+      "management": 95,
+      "counter": 5
     },
     {
       "weapon_id": "light_bowgun",
       "weapon_name": "라이트보우건",
-      "attack": 25,
-      "freedom": 75,
-      "combo": 25,
+      "attack": 20,
+      "freedom": 95,
+      "complexity": 20,
       "management": 50,
       "counter": 0
     },
     {
       "weapon_id": "heavy_bowgun",
       "weapon_name": "헤비보우건",
-      "attack": 50,
-      "freedom": 25,
-      "combo": 25,
+      "attack": 55,
+      "freedom": 40,
+      "complexity": 15,
       "management": 75,
-      "counter": 0
+      "counter": 45
     },
     {
       "weapon_id": "bow",
       "weapon_name": "활",
-      "attack": 25,
-      "freedom": 75,
-      "combo": 25,
-      "management": 75,
-      "counter": 0
+      "attack": 30,
+      "freedom": 85,
+      "complexity": 40,
+      "management": 70,
+      "counter": 80
     }
   ]
 }

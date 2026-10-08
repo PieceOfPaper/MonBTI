@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { rankWeapons, recommendWeapons, scoreWeapon } from './recommend.js';
 
 const weapon = (weapon_id, values) => ({
-  weapon_id, weapon_name: weapon_id, attack: 50, freedom: 50, combo: 50, management: 50, counter: 50, ...values,
+  weapon_id, weapon_name: weapon_id, attack: 50, freedom: 50, complexity: 50, management: 50, counter: 50, ...values,
 });
-const profile = (values) => ({ attack: 50, freedom: 50, combo: 50, management: 50, counter: 50, ...values });
+const profile = (values) => ({ attack: 50, freedom: 50, complexity: 50, management: 50, counter: 50, ...values });
 const ids = (weapons) => weapons.map(({ weapon_id }) => weapon_id);
 
 describe('축별 불일치', () => {
@@ -20,20 +20,20 @@ describe('축별 불일치', () => {
     expect(scoreWeapon(profile({ freedom: 25 }), weapon('w', { freedom: 100 })).score).toBe(100);
   });
 
-  it('combo·management는 무기 요구량이 사용자 수준을 넘을 때만 벌점을 준다', () => {
-    for (const axis of ['combo', 'management']) {
+  it('complexity·management는 무기 요구량이 사용자 수준을 넘을 때만 벌점을 준다', () => {
+    for (const axis of ['complexity', 'management']) {
       expect(scoreWeapon(profile({ [axis]: 25 }), weapon('w', { [axis]: 100 })).maxMismatch).toBe(75);
       expect(scoreWeapon(profile({ [axis]: 100 }), weapon('w', { [axis]: 0 })).score).toBe(100);
     }
   });
 
   it('측정된 축의 적합도를 같은 비중으로 평균하고 미측정 축은 뺀다', () => {
-    const user = { attack: 0, freedom: null, combo: null, management: null, counter: 100 };
+    const user = { attack: 0, freedom: null, complexity: null, management: null, counter: 100 };
     // attack 적합도 0(불일치 100), counter 적합도 50(불일치 50) → 평균 25
-    expect(scoreWeapon(user, weapon('w', { attack: 100, counter: 50, freedom: 0, combo: 100 }))).toEqual({
+    expect(scoreWeapon(user, weapon('w', { attack: 100, counter: 50, freedom: 0, complexity: 100 }))).toEqual({
       score: 25, maxMismatch: 100,
     });
-    expect(scoreWeapon({ attack: null, freedom: null, combo: null, management: null, counter: null }, weapon('w')).score)
+    expect(scoreWeapon({ attack: null, freedom: null, complexity: null, management: null, counter: null }, weapon('w')).score)
       .toBeNull();
   });
 });

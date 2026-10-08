@@ -4,7 +4,7 @@ import { computeAxisProfile, computeAxisTotals, firstUnansweredIndex, isComplete
 
 const q = (id, order, weights) => ({
   question_id: id, question_order: order, question_text: id,
-  attack: 0, freedom: 0, combo: 0, management: 0, counter: 0, ...weights,
+  attack: 0, freedom: 0, complexity: 0, management: 0, counter: 0, ...weights,
 });
 
 describe('응답 계수', () => {
@@ -32,7 +32,7 @@ describe('축별 합산', () => {
     const totals = computeAxisTotals([sample], { wilds_q001: 6 });
     expect(totals.attack).toEqual({ total: 100, count: 1, maxAbs: 100 });
     expect(totals.freedom).toEqual({ total: 50, count: 1, maxAbs: 50 });
-    expect(totals.combo.total).toBeNull();
+    expect(totals.complexity.total).toBeNull();
     expect(totals.management.total).toBeNull();
     expect(totals.counter.total).toBeNull();
   });
@@ -44,9 +44,9 @@ describe('축별 합산', () => {
   });
 
   it('상쇄된 합계 0은 null이 아닌 유효한 값이다', () => {
-    const questions = [q('a', 1, { combo: 60 }), q('b', 2, { combo: -60 })];
+    const questions = [q('a', 1, { complexity: 60 }), q('b', 2, { complexity: -60 })];
     const totals = computeAxisTotals(questions, { a: 6, b: 6 });
-    expect(totals.combo).toEqual({ total: 0, count: 2, maxAbs: 120 });
+    expect(totals.complexity).toEqual({ total: 0, count: 2, maxAbs: 120 });
   });
 
   it('무응답 문항은 합산에서 제외하며 응답 1과 다르다', () => {
@@ -98,7 +98,7 @@ describe('사용자 점수 정규화', () => {
     // attack: (100 - 50) / 150 → 50 + 50 × 1/3
     expect(profile.attack).toBeCloseTo(50 + 50 / 3);
     expect(profile.freedom).toBe(0);
-    expect(profile.combo).toBeNull();
+    expect(profile.complexity).toBeNull();
   });
 
   it('모두 매우 그렇다면 100, 상쇄되면 50이다', () => {

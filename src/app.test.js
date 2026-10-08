@@ -12,7 +12,7 @@ const testGame = {
   ...wilds,
   questions: [{
     question_id: 'wilds_q001', question_order: 1, question_text: '테스트 질문',
-    attack: 100, freedom: 0, combo: 0, management: 0, counter: 0,
+    attack: 100, freedom: 0, complexity: 0, management: 0, counter: 0,
   }],
 };
 
@@ -25,7 +25,7 @@ describe('작품 데이터', () => {
     const orders = wilds.questions.map(({ question_order }) => question_order);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
     for (const weapon of wilds.weapons) {
-      for (const axis of ['attack', 'freedom', 'combo', 'management', 'counter']) {
+      for (const axis of ['attack', 'freedom', 'complexity', 'management', 'counter']) {
         expect(weapon[axis]).toBeGreaterThanOrEqual(0);
         expect(weapon[axis]).toBeLessThanOrEqual(100);
       }
@@ -91,7 +91,7 @@ describe('화면', () => {
     expect(html.match(/class="rank rank--/g)).toHaveLength(3);
     expect(html).toContain('rank--1');
     expect(html).toContain('aria-pressed="true"');
-    for (const short of ['한방', '자유', '연계', '관리', '반격']) expect(html).toContain(short);
+    for (const short of ['한방', '자유', '복잡', '관리', '반격']) expect(html).toContain(short);
     expect(html).not.toContain('axis__description');
   });
 
@@ -163,7 +163,7 @@ describe('추천과 공유 링크', () => {
     expect(route).toMatchObject({ name: 'share', gameId: 'wilds' });
     const decoded = decodeShareCode(route.code, wilds.weapons);
     expect(decoded.weapons).toEqual(own.weapons);
-    for (const axis of ['attack', 'freedom', 'combo', 'management', 'counter']) {
+    for (const axis of ['attack', 'freedom', 'complexity', 'management', 'counter']) {
       expect(decoded.profile[axis]).toBe(own.profile[axis] === null ? null : Math.round(own.profile[axis]));
     }
   });
@@ -178,7 +178,7 @@ describe('추천과 공유 링크', () => {
   });
 
   it('잘못된 공유 코드는 거부한다', () => {
-    expect(decodeShareCode('bow.lance.hammer.10.20.-.40.100', wilds.weapons).profile.combo).toBeNull();
+    expect(decodeShareCode('bow.lance.hammer.10.20.-.40.100', wilds.weapons).profile.complexity).toBeNull();
     for (const bad of [
       'bow.lance.1.2.3.4.5',
       'bow.bow.lance.1.2.3.4.5',

@@ -1,6 +1,6 @@
 # 시트 데이터 및 참조 설계
 
-- 상태: 원본 시트·입력 규격·추천 계산 규칙 확정, `combo`→`complexity` 필드 마이그레이션 대기
+- 상태: 원본 시트·입력 규격·추천 계산 규칙 확정, XLSX 변환기와 사이트 데이터 로딩 구현 완료
 - 최신 방향 반영일: 2026-10-08
 
 ## 데이터 원본
@@ -28,11 +28,9 @@
 | --- | --- | --- | --- |
 | attack | 대미지 집중도 | 자주 대미지를 누적하는 지속형 | 준비한 기회에 대미지를 집중하는 한방형 |
 | freedom | 자유도 | 행동을 시작하면 방향·위치·다음 대응을 바꾸기 어려움 | 판단을 바꾼 뒤 공격·이동·방향·회피·가드로 빠르게 전환 가능 |
-| complexity *(현재 구현: combo)* | 운용 복잡도 | 여러 선택 중 어느 것을 골라도 기본 역할 수행이 쉬움 | 상황에 맞는 행동·파생·상태 전환을 골라야 제 성능을 내기 쉬움 |
+| complexity | 운용 복잡도 | 여러 선택 중 어느 것을 골라도 기본 역할 수행이 쉬움 | 상황에 맞는 행동·파생·상태 전환을 골라야 제 성능을 내기 쉬움 |
 | management | 관리 부담 | 별도 확인·개입이 거의 필요 없음 | 무기 고유 자원·게이지·강화 상태·지속 시간을 계속 확인하고 유지·소비·보충해야 함 |
 | counter | 카운터 취향·중심도 | 카운터가 운용의 중심이 아님 | 카운터 성공이 무기 운용의 핵심 정체성임 |
-
-기획상 세 번째 축의 필드명은 `complexity`로 확정했습니다. 현재 원본 시트·생성 JSON·코드는 `combo`를 사용하므로, 이름 변경은 시트 헤더·변환기·데이터·계산·표시를 함께 바꾸는 별도 구현 작업으로 진행합니다. 마이그레이션 전 데이터 갱신은 현재 `combo` 열을 사용합니다.
 
 무기 탭에는 각 무기의 특성을 입력합니다.
 질문 탭도 같은 다섯 필드를 사용하되, 값은 무기 특성값이 아니라 해당 문항의 영향 방향·강도를 나타내는 가중치입니다. 양수·음수는 방향, 절댓값은 영향 크기, 0·빈칸은 영향 없음을 뜻합니다. `axis`·`reverse`는 사용하지 않습니다.
@@ -55,7 +53,7 @@
 | weapon_name | 문자열 | 화면에 보여줄 한국어 무기 이름 |
 | attack | 숫자 | 0~100, 필수 |
 | freedom | 숫자 | 0~100, 필수 |
-| combo | 숫자 | 0~100, 필수. 현재 구현 열이며 기획상 `complexity`로 변경 예정 |
+| complexity | 숫자 | 0~100, 필수 |
 | management | 숫자 | 0~100, 필수 |
 | counter | 숫자 | 0~100, 필수 |
 | reason | 문자열 | 수치 판단 근거를 적는 편집 메모. 계산·JSON에서 제외 |
@@ -78,7 +76,7 @@
 | question_text | 문자열 | 동의 정도를 답할 수 있는 평서문 |
 | attack | 숫자 | -100~100. 0·빈칸은 영향 없음 |
 | freedom | 숫자 | -100~100. 0·빈칸은 영향 없음 |
-| combo | 숫자 | -100~100. 0·빈칸은 영향 없음. 현재 구현 열이며 기획상 `complexity`로 변경 예정 |
+| complexity | 숫자 | -100~100. 0·빈칸은 영향 없음 |
 | management | 숫자 | -100~100. 0·빈칸은 영향 없음 |
 | counter | 숫자 | -100~100. 0·빈칸은 영향 없음 |
 | 분류1 | 문자열 | 유사 문항 중복을 확인하기 위한 주된 의미 태그. 계산·JSON에서 제외 |
@@ -94,7 +92,7 @@
 
 아래는 다축 계산 방식을 설명하기 위한 가상 값입니다. 원본 시트의 현재 질문을 뜻하지 않습니다.
 
-| question_id | question_order | question_text | attack | freedom | combo | management | counter |
+| question_id | question_order | question_text | attack | freedom | complexity | management | counter |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | example | 1 | 예시 문장 | 100 | 50 | 0 | 0 | 0 |
 
@@ -165,7 +163,7 @@ npm run data:convert -- --if-changed       # 실질 데이터가 바뀐 파일�
 ```json
 {
   "meta": {
-    "format_version": 4,
+    "format_version": 5,
     "source": { "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras", "sheet": "Wilds_Question" },
     "exported_at": "2026-10-05T12:34:47.428Z",
     "converted_at": "2026-10-05T12:34:47.496Z"
@@ -174,7 +172,7 @@ npm run data:convert -- --if-changed       # 실질 데이터가 바뀐 파일�
 }
 ```
 
-`format_version`은 선택지 행 구조를 1, 단일 축 구조를 2, 다축 가중치의 `resource` 필드 구조를 3, 같은 축을 `management`로 확장·개명한 현재 구조를 4로 구분합니다.
+`format_version`은 선택지 행 구조를 1, 단일 축 구조를 2, 다축 가중치의 `resource` 필드 구조를 3, 같은 축을 `management`로 확장·개명한 구조를 4, 세 번째 축 `combo`를 `complexity`로 개명한 현재 구조를 5로 구분합니다.
 
 질문 배열의 각 항목은 다음처럼 질문당 한 객체입니다.
 
@@ -185,7 +183,7 @@ npm run data:convert -- --if-changed       # 실질 데이터가 바뀐 파일�
   "question_text": "예시 문장",
   "attack": 100,
   "freedom": 50,
-  "combo": 0,
+  "complexity": 0,
   "management": 0,
   "counter": 0
 }
@@ -223,7 +221,7 @@ npm run data:convert -- --if-changed       # 실질 데이터가 바뀐 파일�
 - 사용자 점수: `user_a = clamp(50 + 50 × raw_a / max_a, 0, 100)`
 - `max_a`가 0이면 그 축은 `null`이며 추천 평균에서도 제외합니다.
 
-무기 값은 같은 0~100 척도에서 비교합니다. `attack`·`counter`는 `|user - weapon|`, `freedom`은 `max(0, user - weapon)`, 현재 구현의 `combo`와 `management`는 `max(0, weapon - user)`를 불일치로 사용합니다. `combo`는 기획상 `complexity`를 뜻하며 필드 마이그레이션 후에도 계산 방향은 유지합니다. 축 적합도는 `100 - 불일치`이며 측정된 축의 동일 가중 평균이 무기별 최종 추천 점수입니다.
+무기 값은 같은 0~100 척도에서 비교합니다. `attack`·`counter`는 `|user - weapon|`, `freedom`은 `max(0, user - weapon)`, `complexity`·`management`는 `max(0, weapon - user)`를 불일치로 사용합니다. 축 적합도는 `100 - 불일치`이며 측정된 축의 동일 가중 평균이 무기별 최종 추천 점수입니다.
 
 질문의 영향 가중치와 최종 추천에서 축의 중요도는 별개입니다. 질문 수나 가중치 절댓값 합은 정규화 분모에도 함께 반영되므로 특정 축의 최종 비중을 자동으로 높이지 않습니다. 현재 추천 축 가중치는 모두 1입니다.
 사용자 점수는 `computeAxisProfile`(`src/core/scoring.js`), 무기 적합도와 순위는 `src/core/recommend.js`에서 계산합니다.

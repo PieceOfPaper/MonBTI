@@ -1,13 +1,13 @@
 // 원본 시트의 행 배열을 사이트용 JSON 구조로 검증·변환한다.
 // 규칙은 docs/data-schema.md의 '변환 규칙'을 따른다.
 
-export const AXIS_FIELDS = ['attack', 'freedom', 'combo', 'management', 'counter'];
+export const AXIS_FIELDS = ['attack', 'freedom', 'complexity', 'management', 'counter'];
 export const WEAPON_COLUMNS = ['weapon_id', 'weapon_name', ...AXIS_FIELDS];
 export const QUESTION_COLUMNS = ['question_id', 'question_order', 'question_text', ...AXIS_FIELDS];
 export const LEGACY_QUESTION_COLUMNS = ['axis', 'reverse'];
 
-// 다축 가중치 구조. 선택지 행(1)·단일 축(2) 구조와 구분한다.
-export const DATA_FORMAT_VERSION = 4;
+// 다축 가중치 구조(complexity 필드). 선택지 행(1)·단일 축(2)·resource(3)·combo(4) 구조와 구분한다.
+export const DATA_FORMAT_VERSION = 5;
 
 export class SheetConversionError extends Error {
   constructor(sheet, errors) {

@@ -5,11 +5,11 @@
 export const RECOMMENDATION_COUNT = 3;
 
 // 축별 불일치. attack·counter는 대칭 취향 거리, freedom은 원하는 자유도보다 부족한 만큼,
-// combo·management는 무기의 요구량이 사용자의 수용 수준을 넘는 만큼만 벌점으로 본다.
+// complexity·management는 무기의 요구량이 사용자의 수용 수준을 넘는 만큼만 벌점으로 본다.
 export const AXIS_MISMATCH = {
   attack: (user, weapon) => Math.abs(user - weapon),
   freedom: (user, weapon) => Math.max(0, user - weapon),
-  combo: (user, weapon) => Math.max(0, weapon - user),
+  complexity: (user, weapon) => Math.max(0, weapon - user),
   management: (user, weapon) => Math.max(0, weapon - user),
   counter: (user, weapon) => Math.abs(user - weapon),
 };
