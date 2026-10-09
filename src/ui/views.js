@@ -18,7 +18,7 @@ const YOUTUBE_ICON = `<svg class="credit__icon" viewBox="0 0 24 24" aria-hidden=
 export function renderGameSelection(games) {
   const choices = games
     .map(({ id, name, logo, description }) => `
-      <li><a class="game-card" href="#/${id}" data-game-id="${id}">
+      <li><a class="game-card" href="#/${id}" data-game-id="${id}" data-start-quiz="${id}">
         <span class="game-card__label">현재 검사 가능</span>
         ${logo
           ? `<img class="game-card__logo" src="${escapeHtml(logo)}" alt="${escapeHtml(name)}" />`
@@ -150,7 +150,7 @@ export function renderVideoPlayer(videoId, title) {
 export function renderResult(game, result, { selectedIndex = 0, shared = false } = {}) {
   const selected = result.weapons[selectedIndex];
   const actions = shared
-    ? `<a class="button" href="#/${game.id}" data-action="start">나도 검사하기</a>`
+    ? `<a class="button" href="#/${game.id}" data-action="start" data-start-quiz="${game.id}">나도 검사하기</a>`
     : `<a class="button button--ghost" href="#/${game.id}" data-action="review">답변 수정하기</a>
       <button class="button button--ghost" type="button" data-action="restart">처음부터 다시 하기</button>`;
 
@@ -222,7 +222,7 @@ export function renderGuide(game) {
       <p class="guide__note">무기별 값은 테스트하면서 계속 다듬고 있어요. 결과는 첫 무기를 고르는 참고로 삼고, 마음에 드는 무기는 직접 써 보는 것을 추천해요.</p>
     </section>
     <div class="result__actions">
-      <a class="button" href="#/${game.id}">검사 시작하기</a>
+      <a class="button" href="#/${game.id}" data-start-quiz="${game.id}">검사 시작하기</a>
       <a class="button button--ghost" href="#/">작품 선택으로</a>
     </div>
   </section>`;

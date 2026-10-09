@@ -116,6 +116,13 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
 
   const focusHeading = () => root.querySelector('h1')?.focus({ preventScroll: false });
 
+  // 저장한 답변과 질문 순서를 지워 다음 진입에서 순서를 새로 섞고 첫 질문부터 시작한다.
+  function resetQuiz(game) {
+    store.clear(game);
+    state.gameId = null;
+    state.startFromFirst = true;
+  }
+
   function enterGame(game) {
     if (state.gameId === game.id) return;
     state.gameId = game.id;
@@ -234,10 +241,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
       state.startFromFirst = true;
     });
     root.querySelector('[data-action="restart"]').addEventListener('click', () => {
-      store.clear(game);
-      // 다음 검사에서 질문 순서를 새로 섞는다.
-      state.gameId = null;
-      state.startFromFirst = true;
+      resetQuiz(game);
       location.hash = `#/${game.id}`;
     });
   }
@@ -288,6 +292,17 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
   // 공유 링크로 들어오면 쿼리를 지우고 내부 해시 주소로 바꾼다. 새로고침해도 같은 결과가 유지된다.
   const sharedHash = shareParamToHash(location.search);
   if (sharedHash) history.replaceState(null, '', `${location.pathname}${sharedHash}`);
+
+  // 작품 카드·검사 설명·공유 결과의 검사 시작 링크는 이전 진행을 이어 가지 않고 새 검사를 연다.
+  // 이어 하기는 새로고침, 이전 질문 이동, 결과의 ‘답변 수정하기’에서만 유지한다.
+  // 클릭 처리가 링크 이동(hashchange)보다 먼저 실행되므로 render는 비운 저장소를 읽는다.
+  root.addEventListener('click', (event) => {
+    // 새 탭으로 여는 클릭은 현재 탭의 진행을 지우지 않는다.
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest('[data-start-quiz]');
+    const game = link && findGame(link.dataset.startQuiz, games);
+    if (game) resetQuiz(game);
+  });
 
   window.addEventListener('hashchange', render);
   render();

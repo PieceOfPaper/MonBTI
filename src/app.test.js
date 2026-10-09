@@ -87,6 +87,16 @@ describe('화면', () => {
     expect(renderGameSelection(supportedGames)).toContain('href="#/wilds"');
   });
 
+  it('검사 시작 링크는 새 검사로 표시하고, 답변 수정 링크는 이어 하기로 남긴다', () => {
+    const result = buildResult(wilds, Object.fromEntries(wilds.questions.map(({ question_id }) => [question_id, 4])));
+    expect(renderGameSelection(supportedGames)).toContain('href="#/wilds" data-game-id="wilds" data-start-quiz="wilds"');
+    expect(renderGuide(wilds)).toContain('href="#/wilds" data-start-quiz="wilds"');
+    expect(renderResult(wilds, result, { shared: true })).toContain('data-start-quiz="wilds"');
+    const own = renderResult(wilds, result);
+    expect(own).toContain('data-action="review"');
+    expect(own).not.toContain('data-start-quiz');
+  });
+
   it('작품 선택 화면은 검사 옆에 검사 설명 링크를 제공한다', () => {
     expect(renderGameSelection(supportedGames)).toContain('href="#/wilds/guide"');
   });
