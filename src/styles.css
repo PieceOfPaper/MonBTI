@@ -115,6 +115,14 @@ legend { padding: 0; margin-bottom: 1.5rem; }
 .compare__table td:nth-child(2) { color: #e3a68a; font-weight: 700; }
 .compare__table td:nth-child(3) { color: #c8da81; font-weight: 700; }
 
+/* 무기 소개: 공식 소개 문구를 인용처럼 가운데에 두고 바로 아래에 영상을 이어 붙인다. */
+.quote { max-width: 34rem; margin: .25rem auto 1.75rem; padding: 0 .5rem; text-align: center; }
+.quote blockquote { margin: 0; color: #e8eee9; font-size: 1.05rem; line-height: 1.85; word-break: keep-all; }
+.quote blockquote::before, .quote blockquote::after { display: block; color: #c8da81; font-family: Georgia, "Times New Roman", serif; font-size: 2.75rem; line-height: 1; opacity: .8; }
+.quote blockquote::before { content: "\201C"; margin-bottom: .1rem; }
+.quote blockquote::after { content: "\201D"; margin-top: .6rem; }
+.quote__credit { margin-top: .35rem; color: #a9b8ad; font-size: .75rem; }
+
 /* 소개 영상: 누르면 그 자리에서 재생 */
 .video { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 1rem; background: #000; }
 .video iframe, .video__play, .video__play img { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }

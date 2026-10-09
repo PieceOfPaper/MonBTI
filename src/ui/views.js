@@ -124,19 +124,39 @@ function renderComparison(profile, weapon, who) {
     </section>`;
 }
 
+// 선택한 무기의 공식 소개 문구(인용)와 소개 영상을 제목 없이 한 영역으로 보여 준다.
+function renderQuote(weapon) {
+  if (!weapon.description?.length) return '';
+  const lines = weapon.description.map(escapeHtml).join('<br />');
+  const credit = weapon.descriptionSource
+    ? `<figcaption class="quote__credit">출처: ${escapeHtml(weapon.descriptionSource)}</figcaption>`
+    : '';
+  return `<figure class="quote">
+        <blockquote>${lines}</blockquote>
+        ${credit}
+      </figure>`;
+}
+
 function renderVideo(weapon) {
   if (!weapon.videoId) return '';
   const id = escapeHtml(weapon.videoId);
   // 처음에는 미리보기 이미지만 보여 주고, 누르면 그 자리에서 영상을 바로 재생한다.
-  return `<section class="result__section" aria-labelledby="video-title">
-      <h2 id="video-title">${escapeHtml(weapon.weapon_name)} 소개 영상</h2>
-      <div class="video" data-video-id="${id}">
+  return `<div class="video" data-video-id="${id}">
         <button class="video__play" type="button" data-action="play-video" aria-label="${escapeHtml(weapon.weapon_name)} 소개 영상 재생">
           <img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy" />
           <span class="video__icon" aria-hidden="true"></span>
         </button>
       </div>
-      <p class="video__credit">출처: 캡콤아시아 공식 유튜브</p>
+      <p class="video__credit">출처: 캡콤아시아 공식 유튜브</p>`;
+}
+
+function renderIntro(weapon) {
+  const quote = renderQuote(weapon);
+  const video = renderVideo(weapon);
+  if (!quote && !video) return '';
+  return `<section class="result__section intro" aria-label="${escapeHtml(weapon.weapon_name)} 소개">
+      ${quote}
+      ${video}
     </section>`;
 }
 
@@ -160,7 +180,7 @@ export function renderResult(game, result, { selectedIndex = 0, shared = false }
     <ol class="ranking" aria-label="추천 무기 순위">${renderRanking(result.weapons, selectedIndex)}
     </ol>
     ${renderComparison(result.profile, selected, shared ? '친구' : '나')}
-    ${renderVideo(selected)}
+    ${renderIntro(selected)}
     <section class="result__section" aria-labelledby="share-title">
       <h2 id="share-title">결과 공유하기</h2>
       <div class="share">

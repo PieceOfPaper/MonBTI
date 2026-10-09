@@ -165,6 +165,20 @@ describe('화면', () => {
     expect(html).toContain('data-action="restart"');
   });
 
+  it('결과 화면은 그래프 아래에 제목 없이 공식 소개 문구 인용과 출처, 소개 영상을 한 영역으로 보여 준다', () => {
+    const weapon = result.weapons[1];
+    const html = renderResult(testGame, result, { selectedIndex: 1 });
+    expect(html).toContain(`<blockquote>${weapon.description.join('<br />').replaceAll("'", '&#39;')}</blockquote>`);
+    expect(html).toContain('출처: 몬스터헌터 와일즈 공식 사이트</figcaption>');
+    expect(html).not.toContain('소개</h2>');
+    expect(html).not.toContain('소개 영상</h2>');
+    const order = ['id="compare-title"', 'class="quote"', 'class="video"'].map((mark) => html.indexOf(mark));
+    expect(order[0]).toBeGreaterThan(-1);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    const intro = html.slice(html.indexOf('class="result__section intro"'));
+    expect(intro.indexOf('class="video"')).toBeLessThan(intro.indexOf('</section>'));
+  });
+
   it('공유 결과 화면은 답변 수정 대신 검사 시작을 안내한다', () => {
     const html = renderResult(testGame, result, { shared: true });
     expect(html).toContain('나도 검사하기');
@@ -179,10 +193,11 @@ describe('화면', () => {
 });
 
 describe('추천과 공유 링크', () => {
-  it('와일즈 무기는 모두 아이콘과 소개 영상을 가진다', () => {
+  it('와일즈 무기는 모두 아이콘과 소개 영상, 소개 문구를 가진다', () => {
     for (const weapon of wilds.weapons) {
       expect(weapon.icon, weapon.weapon_id).toBeTruthy();
       expect(weapon.videoId, weapon.weapon_id).toMatch(/^[\w-]{11}$/);
+      expect(weapon.description?.length, weapon.weapon_id).toBeGreaterThan(0);
     }
   });
 
