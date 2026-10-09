@@ -221,7 +221,7 @@ npm run data:convert -- --if-changed       # 실질 데이터가 바뀐 파일�
 - 사용자 점수: `user_a = clamp(50 + 50 × raw_a / max_a, 0, 100)`
 - `max_a`가 0이면 그 축은 `null`이며 추천 평균에서도 제외합니다.
 
-무기 값은 같은 0~100 척도에서 비교합니다. `attack`·`counter`는 `|user - weapon|`, `freedom`은 `max(0, user - weapon)`을 불일치로 사용합니다. `complexity`·`management`는 `max(0, weapon - user) + 0.5 × max(0, user - weapon)`을 사용해 무기가 더 높은 차이는 100%, 더 낮은 차이는 50% 반영합니다. 축 적합도는 `100 - 불일치`이며 측정된 축의 동일 가중 평균이 무기별 최종 추천 점수입니다. `complexity`·`management`의 사용자 값은 최대 감당치가 아니라 잘 맞는 선호 수준으로 해석하되, 낮은 요구 수준의 불일치는 초과 부담보다 약하게 봅니다.
+무기 값은 같은 0~100 척도에서 비교합니다. `attack`·`counter`는 `|user - weapon|`을 불일치로 사용합니다. `freedom`은 `max(0, user - weapon) + 0.5 × max(0, weapon - user)`를 사용해 무기가 더 낮은 차이는 100%, 더 높은 차이는 50% 반영합니다. `complexity`·`management`는 반대 방향인 `max(0, weapon - user) + 0.5 × max(0, user - weapon)`을 사용해 무기가 더 높은 차이는 100%, 더 낮은 차이는 50% 반영합니다. 축 적합도는 `100 - 불일치`이며 측정된 축의 동일 가중 평균이 무기별 최종 추천 점수입니다. 자유도 부족은 입문자의 직접적인 조작 장벽으로 크게 보고, 필요 이상의 자유도도 선호한 행동 단위·조작 리듬과 다른 정도로 절반만 반영합니다. `complexity`·`management`의 사용자 값은 최대 감당치가 아니라 잘 맞는 선호 수준으로 해석하되, 낮은 요구 수준의 불일치는 초과 부담보다 약하게 봅니다.
 
 질문의 영향 가중치와 최종 추천에서 축의 중요도는 별개입니다. 질문 수나 가중치 절댓값 합은 정규화 분모에도 함께 반영되므로 특정 축의 최종 비중을 자동으로 높이지 않습니다. 현재 추천 축 가중치는 모두 1입니다.
 사용자 점수는 `computeAxisProfile`(`src/core/scoring.js`), 무기 적합도와 순위는 `src/core/recommend.js`에서 계산합니다.
