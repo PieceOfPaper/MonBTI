@@ -20,10 +20,11 @@ describe('축별 불일치', () => {
     expect(scoreWeapon(profile({ freedom: 25 }), weapon('w', { freedom: 100 })).score).toBe(100);
   });
 
-  it('complexity·management는 무기 요구량이 사용자 수준을 넘을 때만 벌점을 준다', () => {
+  it('complexity·management는 무기가 높으면 차이 전부, 낮으면 차이의 절반을 벌점으로 준다', () => {
     for (const axis of ['complexity', 'management']) {
       expect(scoreWeapon(profile({ [axis]: 25 }), weapon('w', { [axis]: 100 })).maxMismatch).toBe(75);
-      expect(scoreWeapon(profile({ [axis]: 100 }), weapon('w', { [axis]: 0 })).score).toBe(100);
+      expect(scoreWeapon(profile({ [axis]: 100 }), weapon('w', { [axis]: 0 })).maxMismatch).toBe(50);
+      expect(scoreWeapon(profile({ [axis]: 60 }), weapon('w', { [axis]: 60 })).score).toBe(100);
     }
   });
 
@@ -56,4 +57,5 @@ describe('추천 순위', () => {
     expect(ranked.map(({ score }) => score)).toEqual([90, 90, 90]);
     expect(ids(ranked.map(({ weapon: w }) => w))).toEqual(['spread', 'row_first', 'row_second']);
   });
+
 });
