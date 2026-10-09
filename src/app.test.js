@@ -191,10 +191,18 @@ describe('추천과 공유 링크', () => {
     const first = buildResult(wilds, answers);
     expect(buildResult(wilds, { ...answers }).weapons).toEqual(first.weapons);
     expect(new Set(first.weapons.map(({ weapon_id }) => weapon_id)).size).toBe(3);
+    // 축마다 양·음 문항이 균형을 이루면 모든 질문에 같은 답을 해도 결과가 같으므로,
+    // 축별로 가중치 방향에 맞춰 답을 높이거나 낮춘 답변들을 비교한다.
     const picks = new Set();
-    for (let r = 1; r <= 6; r += 1) {
-      const changed = Object.fromEntries(wilds.questions.map(({ question_id }) => [question_id, r]));
-      picks.add(buildResult(wilds, changed).weapons.map(({ weapon_id }) => weapon_id).join());
+    for (const axis of ['attack', 'freedom', 'complexity', 'management', 'counter']) {
+      for (const high of [true, false]) {
+        const changed = Object.fromEntries(wilds.questions.map((question) => {
+          const weight = question[axis] ?? 0;
+          if (!weight) return [question.question_id, 4];
+          return [question.question_id, (weight > 0) === high ? 6 : 1];
+        }));
+        picks.add(buildResult(wilds, changed).weapons.map(({ weapon_id }) => weapon_id).join());
+      }
     }
     expect(picks.size).toBeGreaterThan(1);
   });
