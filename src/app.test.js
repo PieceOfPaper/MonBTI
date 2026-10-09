@@ -5,6 +5,7 @@ import {
 import { supportedGames } from './games/index.js';
 import { renderGameSelection, renderGuide, renderQuestion, renderResult } from './ui/views.js';
 import { decodeShareCode } from './core/share.js';
+import { remainingWeapons } from './core/recommend.js';
 
 const wilds = supportedGames[0];
 // 화면·저장 테스트는 편집 가능한 원본 시트의 문항 ID·가중치와 분리한다.
@@ -177,6 +178,21 @@ describe('화면', () => {
     expect(order).toEqual([...order].sort((a, b) => a - b));
     const intro = html.slice(html.indexOf('class="result__section intro"'));
     expect(intro.indexOf('class="video"')).toBeLessThan(intro.indexOf('</section>'));
+  });
+
+  it('결과 화면은 1~3순위 아래 접힌 나머지 무기 목록을 4순위부터 보여 주고 선택할 수 있다', () => {
+    const others = remainingWeapons(testGame.weapons, result.profile, result.weapons);
+    expect(others).toHaveLength(testGame.weapons.length - 3);
+    const closed = renderResult(testGame, result, { others });
+    expect(closed).toContain('data-action="toggle-others" aria-expanded="false"');
+    expect(closed).toMatch(/id="other-weapons"[^>]* hidden>/);
+    expect(closed).toContain('<span class="others__rank">4순위</span>');
+    expect(closed.indexOf('class="ranking"')).toBeLessThan(closed.indexOf('class="others"'));
+    const open = renderResult(testGame, result, { others, othersOpen: true, selectedIndex: 3 });
+    expect(open).toContain('aria-expanded="true"');
+    expect(open).not.toMatch(/id="other-weapons"[^>]* hidden>/);
+    expect(open).toContain(`vs ${others[0].weapon_name}`);
+    expect(open).toContain('data-select="3" aria-pressed="true"');
   });
 
   it('공유 결과 화면은 답변 수정 대신 검사 시작을 안내한다', () => {

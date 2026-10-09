@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rankWeapons, recommendWeapons, scoreWeapon } from './recommend.js';
+import { rankWeapons, recommendWeapons, remainingWeapons, scoreWeapon } from './recommend.js';
 
 const weapon = (weapon_id, values) => ({
   weapon_id, weapon_name: weapon_id, attack: 50, freedom: 50, complexity: 50, management: 50, counter: 50, ...values,
@@ -58,4 +58,11 @@ describe('추천 순위', () => {
     expect(ids(ranked.map(({ weapon: w }) => w))).toEqual(['spread', 'row_first', 'row_second']);
   });
 
+  it('나머지 무기는 지정한 상위 무기를 빼고 같은 순위 규칙으로 이어진다', () => {
+    const user = profile({ attack: 100 });
+    const weapons = [weapon('far', { attack: 0 }), weapon('exact', { attack: 100 }), weapon('near', { attack: 80 })];
+    const ranked = rankWeapons(weapons, user).map(({ weapon: w }) => w);
+    expect(ids(remainingWeapons(weapons, user, ranked.slice(0, 1)))).toEqual(ids(ranked.slice(1)));
+    expect(ids(remainingWeapons(weapons, user, [ranked[2]]))).toEqual(ids(ranked.slice(0, 2)));
+  });
 });

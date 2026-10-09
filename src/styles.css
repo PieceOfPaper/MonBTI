@@ -90,6 +90,20 @@ legend { padding: 0; margin-bottom: 1.5rem; }
 .rank__name { grid-area: name; align-self: start; font-size: 1.25rem; word-break: keep-all; }
 .rank__icon { grid-area: icon; width: 3.5rem; height: 3.5rem; object-fit: contain; }
 .rank__icon--text { display: grid; place-items: center; border-radius: 50%; background: #304535; font-weight: 800; }
+.others { margin-top: .75rem; }
+.others__toggle { display: flex; align-items: center; gap: .4rem; margin: 0 auto; padding: .4rem .8rem; border: 0; border-radius: .5rem; color: #a9b8ad; background: none; font-size: .875rem; cursor: pointer; }
+.others__toggle::after { content: ""; width: .45rem; height: .45rem; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-.15rem) rotate(45deg); transition: transform .15s; }
+.others__toggle[aria-expanded="true"]::after { transform: translateY(.1rem) rotate(-135deg); }
+.others__toggle:hover, .others__toggle:focus-visible { outline: 2px solid #d8ef86; outline-offset: 2px; color: #f7f4ec; }
+.others__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .5rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.others__list[hidden] { display: none; }
+.others__button { display: flex; align-items: center; gap: .5rem; width: 100%; padding: .45rem .6rem; border: 1px solid #304535; border-radius: .75rem; color: inherit; background: #1c2a22; text-align: left; cursor: pointer; }
+.others__button:hover, .others__button:focus-visible { outline: 2px solid #d8ef86; outline-offset: 2px; }
+.others__button[aria-pressed="true"] { border-color: #c8da81; background: #2a3d2e; }
+.others__rank { flex: none; color: #a9b8ad; font-size: .75rem; font-weight: 700; }
+.others__icon { flex: none; width: 2rem; height: 2rem; object-fit: contain; }
+.others__icon--text { display: grid; place-items: center; border-radius: 50%; background: #304535; font-size: .8rem; font-weight: 800; }
+.others__name { font-size: .9rem; word-break: keep-all; }
 .rank--1 .rank__button { padding: 1.4rem 1.5rem; border: 2px solid #c8da81; background: linear-gradient(135deg, #34502f, #22332a); }
 .rank--1 .rank__icon { width: clamp(5.5rem, 22vw, 8rem); height: clamp(5.5rem, 22vw, 8rem); }
 .rank--1 .rank__label { color: #c8da81; font-size: 1.05rem; }

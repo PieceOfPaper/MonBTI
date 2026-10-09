@@ -2,7 +2,7 @@
 // 경로 대신 #/<작품 ID>, #/<작품 ID>/guide, #/<작품 ID>/result, #/<작품 ID>/share/<코드> 형식을 사용한다.
 // 외부로 공유하는 링크만 ?r=<작품 ID>.<코드> 형식이며, 열면 내부 해시 주소로 바꾼다(core/share.js).
 import { AXIS_IDS } from './core/axes.js';
-import { recommendWeapons } from './core/recommend.js';
+import { recommendWeapons, remainingWeapons } from './core/recommend.js';
 import {
   computeAxisProfile, computeAxisTotals, firstUnansweredIndex, isComplete, sanitizeAnswers, setAnswer,
 } from './core/scoring.js';
@@ -173,8 +173,10 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
     });
   }
 
-  function showResult(game, result, { shared = false, selectedIndex = 0 } = {}) {
-    root.innerHTML = renderResult(game, result, { selectedIndex, shared });
+  function showResult(game, result, { shared = false, selectedIndex = 0, othersOpen = false } = {}) {
+    const others = remainingWeapons(game.weapons, result.profile, result.weapons);
+    const selected = [...result.weapons, ...others][selectedIndex];
+    root.innerHTML = renderResult(game, result, { selectedIndex, shared, others, othersOpen });
     const status = root.querySelector('.share__status');
     const say = (message) => { status.textContent = message; };
 
@@ -182,14 +184,20 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
       button.addEventListener('click', () => {
         const index = Number(button.dataset.select);
         if (index === selectedIndex) return;
-        showResult(game, result, { shared, selectedIndex: index });
+        showResult(game, result, { shared, selectedIndex: index, othersOpen });
         root.querySelector(`[data-select="${index}"]`)?.focus();
       });
     });
 
+    root.querySelector('[data-action="toggle-others"]')?.addEventListener('click', (event) => {
+      othersOpen = !othersOpen;
+      event.currentTarget.setAttribute('aria-expanded', String(othersOpen));
+      root.querySelector('#other-weapons').hidden = !othersOpen;
+    });
+
     root.querySelector('[data-action="play-video"]')?.addEventListener('click', (event) => {
       const box = event.currentTarget.closest('.video');
-      box.innerHTML = renderVideoPlayer(box.dataset.videoId, `${result.weapons[selectedIndex].weapon_name} 소개 영상`);
+      box.innerHTML = renderVideoPlayer(box.dataset.videoId, `${selected.weapon_name} 소개 영상`);
     });
 
     root.querySelector('[data-action="share-link"]').addEventListener('click', async () => {

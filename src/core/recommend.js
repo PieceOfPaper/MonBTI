@@ -40,3 +40,12 @@ export function rankWeapons(weapons, profile) {
 export function recommendWeapons(weapons, profile, count = RECOMMENDATION_COUNT) {
   return rankWeapons(weapons, profile).slice(0, count).map(({ weapon }) => weapon);
 }
+
+// 1~3순위(top) 이후의 무기를 순위대로 돌려준다. 공유 링크처럼 top이 따로 정해진 경우에도
+// top에 없는 무기만 같은 순위 규칙으로 이어 붙인다.
+export function remainingWeapons(weapons, profile, top) {
+  const topIds = new Set(top.map(({ weapon_id }) => weapon_id));
+  return rankWeapons(weapons, profile)
+    .map(({ weapon }) => weapon)
+    .filter(({ weapon_id }) => !topIds.has(weapon_id));
+}

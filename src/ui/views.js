@@ -97,6 +97,25 @@ function renderRanking(weapons, selectedIndex) {
       </li>`).join('');
 }
 
+// 1~3순위 아래의 접히는 '나머지 무기' 목록. 순위 번호는 4순위부터 이어지고, 누르면 그 무기와 비교한다.
+function renderOthers(others, selectedIndex, open) {
+  if (others.length === 0) return '';
+  const items = others.map((weapon, offset) => {
+    const index = offset + RANK_LABELS.length;
+    return `
+        <li><button class="others__button" type="button" data-select="${index}" aria-pressed="${index === selectedIndex}">
+          <span class="others__rank">${index + 1}순위</span>
+          ${weaponIcon(weapon, 'others__icon')}
+          <span class="others__name">${escapeHtml(weapon.weapon_name)}</span>
+        </button></li>`;
+  }).join('');
+  return `<div class="others">
+      <button class="others__toggle" type="button" data-action="toggle-others" aria-expanded="${open}" aria-controls="other-weapons">나머지 무기</button>
+      <ol class="others__list" id="other-weapons" aria-label="나머지 무기 순위"${open ? '' : ' hidden'}>${items}
+      </ol>
+    </div>`;
+}
+
 const formatValue = (value) => (value === null ? '측정 안 됨' : String(Math.round(value)));
 
 function renderComparison(profile, weapon, who) {
@@ -166,9 +185,10 @@ export function renderVideoPlayer(videoId, title) {
 }
 
 // result: { weapons: [1~3순위], profile: { 축: 0~100 | null } }
+// others는 4순위 이후 무기이며 selectedIndex는 1순위부터 이어지는 전체 순위의 위치다.
 // shared가 참이면 공유 링크로 연 결과이며 답변 수정 대신 검사 시작을 안내한다.
-export function renderResult(game, result, { selectedIndex = 0, shared = false } = {}) {
-  const selected = result.weapons[selectedIndex];
+export function renderResult(game, result, { selectedIndex = 0, shared = false, others = [], othersOpen = false } = {}) {
+  const selected = [...result.weapons, ...others][selectedIndex] ?? result.weapons[0];
   const actions = shared
     ? `<a class="button" href="#/${game.id}" data-action="start" data-start-quiz="${game.id}">나도 검사하기</a>`
     : `<a class="button button--ghost" href="#/${game.id}" data-action="review">답변 수정하기</a>
@@ -179,6 +199,7 @@ export function renderResult(game, result, { selectedIndex = 0, shared = false }
     <h1 id="result-title" tabindex="-1">${shared ? '친구와 어울리는 무기' : '나와 어울리는 무기'}</h1>
     <ol class="ranking" aria-label="추천 무기 순위">${renderRanking(result.weapons, selectedIndex)}
     </ol>
+    ${renderOthers(others, selectedIndex, othersOpen)}
     ${renderComparison(result.profile, selected, shared ? '친구' : '나')}
     ${renderIntro(selected)}
     <section class="result__section" aria-labelledby="share-title">
