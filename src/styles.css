@@ -18,6 +18,12 @@ h1 { margin: 0; font-size: clamp(2rem, 8vw, 4.5rem); line-height: 1.15; word-bre
 .game-card strong { margin: .35rem 0; font-size: 1.35rem; }
 .game-card__label { color: #c8da81; font-size: .875rem; font-weight: 700; }
 .game-card__logo { display: block; width: min(100%, 22rem); height: auto; margin: .5rem auto; }
+.credit { margin-top: 3rem; color: #9fab9f; font-size: .9375rem; }
+.credit__by { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25rem .75rem; margin: 0; }
+.credit__by strong { color: #f7f4ec; }
+.credit__icon { flex: none; width: 1.15em; height: 1.15em; }
+.credit__link { display: inline-flex; align-items: center; gap: .35rem; color: #d5ddd7; text-underline-offset: .2em; }
+.credit__link:hover, .credit__link:focus-visible { color: #d8ef86; }
 
 .button { width: fit-content; padding: .85rem 1.25rem; border-radius: .75rem; background: #3d5a2f; font-weight: 700; text-align: center; }
 .button:disabled { opacity: .45; cursor: not-allowed; }

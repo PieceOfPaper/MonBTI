@@ -91,6 +91,14 @@ describe('화면', () => {
     expect(renderGameSelection(supportedGames)).toContain('href="#/wilds/guide"');
   });
 
+  it('작품 선택 화면 하단에 개발자와 채널 링크를 보여 준다', () => {
+    const html = renderGameSelection(supportedGames);
+    expect(html).toContain('종잇장');
+    expect(html).toContain('href="https://github.com/PieceOfPaper"');
+    expect(html).toContain('href="https://www.youtube.com/@lancer_owl"');
+    expect(html).toContain('랜스하는 부엉이');
+  });
+
   it('검사 설명 화면은 대상, 진행 방식, 다섯 기준과 검사 시작 링크를 보여 준다', () => {
     const html = renderGuide(wilds);
     expect(html).toContain('누구를 위한 검사인가요?');
