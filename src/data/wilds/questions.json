@@ -5,14 +5,14 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_Question"
     },
-    "exported_at": "2026-10-08T15:05:44.510Z",
-    "converted_at": "2026-10-08T15:05:44.596Z"
+    "exported_at": "2026-10-09T00:29:22.520Z",
+    "converted_at": "2026-10-09T00:29:22.572Z"
   },
   "questions": [
     {
       "question_id": "wilds_q001",
       "question_order": 1,
-      "question_text": "나는 작은 변화가 계속 생기는 것보다, 한 번의 행동으로 큰 변화를 만들어내는 편이 더 만족스럽다.",
+      "question_text": "나는 여러 행동에 결과가 나뉘는 방식보다, 한 번의 행동에 결과가 집중되는 방식을 선호한다.",
       "attack": 75,
       "freedom": 0,
       "complexity": 0,
@@ -22,7 +22,7 @@
     {
       "question_id": "wilds_q002",
       "question_order": 2,
-      "question_text": "나는 몇 가지 단순한 방법만 반복하기보다, 여러 동작을 알맞게 조합해야 하는 일이 더 흥미롭다.",
+      "question_text": "나는 익숙한 몇 가지 행동을 능숙하게 사용하는 방식보다, 여러 행동 중에서 상황마다 알맞은 것을 고르는 방식이 잘 맞는다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 100,
@@ -32,7 +32,7 @@
     {
       "question_id": "wilds_q003",
       "question_order": 3,
-      "question_text": "나는 한 가지 일에 집중하는 중에도 여러 상태를 계속 확인해야 하면 금방 피곤해진다.",
+      "question_text": "나는 한 가지 일에 집중하는 편이라, 동시에 여러 상태를 계속 확인해야 하면 금방 피곤해진다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
@@ -42,7 +42,7 @@
     {
       "question_id": "wilds_q004",
       "question_order": 4,
-      "question_text": "나는 한번 시작한 행동은 중간에 바꾸기 어렵더라도, 끝까지 이어지는 편이 오히려 편하다.",
+      "question_text": "나는 행동을 시작하기 전에 충분히 정할 수 있다면, 시작한 뒤 선택이 제한되어도 크게 답답하지 않다.",
       "attack": 0,
       "freedom": -75,
       "complexity": 0,
@@ -52,7 +52,7 @@
     {
       "question_id": "wilds_q005",
       "question_order": 5,
-      "question_text": "나는 상대가 한 행동을 그대로 이용해 되돌려주는 순간이 특히 통쾌하다.",
+      "question_text": "나는 상대가 움직이지 않을 때보다, 먼저 움직였을 때 다음 행동을 고르기 쉽다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
@@ -62,7 +62,7 @@
     {
       "question_id": "wilds_q006",
       "question_order": 6,
-      "question_text": "나는 신호를 본 뒤 정해진 순간에 정확히 반응했을 때 큰 만족감을 느낀다.",
+      "question_text": "나는 행동 시점을 내가 정하기보다, 상대가 보내는 신호에 맞춰 정하는 편이 잘 맞는다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
@@ -72,7 +72,7 @@
     {
       "question_id": "wilds_q007",
       "question_order": 7,
-      "question_text": "나는 내 계획을 그대로 이어가기보다, 상대가 하는 행동에 맞춰 대응을 바꾸는 편이 더 재미있다.",
+      "question_text": "나는 여러 선택을 자유롭게 이어 가는 방식보다, 상대의 행동마다 맞는 대응이 정해져 있는 방식이 잘 맞는다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
@@ -82,7 +82,7 @@
     {
       "question_id": "wilds_q008",
       "question_order": 8,
-      "question_text": "나는 상황이 바뀌면 하던 일을 바로 멈출 수 있어야 편하다.",
+      "question_text": "나는 예상과 다른 상황이 생기면 하던 일을 마무리하기보다, 중간에 끊고 바로 대응하는 편이다.",
       "attack": 0,
       "freedom": 100,
       "complexity": 0,
@@ -112,7 +112,7 @@
     {
       "question_id": "wilds_q011",
       "question_order": 11,
-      "question_text": "나는 여러 번 잘해 온 것보다 결정적인 순간에 제대로 해내는 것이 더 만족스럽다.",
+      "question_text": "나는 여러 행동에서 비슷한 결과를 얻는 방식보다, 특정 행동 하나에 결과가 크게 몰리는 방식을 선호한다.",
       "attack": 75,
       "freedom": 0,
       "complexity": 0,
@@ -122,7 +122,7 @@
     {
       "question_id": "wilds_q012",
       "question_order": 12,
-      "question_text": "나는 작은 성과를 자주 확인할 수 있을 때 일이 더 재미있다.",
+      "question_text": "나는 결과가 특정 순간에 몰리기보다, 진행하는 동안 작은 반응이 계속 이어지는 방식이 잘 맞는다.",
       "attack": -75,
       "freedom": 0,
       "complexity": 0,
@@ -132,7 +132,7 @@
     {
       "question_id": "wilds_q013",
       "question_order": 13,
-      "question_text": "나는 중간 과정이 답답하더라도 마지막에 크게 보상받는 일을 좋아한다.",
+      "question_text": "나는 바로 여러 번 시도할 수 있는 방식보다, 준비 시간이 필요하더라도 한 번의 행동에 힘을 모으는 방식을 선호한다.",
       "attack": 75,
       "freedom": 0,
       "complexity": 0,
@@ -142,7 +142,7 @@
     {
       "question_id": "wilds_q014",
       "question_order": 14,
-      "question_text": "나는 한 번의 실수가 크게 남는 것보다 다음 시도로 금방 만회할 수 있는 편이 좋다.",
+      "question_text": "나는 기회가 적은 한 번에 크게 걸기보다, 작은 기회를 여러 번 활용하는 방식이 잘 맞는다.",
       "attack": -75,
       "freedom": 0,
       "complexity": 0,
@@ -152,7 +152,7 @@
     {
       "question_id": "wilds_q015",
       "question_order": 15,
-      "question_text": "나는 처음부터 정확히 결정해야 하는 것보다 움직이면서 고칠 수 있는 편이 좋다.",
+      "question_text": "나는 시작 전에 방향을 정해 끝까지 이어 가기보다, 진행 중에도 방향이나 위치를 자주 고치는 편이 잘 맞는다.",
       "attack": 0,
       "freedom": 75,
       "complexity": 0,
@@ -172,7 +172,7 @@
     {
       "question_id": "wilds_q017",
       "question_order": 17,
-      "question_text": "나는 같은 방법을 반복하기보다, 상황에 따라 다음 단계를 다르게 골라야 하는 일이 더 흥미롭다.",
+      "question_text": "나는 정해진 운용 흐름을 그대로 반복하기보다, 상황이 달라질 때마다 알맞은 흐름을 다시 구성하는 편이 잘 맞는다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 75,
@@ -182,7 +182,7 @@
     {
       "question_id": "wilds_q018",
       "question_order": 18,
-      "question_text": "나는 익숙해진 뒤에도 매번 다음 행동을 따져야 하는 방식보다, 몸에 익으면 자연스럽게 이어지는 방식이 좋다.",
+      "question_text": "나는 상황마다 다음 행동을 다시 고르는 방식보다, 익숙한 몇 가지 행동으로 꾸준히 이어 가는 방식이 잘 맞는다.",
       "attack": 0,
       "freedom": 0,
       "complexity": -75,
@@ -192,7 +192,7 @@
     {
       "question_id": "wilds_q019",
       "question_order": 19,
-      "question_text": "나는 일부 동작을 놓치면 결과가 아쉬워지는 구조도 받아들일 수 있다.",
+      "question_text": "나는 운용 흐름의 일부를 놓쳤을 때, 다시 알맞은 단계부터 맞춰 가야 하는 구조도 괜찮다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 75,
@@ -202,7 +202,7 @@
     {
       "question_id": "wilds_q020",
       "question_order": 20,
-      "question_text": "나는 익숙하지 않아도 기본적인 역할은 충분히 할 수 있는 것이 좋다.",
+      "question_text": "나는 먼저 전체 구조를 이해하고 시작하기보다, 몇 가지 행동부터 직접 써 보며 하나씩 익히는 편이다.",
       "attack": 0,
       "freedom": 0,
       "complexity": -100,
@@ -212,7 +212,7 @@
     {
       "question_id": "wilds_q021",
       "question_order": 21,
-      "question_text": "나는 여러 가지 상태를 동시에 확인하면서 조절하는 일도 꽤 재미있다.",
+      "question_text": "나는 한 가지 상태를 완벽하게 맞추기보다, 여러 상태를 번갈아 확인하며 적당히 유지하는 방식이 잘 맞는다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
@@ -222,7 +222,7 @@
     {
       "question_id": "wilds_q022",
       "question_order": 22,
-      "question_text": "나는 좋은 상태를 유지하려면 계속 관리해야 하는 것보다 언제나 비슷하게 작동하는 것이 좋다.",
+      "question_text": "나는 상태를 일정하게 유지하기 위해 중간중간 따로 손보는 일이 반복되면 흐름이 끊긴다고 느낀다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
@@ -232,7 +232,7 @@
     {
       "question_id": "wilds_q023",
       "question_order": 23,
-      "question_text": "나는 무언가를 사용할 때마다 다시 보충해야 한다면 번거롭게 느낀다.",
+      "question_text": "나는 사용한 것을 다시 채우는 과정이 자주 반복되면, 하던 흐름이 끊긴다고 느낀다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
@@ -242,7 +242,7 @@
     {
       "question_id": "wilds_q024",
       "question_order": 24,
-      "question_text": "나는 좋은 상태를 유지하기 위해 중간중간 손을 보는 과정도 다루는 재미의 일부라고 느낀다.",
+      "question_text": "나는 하던 일을 잠시 멈추더라도, 상태를 정비한 뒤 다시 이어 가는 흐름이 잘 맞는다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
@@ -252,7 +252,7 @@
     {
       "question_id": "wilds_q025",
       "question_order": 25,
-      "question_text": "나는 상대의 움직임을 기다리기보다 내가 먼저 흐름을 만드는 편이 더 좋다.",
+      "question_text": "나는 상대의 움직임을 본 뒤 대응을 고르기보다, 내가 먼저 행동을 정해 이어 가는 편이 잘 맞는다.",
       "attack": 0,
       "freedom": 0,
       "complexity": 0,
