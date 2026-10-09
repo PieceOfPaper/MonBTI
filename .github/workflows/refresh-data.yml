@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+      # 배포 워크플로 실행 요청에 필요하다.
+      actions: write
     steps:
       - name: main 브랜치 실행 확인
         env:
@@ -50,23 +52,13 @@ jobs:
             git push origin HEAD:main
             echo "최신 시트 데이터 두 파일을 main에 반영했습니다." >> "$GITHUB_STEP_SUMMARY"
           fi
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist
-
-  # GITHUB_TOKEN으로 만든 커밋은 push 워크플로를 실행하지 않으므로 직접 배포한다.
-  deploy:
-    needs: refresh
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/configure-pages@v5
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      # 이 실행에서 직접 배포하면 Pages 배포 버전이 데이터 커밋이 아니라 실행을 시작한 커밋이 되어,
+      # 같은 커밋의 푸시 배포와 겹치면 새 데이터가 반영되지 않을 수 있다.
+      # 일반 배포 워크플로를 최신 main으로 실행해 데이터 커밋 기준으로 배포한다.
+      # GITHUB_TOKEN으로도 workflow_dispatch는 실행할 수 있고, 같은 pages 그룹이라 이 실행이 끝난 뒤 시작한다.
+      - name: 최신 main으로 Pages 배포 실행
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run deploy-pages.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo "[Deploy GitHub Pages](https://github.com/$GITHUB_REPOSITORY/actions/workflows/deploy-pages.yml) 실행을 요청했습니다. 배포 결과는 해당 실행에서 확인하세요." >> "$GITHUB_STEP_SUMMARY"

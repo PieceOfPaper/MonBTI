@@ -49,7 +49,7 @@ MBTI 검사처럼 질문에 답하는 경험을 제공하며, 기존 유저에�
 무기 기준값 입력 범위는 0~100이며, 질문 가중치는 -100~100입니다. 무기 값과 질문 문항은 원본 시트에서 계속 조정합니다.
 사이트는 시트에서 내보낸 데이터를 검증·변환한 JSON을 배포에 포함하는 방식으로 개발합니다.
 열 정의와 반영 절차는 [시트 데이터 설계](docs/data-schema.md)에 기록했습니다.
-시트 편집 후 [Actions → 시트 데이터 갱신](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data.yml)에서 **Run workflow → main → Run workflow**를 누르면 검증·JSON 갱신·데이터 커밋·Pages 배포까지 실행합니다. 별도의 입력값이나 인증 Secret은 필요하지 않습니다.
+시트 편집 후 [Actions → 시트 데이터 갱신](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data.yml)에서 **Run workflow → main → Run workflow**를 누르면 검증·JSON 갱신·데이터 커밋을 마친 뒤 **Deploy GitHub Pages** 워크플로를 실행해 최신 `main`을 배포합니다. 별도의 입력값이나 인증 Secret은 필요하지 않습니다.
 로컬에서는 `npm run data:convert`로 같은 변환기를 실행할 수 있습니다.
 
 ## 문서

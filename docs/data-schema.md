@@ -198,7 +198,7 @@ npm run data:convert -- --if-changed       # 실질 데이터가 바뀐 파일�
 1. 원본 시트에서 수치·문항을 수정합니다.
 2. [Actions → 시트 데이터 갱신](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data.yml)에서 **Run workflow**를 누르고 `main`으로 실행합니다.
 3. 자동 다운로드·검증·변환·테스트·빌드가 성공하면 `weapons.json`·`questions.json` 변경만 커밋합니다. 변경이 없으면 커밋을 생략합니다.
-4. 같은 워크플로에서 빌드 산출물을 Pages에 배포합니다. 실행 성공 후 사이트를 확인합니다.
+4. 이어서 **Deploy GitHub Pages** 워크플로가 최신 `main`을 빌드해 배포합니다. 배포 실행이 성공한 뒤 사이트를 확인합니다.
 
 로컬에서 반영할 때:
 
