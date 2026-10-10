@@ -1,17 +1,19 @@
 // 결과 공유 링크. 답변 대신 결과 자체(추천 무기 ID와 축별 0~100 값)를 담아
 // 질문 데이터가 바뀌어도 공유받은 사람이 같은 결과를 볼 수 있게 한다.
 // 공유 창·메신저·복사 과정에서 인코딩되지 않도록 영문·숫자·'.'·'_'·'-'만 사용한다.
-// 코드: <1순위>.<2순위>.<3순위 weapon_id>.<attack>.<freedom>.<complexity>.<management>.<counter>
-// 축 값은 0~100 정수이며 미측정 축은 '-'로 적는다.
+// 코드: <1순위>.<2순위>.<3순위 weapon_id>.<attack>.<freedom>.<complexity>.<management>.<counter>.<이름>
+// 축 값은 0~100 정수이며 미측정 축은 '-'로 적는다. 이름은 UTF-8 base64url이며,
+// 이름이 없는 예전 링크는 대체 이름으로 연다.
 // 외부 링크: <사이트 주소>?r=<작품 ID>.<코드>, 앱 내부 주소: #/<작품 ID>/share/<코드>
 import { AXIS_IDS } from './axes.js';
+import { FALLBACK_NICKNAME, decodeNickname, encodeNickname } from './nickname.js';
 import { RECOMMENDATION_COUNT } from './recommend.js';
 
 export const SHARE_PARAM = 'r';
 
-export function encodeShareCode({ weaponIds, profile }) {
+export function encodeShareCode({ weaponIds, profile, nickname }) {
   const values = AXIS_IDS.map((axis) => (profile[axis] === null ? '-' : String(Math.round(profile[axis]))));
-  return [...weaponIds, ...values].join('.');
+  return [...weaponIds, ...values, encodeNickname(nickname)].join('.');
 }
 
 export function shareHash(gameId, code) {
@@ -24,12 +26,15 @@ export function parseShareParam(value) {
   return match ? { gameId: match[1], code: match[2] } : null;
 }
 
-// 알 수 없는 무기, 중복, 범위 밖 값이 있으면 null을 돌려준다.
+// 알 수 없는 무기, 중복, 범위 밖 값, 잘못된 이름이 있으면 null을 돌려준다.
 export function decodeShareCode(code, weapons) {
   const parts = (code ?? '').split('.');
-  if (parts.length !== RECOMMENDATION_COUNT + AXIS_IDS.length) return null;
+  const base = RECOMMENDATION_COUNT + AXIS_IDS.length;
+  if (parts.length !== base && parts.length !== base + 1) return null;
   const ids = parts.slice(0, RECOMMENDATION_COUNT);
-  const values = parts.slice(RECOMMENDATION_COUNT);
+  const values = parts.slice(RECOMMENDATION_COUNT, base);
+  const nickname = parts.length === base ? FALLBACK_NICKNAME : decodeNickname(parts[base]);
+  if (!nickname) return null;
   if (new Set(ids).size !== ids.length) return null;
 
   const byId = new Map(weapons.map((weapon) => [weapon.weapon_id, weapon]));
@@ -46,5 +51,5 @@ export function decodeShareCode(code, weapons) {
     if (value > 100) return null;
     profile[axis] = value;
   }
-  return { weapons: ids.map((id) => byId.get(id)), profile };
+  return { weapons: ids.map((id) => byId.get(id)), profile, nickname };
 }

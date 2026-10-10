@@ -1,6 +1,7 @@
 // 결과를 한 장의 PNG로 그린다. 브라우저 전용(canvas).
 // 아이콘은 사이트와 같은 출처의 파일이라 캔버스를 내보낼 때 막히지 않는다.
 import { AXES } from '../core/axes.js';
+import { FALLBACK_NICKNAME } from '../core/nickname.js';
 import { RADAR_RINGS, radarPoint, radarPolygon } from './radar.js';
 
 const WIDTH = 1080;
@@ -42,6 +43,15 @@ function text(ctx, value, x, y, { size, weight = 400, color = COLORS.text, align
   ctx.textAlign = align;
   ctx.textBaseline = 'middle';
   ctx.fillText(value, x, y);
+}
+
+// 최대 너비를 넘으면 글자 크기를 줄여 한 줄에 맞춘다.
+function fitText(ctx, value, x, y, maxWidth, options) {
+  let { size } = options;
+  ctx.font = `${options.weight ?? 400} ${size}px ${FONT}`;
+  const width = ctx.measureText(value).width;
+  if (width > maxWidth) size = Math.max(24, Math.floor(size * (maxWidth / width)));
+  text(ctx, value, x, y, { ...options, size });
 }
 
 function drawIcon(ctx, image, weapon, x, y, size) {
@@ -94,8 +104,9 @@ function drawRadar(ctx, profile, weapon, cx, cy, radius) {
   });
 }
 
-// result: { weapons, profile }. 차트는 1순위 무기와 비교한다.
-export async function drawShareImage({ gameName, result, siteUrl, shared = false }) {
+// result: { weapons, profile, nickname }. 차트는 1순위 무기와 비교한다.
+export async function drawShareImage({ gameName, result, siteUrl }) {
+  const who = result.nickname || FALLBACK_NICKNAME;
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
@@ -108,7 +119,7 @@ export async function drawShareImage({ gameName, result, siteUrl, shared = false
 
   text(ctx, 'MONBTI · 몬BTI', 80, 90, { size: 32, weight: 700, color: COLORS.accent });
   text(ctx, gameName, WIDTH - 80, 90, { size: 30, color: COLORS.muted, align: 'right' });
-  text(ctx, shared ? '친구와 어울리는 무기' : '나와 어울리는 무기', 80, 160, { size: 64, weight: 800 });
+  fitText(ctx, `${who}에게 어울리는 무기`, 80, 160, WIDTH - 160, { size: 64, weight: 800 });
 
   // 1순위: 가장 크게
   roundRect(ctx, 80, 220, 920, 260, 32);
@@ -136,13 +147,18 @@ export async function drawShareImage({ gameName, result, siteUrl, shared = false
 
   drawRadar(ctx, result.profile, first, WIDTH / 2, 965, 190);
 
-  // 범례: 차트 아래 가운데
-  [[COLORS.me, shared ? '친구' : '나'], [COLORS.accent, first.weapon_name]].forEach(([color, label], i) => {
-    const x = WIDTH / 2 - 170 + i * 200;
+  // 범례: 차트 아래 가운데. 이름 길이에 맞춰 항목 너비를 재서 가운데 정렬한다.
+  ctx.font = `700 30px ${FONT}`;
+  const legend = [[COLORS.me, who], [COLORS.accent, first.weapon_name]]
+    .map(([color, label]) => ({ color, label, width: 50 + ctx.measureText(label).width }));
+  const gap = 48;
+  let x = (WIDTH - legend.reduce((sum, { width }) => sum + width, 0) - gap) / 2;
+  for (const { color, label, width } of legend) {
     ctx.fillStyle = color;
     ctx.fillRect(x, 1237, 36, 16);
     text(ctx, label, x + 50, 1245, { size: 30, weight: 700 });
-  });
+    x += width + gap;
+  }
   text(ctx, siteUrl, WIDTH / 2, 1305, { size: 26, color: COLORS.muted, align: 'center' });
 
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));

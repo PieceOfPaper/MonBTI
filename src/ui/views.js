@@ -1,5 +1,6 @@
 // 화면 마크업. 상태를 받아 문자열을 돌려주며 이벤트 연결은 app.js가 맡는다.
 import { AXES } from '../core/axes.js';
+import { FALLBACK_NICKNAME, NICKNAME_MAX_LENGTH } from '../core/nickname.js';
 import { RESPONSES } from '../core/responses.js';
 import { renderRadarSvg } from './radar.js';
 
@@ -40,6 +41,28 @@ export function renderGameSelection(games) {
   </section>`;
 }
 
+// 검사 시작 전 이름 입력. value는 입력 칸의 기본값(이번 검사의 이름, 없으면 기본 이름)이다.
+export function renderNameForm(game, value = '') {
+  return `<section class="quiz" aria-labelledby="name-title">
+    <header class="quiz__header">
+      <p class="eyebrow">${escapeHtml(game.name)}</p>
+    </header>
+    <form class="quiz__form name-form" novalidate>
+      <h1 id="name-title" class="quiz__question" tabindex="-1">결과에 표시할 이름을 알려 주세요</h1>
+      <p class="name-form__help" id="nickname-help">결과 화면과 공유 이미지·링크에 이 이름이 그대로 나와요. 별명도 좋아요. (최대 ${NICKNAME_MAX_LENGTH}자)</p>
+      <label class="sr-only" for="nickname">표시 이름</label>
+      <input class="name-form__input" id="nickname" name="nickname" type="text" value="${escapeHtml(value)}"
+        maxlength="${NICKNAME_MAX_LENGTH}" autocomplete="nickname" enterkeyhint="go" placeholder="이름을 입력해 주세요"
+        aria-describedby="nickname-help nickname-error" required />
+      <p class="name-form__error" id="nickname-error" role="alert"></p>
+      <div class="quiz__nav">
+        <a class="button button--ghost" href="#/">작품 선택으로</a>
+        <button class="button" type="submit">검사 시작</button>
+      </div>
+    </form>
+  </section>`;
+}
+
 export function renderQuestion(game, index, answers) {
   const { questions } = game;
   const question = questions[index];
@@ -71,7 +94,7 @@ export function renderQuestion(game, index, answers) {
         <p class="scale__selected" aria-hidden="true">${selectedLabel || '&nbsp;'}</p>
       </fieldset>
       <div class="quiz__nav">
-        <button class="button button--ghost" type="button" data-action="prev">${index === 0 ? '작품 선택으로' : '이전 질문'}</button>
+        <button class="button button--ghost" type="button" data-action="prev">${index === 0 ? '이름 바꾸기' : '이전 질문'}</button>
         <button class="button" type="submit"${selected ? '' : ' disabled'}>${isLast ? '결과 보기' : '다음 질문'}</button>
       </div>
     </form>
@@ -121,7 +144,7 @@ const formatValue = (value) => (value === null ? '측정 안 됨' : String(Math.
 function renderComparison(profile, weapon, who) {
   const chart = renderRadarSvg(
     [{ values: weapon, className: 'radar__series--weapon' }, { values: profile, className: 'radar__series--me' }],
-    { label: `${who}와 ${escapeHtml(weapon.weapon_name)}의 기준 비교` },
+    { label: `${who} 점수와 ${escapeHtml(weapon.weapon_name)} 기준 비교` },
   );
   const rows = AXES.map(({ id, short }) => `
           <tr><th scope="row">${short}</th><td>${formatValue(profile[id])}</td><td>${formatValue(weapon[id])}</td></tr>`).join('');
@@ -184,11 +207,12 @@ export function renderVideoPlayer(videoId, title) {
   return `<iframe src="${src}" title="${escapeHtml(title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
 }
 
-// result: { weapons: [1~3순위], profile: { 축: 0~100 | null } }
+// result: { weapons: [1~3순위], profile: { 축: 0~100 | null }, nickname: 표시 이름 }
 // others는 4순위 이후 무기이며 selectedIndex는 1순위부터 이어지는 전체 순위의 위치다.
 // shared가 참이면 공유 링크로 연 결과이며 답변 수정 대신 검사 시작을 안내한다.
 export function renderResult(game, result, { selectedIndex = 0, shared = false, others = [], othersOpen = false } = {}) {
   const selected = [...result.weapons, ...others][selectedIndex] ?? result.weapons[0];
+  const who = escapeHtml(result.nickname || FALLBACK_NICKNAME);
   const actions = shared
     ? `<a class="button" href="#/${game.id}" data-action="start" data-start-quiz="${game.id}">나도 검사하기</a>`
     : `<a class="button button--ghost" href="#/${game.id}" data-action="review">답변 수정하기</a>
@@ -196,11 +220,11 @@ export function renderResult(game, result, { selectedIndex = 0, shared = false, 
 
   return `<section class="result" aria-labelledby="result-title">
     <p class="eyebrow">${escapeHtml(game.name)}</p>
-    <h1 id="result-title" tabindex="-1">${shared ? '친구와 어울리는 무기' : '나와 어울리는 무기'}</h1>
+    <h1 id="result-title" tabindex="-1">${who}에게 어울리는 무기</h1>
     <ol class="ranking" aria-label="추천 무기 순위">${renderRanking(result.weapons, selectedIndex)}
     </ol>
     ${renderOthers(others, selectedIndex, othersOpen)}
-    ${renderComparison(result.profile, selected, shared ? '친구' : '나')}
+    ${renderComparison(result.profile, selected, who)}
     ${renderIntro(selected)}
     <section class="result__section" aria-labelledby="share-title">
       <h2 id="share-title">결과 공유하기</h2>
@@ -239,6 +263,7 @@ export function renderGuide(game) {
     <section aria-labelledby="guide-how">
       <h2 id="guide-how">어떻게 진행되나요?</h2>
       <ul class="guide__list">
+        <li>시작할 때 결과에 표시할 이름(별명도 좋아요)을 입력해요. 결과와 공유 이미지·링크에 이 이름이 그대로 나와요.</li>
         <li>질문 ${questionCount}개에 답해요. 질문 순서는 검사할 때마다 섞여요.</li>
         <li>각 질문에 ‘전혀 그렇지 않다’부터 ‘매우 그렇다’까지 여섯 단계 중 하나를 골라요. 가운데 답은 없으니 조금이라도 더 가까운 쪽을 고르면 돼요.</li>
         <li>정답은 없어요. 잘하는 것보다 <strong>하고 싶은 것</strong>을 기준으로 답해 주세요.</li>

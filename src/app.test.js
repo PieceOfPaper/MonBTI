@@ -3,8 +3,9 @@ import {
   buildResult, createAnswerStore, parseRoute, shareParamToHash, shareUrl,
 } from './app.js';
 import { supportedGames } from './games/index.js';
-import { renderGameSelection, renderGuide, renderQuestion, renderResult } from './ui/views.js';
+import { renderGameSelection, renderGuide, renderNameForm, renderQuestion, renderResult } from './ui/views.js';
 import { decodeShareCode } from './core/share.js';
+import { decodeNickname, encodeNickname, normalizeNickname } from './core/nickname.js';
 import { remainingWeapons } from './core/recommend.js';
 
 const wilds = supportedGames[0];
@@ -75,6 +76,16 @@ describe('답변 저장', () => {
     expect(store.loadOrder(game)).toEqual(['a', 'b', 'c']);
   });
 
+  it('이번 검사의 이름은 초기화하면 지운다', () => {
+    const store = createAnswerStore(memory());
+    expect(store.loadName(testGame)).toBe('');
+    store.saveName(testGame, '종잇장');
+    expect(store.loadName(testGame)).toBe('종잇장');
+    store.clear(testGame);
+    expect(store.loadName(testGame)).toBe('');
+    expect(createAnswerStore(null).loadName(testGame)).toBe('');
+  });
+
   it('저장소가 없거나 오류가 나도 빈 답변으로 진행한다', () => {
     const broken = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); }, removeItem: () => {} };
     expect(createAnswerStore(null).load(testGame)).toEqual({});
@@ -127,6 +138,19 @@ describe('화면', () => {
     expect(renderGameSelection([{ id: 'x', name: '이름', description: '설명' }])).toContain('<strong>이름</strong>');
   });
 
+  it('이름 입력 화면은 기본값을 채우고 HTML을 이스케이프한다', () => {
+    expect(renderNameForm(testGame)).toContain('placeholder="이름을 입력해 주세요"');
+    const html = renderNameForm(testGame, '<종잇장>');
+    expect(html).toContain('name="nickname"');
+    expect(html).toContain('maxlength="12"');
+    expect(html).toContain('value="&lt;종잇장&gt;"');
+    expect(html).toContain('href="#/"');
+  });
+
+  it('첫 질문의 이전 버튼은 이름 입력으로 돌아간다', () => {
+    expect(renderQuestion(testGame, 0, {})).toContain('이름 바꾸기');
+  });
+
   it('질문 화면은 공통 여섯 응답을 라디오 버튼으로 보여 준다', () => {
     const html = renderQuestion(testGame, 0, {});
     expect(html.match(/type="radio"/g)).toHaveLength(6);
@@ -138,7 +162,15 @@ describe('화면', () => {
     expect(renderQuestion(testGame, 0, { wilds_q001: 4 })).toContain('value="4" checked');
   });
 
-  const result = buildResult(testGame, { wilds_q001: 5 });
+  const result = buildResult(testGame, { wilds_q001: 5 }, '종잇장');
+
+  it('결과 화면은 입력한 이름으로 제목과 비교 대상을 표시한다', () => {
+    const html = renderResult(testGame, result);
+    expect(html).toContain('종잇장에게 어울리는 무기');
+    expect(html).toContain(`종잇장 vs ${result.weapons[0].weapon_name}`);
+    expect(html).not.toContain('나와 어울리는 무기');
+    expect(renderResult(testGame, { ...result, nickname: '<b>' })).toContain('&lt;b&gt;에게 어울리는 무기');
+  });
 
   it('결과 화면은 1~3순위 무기와 1순위 강조, 짧은 기준 이름을 보여 준다', () => {
     const html = renderResult(testGame, result);
@@ -198,7 +230,8 @@ describe('화면', () => {
   it('공유 결과 화면은 답변 수정 대신 검사 시작을 안내한다', () => {
     const html = renderResult(testGame, result, { shared: true });
     expect(html).toContain('나도 검사하기');
-    expect(html).toContain('친구 vs');
+    expect(html).toContain('종잇장 vs');
+    expect(html).not.toContain('친구');
     expect(html).not.toContain('data-action="restart"');
   });
 
@@ -239,13 +272,13 @@ describe('추천과 공유 링크', () => {
   });
 
   const answers = Object.fromEntries(wilds.questions.map(({ question_id }, i) => [question_id, (i % 6) + 1]));
-  const own = buildResult(wilds, answers);
+  const own = buildResult(wilds, answers, '종잇장 Lv.3');
   const url = shareUrl(wilds, own, 'https://example.com/MonBTI/');
 
   it('공유 링크는 # 없이 인코딩되지 않는 문자만 사용한다', () => {
     expect(url.startsWith('https://example.com/MonBTI/?r=wilds.')).toBe(true);
     expect(url).not.toContain('#');
-    expect(url.slice(url.indexOf('?r=') + 3)).toMatch(/^[a-z0-9_.-]+$/);
+    expect(url.slice(url.indexOf('?r=') + 3)).toMatch(/^[A-Za-z0-9_.-]+$/);
     expect(encodeURIComponent(url.slice(url.indexOf('?r=') + 3))).toBe(url.slice(url.indexOf('?r=') + 3));
   });
 
@@ -255,6 +288,7 @@ describe('추천과 공유 링크', () => {
     expect(route).toMatchObject({ name: 'share', gameId: 'wilds' });
     const decoded = decodeShareCode(route.code, wilds.weapons);
     expect(decoded.weapons).toEqual(own.weapons);
+    expect(decoded.nickname).toBe('종잇장 Lv.3');
     for (const axis of ['attack', 'freedom', 'complexity', 'management', 'counter']) {
       expect(decoded.profile[axis]).toBe(own.profile[axis] === null ? null : Math.round(own.profile[axis]));
     }
@@ -269,6 +303,24 @@ describe('추천과 공유 링크', () => {
     expect(shareParamToHash('?r=wilds')).toBeNull();
   });
 
+  it('이름을 정리하고 공유 코드용으로 되돌릴 수 있게 바꾼다', () => {
+    expect(normalizeNickname('  종잇장 \n  헌터\u0000 ')).toBe('종잇장 헌터');
+    expect(normalizeNickname('가나다라마바사아자차카타파하')).toBe('가나다라마바사아자차카타');
+    expect(normalizeNickname(null)).toBe('');
+    for (const name of ['종잇장', 'a', '🐸 개구리', 'Lv.99_-?/+']) {
+      const code = encodeNickname(name);
+      expect(code).toMatch(/^[A-Za-z0-9_-]+$/);
+      expect(decodeNickname(code)).toBe(name);
+    }
+    expect(decodeNickname('')).toBeNull();
+    expect(decodeNickname('a.b')).toBeNull();
+    expect(decodeNickname(encodeNickname('  '))).toBeNull();
+  });
+
+  it('이름이 없는 예전 공유 링크는 대체 이름으로 연다', () => {
+    expect(decodeShareCode('bow.lance.hammer.10.20.30.40.50', wilds.weapons).nickname).toBe('헌터');
+  });
+
   it('잘못된 공유 코드는 거부한다', () => {
     expect(decodeShareCode('bow.lance.hammer.10.20.-.40.100', wilds.weapons).profile.complexity).toBeNull();
     for (const bad of [
@@ -278,6 +330,8 @@ describe('추천과 공유 링크', () => {
       'bow.lance.hammer.1.2.3.4',
       'bow.lance.hammer.1.2.3.4.101',
       'bow.lance.hammer.1.2.3.4.x',
+      'bow.lance.hammer.1.2.3.4.5.!!',
+      `bow.lance.hammer.1.2.3.4.5.${encodeNickname('종잇장')}.x`,
       '',
       undefined,
     ]) expect(decodeShareCode(bad, wilds.weapons), bad).toBeNull();

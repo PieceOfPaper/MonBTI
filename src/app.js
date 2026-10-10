@@ -6,13 +6,14 @@ import { recommendWeapons, remainingWeapons } from './core/recommend.js';
 import {
   computeAxisProfile, computeAxisTotals, firstUnansweredIndex, isComplete, sanitizeAnswers, setAnswer,
 } from './core/scoring.js';
+import { FALLBACK_NICKNAME, normalizeNickname } from './core/nickname.js';
 import { orderQuestions, resolveQuestionOrder } from './core/order.js';
 import {
   SHARE_PARAM, decodeShareCode, encodeShareCode, parseShareParam, shareHash,
 } from './core/share.js';
 import { findGame, supportedGames } from './games/index.js';
 import {
-  renderEmpty, renderGameSelection, renderGuide, renderQuestion, renderResult, renderVideoPlayer,
+  renderEmpty, renderGameSelection, renderGuide, renderNameForm, renderQuestion, renderResult, renderVideoPlayer,
 } from './ui/views.js';
 
 function safeDecode(text) {
@@ -42,24 +43,27 @@ export function shareParamToHash(search) {
 }
 
 // 완료한 답변으로 결과를 만든다. 무기 순위는 사용자 점수와 무기 기준값의 적합도로 정한다(core/recommend.js).
-export function buildResult(game, answers) {
+// nickname은 검사 시작 때 입력한 표시 이름이며 계산에는 쓰지 않는다.
+export function buildResult(game, answers, nickname) {
   const profile = computeAxisProfile(computeAxisTotals(game.questions, answers));
-  return { weapons: recommendWeapons(game.weapons, profile), profile };
+  return { weapons: recommendWeapons(game.weapons, profile), profile, nickname };
 }
 
-// 공유 링크. 축 값은 0~100 정수로 반올림해 담는다. # 없이 쿼리 하나만 써서 공유 과정의 변형을 피한다.
+// 공유 링크. 축 값은 0~100 정수로 반올림하고 표시 이름과 함께 담는다. # 없이 쿼리 하나만 써서 공유 과정의 변형을 피한다.
 export function shareUrl(game, result, base = `${location.origin}${location.pathname}`) {
   const code = encodeShareCode({
     weaponIds: result.weapons.map(({ weapon_id }) => weapon_id),
     profile: Object.fromEntries(AXIS_IDS.map((axis) => [axis, result.profile[axis]])),
+    nickname: result.nickname,
   });
   return `${base}?${SHARE_PARAM}=${game.id}.${code}`;
 }
 
 const storageKey = (gameId) => `monbti:answers:${gameId}`;
 const orderKey = (gameId) => `monbti:order:${gameId}`;
+const nameKey = (gameId) => `monbti:name:${gameId}`;
 
-// 진행 중인 답변과 질문 표시 순서는 새로고침 후에도 이어 하도록 세션 저장소에 둔다.
+// 진행 중인 답변, 질문 표시 순서와 이번 검사의 표시 이름은 새로고침 후에도 이어 하도록 세션 저장소에 둔다.
 // 저장소를 쓸 수 없어도 검사는 진행된다.
 export function createAnswerStore(storage, random = Math.random) {
   const read = (key) => {
@@ -83,6 +87,13 @@ export function createAnswerStore(storage, random = Math.random) {
     save(game, answers) {
       write(storageKey(game.id), answers);
     },
+    // 이번 검사에서 확정한 이름. 없으면 빈 문자열이다.
+    loadName(game) {
+      return normalizeNickname(read(nameKey(game.id)));
+    },
+    saveName(game, nickname) {
+      write(nameKey(game.id), nickname);
+    },
     // 저장한 순서가 현재 질문 집합과 맞지 않으면 새로 섞어 저장한다.
     loadOrder(game) {
       const saved = read(orderKey(game.id));
@@ -94,6 +105,7 @@ export function createAnswerStore(storage, random = Math.random) {
       try {
         storage?.removeItem(storageKey(game.id));
         storage?.removeItem(orderKey(game.id));
+        storage?.removeItem(nameKey(game.id));
       } catch {
         // 삭제 실패는 무시한다.
       }
@@ -112,7 +124,8 @@ function safeSessionStorage() {
 export function startApp(root, { games = supportedGames, storage = safeSessionStorage(), random = Math.random } = {}) {
   const store = createAnswerStore(storage, random);
   // quiz는 질문을 표시 순서로 정렬한 작품 데이터다. 점수 계산은 순서와 관계없다.
-  const state = { gameId: null, quiz: null, answers: {}, index: 0, startFromFirst: false };
+  // nickname이 비어 있으면 질문·결과 대신 이름 입력 화면을 먼저 보여 준다.
+  const state = { gameId: null, quiz: null, answers: {}, nickname: '', index: 0, startFromFirst: false };
 
   const focusHeading = () => root.querySelector('h1')?.focus({ preventScroll: false });
 
@@ -128,7 +141,35 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
     state.gameId = game.id;
     state.quiz = { ...game, questions: orderQuestions(game.questions, store.loadOrder(game)) };
     state.answers = store.load(game);
+    state.nickname = store.loadName(game);
     state.index = Math.min(firstUnansweredIndex(state.answers, state.quiz.questions), game.questions.length - 1);
+  }
+
+  // 검사 시작 시 결과에 표시할 이름을 받는다. 입력 칸은 이번 검사의 이름(‘이름 바꾸기’로 돌아온 경우), 없으면 기본 이름으로 채운다. 확정하면 현재 주소의 화면(질문 또는 결과)으로 이어 간다.
+  function showNameForm(game) {
+    root.innerHTML = renderNameForm(game, state.nickname || FALLBACK_NICKNAME);
+    const form = root.querySelector('form');
+    const input = form.elements.nickname;
+    const error = form.querySelector('.name-form__error');
+
+    input.addEventListener('input', () => {
+      error.textContent = '';
+      input.removeAttribute('aria-invalid');
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const nickname = normalizeNickname(input.value);
+      if (!nickname) {
+        error.textContent = '이름을 입력해 주세요.';
+        input.setAttribute('aria-invalid', 'true');
+        input.focus();
+        return;
+      }
+      state.nickname = nickname;
+      store.saveName(game, nickname);
+      render();
+    });
   }
 
   // game에는 표시 순서로 정렬한 state.quiz를 넘긴다.
@@ -164,7 +205,8 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
 
     form.querySelector('[data-action="prev"]').addEventListener('click', () => {
       if (state.index === 0) {
-        location.hash = '#/';
+        showNameForm(game);
+        focusHeading();
         return;
       }
       state.index -= 1;
@@ -205,7 +247,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
       try {
         if (navigator.share) {
           // text를 함께 넘기면 일부 공유 대상에서 문구와 주소가 한 줄로 합쳐지므로 주소만 보낸다.
-          await navigator.share({ title: '몬BTI 결과', url });
+          await navigator.share({ title: `${result.nickname}의 몬BTI 결과`, url });
           return;
         }
         await navigator.clipboard.writeText(url);
@@ -224,11 +266,11 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
         // 캔버스 코드는 공유할 때만 불러온다.
         const { drawShareImage } = await import('./ui/share-image.js');
         const siteUrl = `${location.host}${location.pathname}`;
-        const blob = await drawShareImage({ gameName: game.name, result, siteUrl, shared });
+        const blob = await drawShareImage({ gameName: game.name, result, siteUrl });
         const file = new File([blob], 'monbti-result.png', { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {
           say('');
-          await navigator.share({ files: [file], title: '몬BTI 결과' });
+          await navigator.share({ files: [file], title: `${result.nickname}의 몬BTI 결과` });
         } else {
           const link = document.createElement('a');
           link.href = URL.createObjectURL(blob);
@@ -278,13 +320,15 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
       root.innerHTML = renderEmpty(game);
     } else {
       enterGame(game);
-      if (route.name === 'result') {
+      if (!state.nickname) {
+        showNameForm(state.quiz);
+      } else if (route.name === 'result') {
         if (!isComplete(state.answers, game.questions)) {
           history.replaceState(null, '', `#/${game.id}`);
           state.index = firstUnansweredIndex(state.answers, state.quiz.questions);
           showQuestion(state.quiz);
         } else {
-          showResult(game, buildResult(game, state.answers));
+          showResult(game, buildResult(game, state.answers, state.nickname));
         }
       } else {
         if (state.startFromFirst) {
