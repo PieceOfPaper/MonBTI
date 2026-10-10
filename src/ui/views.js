@@ -14,6 +14,9 @@ export function escapeHtml(value) {
 }
 
 const GITHUB_ICON = `<svg class="credit__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>`;
+// 공유 버튼 아이콘. 선 아이콘으로 그려 버튼 글자색을 따른다.
+const IMAGE_ICON = `<svg class="share__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>`;
+const LINK_ICON = `<svg class="share__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
 const YOUTUBE_ICON = `<svg class="credit__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#ff0033" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#fff" d="M9.545 15.568V8.432L15.818 12z"/></svg>`;
 
 export function renderGameSelection(games) {
@@ -209,14 +212,13 @@ export function renderVideoPlayer(videoId, title) {
 
 // result: { weapons: [1~3순위], profile: { 축: 0~100 | null }, nickname: 표시 이름 }
 // others는 4순위 이후 무기이며 selectedIndex는 1순위부터 이어지는 전체 순위의 위치다.
-// shared가 참이면 공유 링크로 연 결과이며 답변 수정 대신 검사 시작을 안내한다.
+// shared가 참이면 공유 링크로 연 결과이며 다시 하기 대신 검사 시작을 안내한다.
 export function renderResult(game, result, { selectedIndex = 0, shared = false, others = [], othersOpen = false } = {}) {
   const selected = [...result.weapons, ...others][selectedIndex] ?? result.weapons[0];
   const who = escapeHtml(result.nickname || FALLBACK_NICKNAME);
   const actions = shared
     ? `<a class="button" href="#/${game.id}" data-action="start" data-start-quiz="${game.id}">나도 검사하기</a>`
-    : `<a class="button button--ghost" href="#/${game.id}" data-action="review">답변 수정하기</a>
-      <button class="button button--ghost" type="button" data-action="restart">처음부터 다시 하기</button>`;
+    : `<button class="button button--ghost" type="button" data-action="restart">처음부터 다시 하기</button>`;
 
   return `<section class="result" aria-labelledby="result-title">
     <p class="eyebrow">${escapeHtml(game.name)}</p>
@@ -226,11 +228,11 @@ export function renderResult(game, result, { selectedIndex = 0, shared = false, 
     ${renderOthers(others, selectedIndex, othersOpen)}
     ${renderComparison(result.profile, selected, who)}
     ${renderIntro(selected)}
-    <section class="result__section" aria-labelledby="share-title">
+    <section class="result__section share-section" aria-labelledby="share-title">
       <h2 id="share-title">결과 공유하기</h2>
       <div class="share">
-        <button class="button" type="button" data-action="share-image">이미지로 공유</button>
-        <button class="button" type="button" data-action="share-link">링크 공유</button>
+        <button class="share__button" type="button" data-action="share-image" aria-label="이미지로 공유" title="이미지로 공유">${IMAGE_ICON}<span class="share__label">이미지</span></button>
+        <button class="share__button" type="button" data-action="share-link" aria-label="링크 공유" title="링크 공유">${LINK_ICON}<span class="share__label">링크</span></button>
       </div>
       <p class="share__status" role="status" aria-live="polite"></p>
     </section>

@@ -83,7 +83,16 @@ legend { padding: 0; margin-bottom: 1.5rem; }
 .result h1 { font-size: clamp(2rem, 7vw, 3.25rem); }
 .result h2 { margin: 0 0 1rem; font-size: 1.35rem; word-break: keep-all; overflow-wrap: anywhere; }
 .result__section { padding-top: 1.25rem; border-top: 1px solid #304535; }
-.result__actions, .share { display: flex; flex-wrap: wrap; gap: .75rem; }
+.result__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; }
+.share-section { text-align: center; }
+.share { display: flex; justify-content: center; gap: 1.5rem; }
+.share__button { display: grid; justify-items: center; gap: .4rem; padding: 0; border: 0; color: inherit; background: none; cursor: pointer; }
+.share__icon { box-sizing: content-box; width: 1.6rem; height: 1.6rem; padding: 1rem; border: 1px solid #789151; border-radius: 50%; background: #3d5a2f; }
+.share__button:hover:not(:disabled) .share__icon { background: #304535; }
+.share__button:focus-visible { outline: none; }
+.share__button:focus-visible .share__icon { outline: 3px solid #d8ef86; outline-offset: 3px; }
+.share__button:disabled { opacity: .45; cursor: not-allowed; }
+.share__label { color: #d5ddd7; font-size: .875rem; font-weight: 700; }
 
 /* 1~3순위. 1순위는 첫 줄 전체를 차지하고 가장 크게 보인다. */
 .ranking { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: .5rem 0 0; padding: 0; list-style: none; }
@@ -161,7 +170,7 @@ legend { padding: 0; margin-bottom: 1.5rem; }
   .rank__button { column-gap: .65rem; padding: .75rem; }
   .rank__icon { width: 2.75rem; height: 2.75rem; }
   .rank__name { font-size: 1.05rem; }
-  .result__actions .button, .share .button { flex: 1 1 auto; }
+  .result__actions .button { flex: 1 1 auto; }
 }
 @media (max-width: 480px) {
   .quiz__nav .button { flex: 1; }

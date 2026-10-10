@@ -287,9 +287,6 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
     });
 
     if (shared) return;
-    root.querySelector('[data-action="review"]').addEventListener('click', () => {
-      state.startFromFirst = true;
-    });
     root.querySelector('[data-action="restart"]').addEventListener('click', () => {
       resetQuiz(game);
       location.hash = `#/${game.id}`;
@@ -346,7 +343,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
   if (sharedHash) history.replaceState(null, '', `${location.pathname}${sharedHash}`);
 
   // 작품 카드·검사 설명·공유 결과의 검사 시작 링크는 이전 진행을 이어 가지 않고 새 검사를 연다.
-  // 이어 하기는 새로고침, 이전 질문 이동, 결과의 ‘답변 수정하기’에서만 유지한다.
+  // 이어 하기는 새로고침, 이전 질문 이동, 브라우저 뒤로·앞으로 이동에서만 유지한다.
   // 클릭 처리가 링크 이동(hashchange)보다 먼저 실행되므로 render는 비운 저장소를 읽는다.
   root.addEventListener('click', (event) => {
     // 새 탭으로 여는 클릭은 현재 탭의 진행을 지우지 않는다.

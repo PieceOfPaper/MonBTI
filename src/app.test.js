@@ -99,13 +99,14 @@ describe('화면', () => {
     expect(renderGameSelection(supportedGames)).toContain('href="#/wilds"');
   });
 
-  it('검사 시작 링크는 새 검사로 표시하고, 답변 수정 링크는 이어 하기로 남긴다', () => {
+  it('검사 시작 링크는 새 검사로 표시하고, 결과 화면에는 답변 수정 링크를 두지 않는다', () => {
     const result = buildResult(wilds, Object.fromEntries(wilds.questions.map(({ question_id }) => [question_id, 4])));
     expect(renderGameSelection(supportedGames)).toContain('href="#/wilds" data-game-id="wilds" data-start-quiz="wilds"');
     expect(renderGuide(wilds)).toContain('href="#/wilds" data-start-quiz="wilds"');
     expect(renderResult(wilds, result, { shared: true })).toContain('data-start-quiz="wilds"');
     const own = renderResult(wilds, result);
-    expect(own).toContain('data-action="review"');
+    expect(own).not.toContain('data-action="review"');
+    expect(own).toContain('data-action="restart"');
     expect(own).not.toContain('data-start-quiz');
   });
 
@@ -227,7 +228,7 @@ describe('화면', () => {
     expect(open).toContain('data-select="3" aria-pressed="true"');
   });
 
-  it('공유 결과 화면은 답변 수정 대신 검사 시작을 안내한다', () => {
+  it('공유 결과 화면은 다시 하기 대신 검사 시작을 안내한다', () => {
     const html = renderResult(testGame, result, { shared: true });
     expect(html).toContain('나도 검사하기');
     expect(html).toContain('종잇장 vs');
