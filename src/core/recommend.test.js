@@ -15,9 +15,10 @@ describe('축별 불일치', () => {
     }
   });
 
-  it('freedom은 무기가 원하는 자유도보다 부족할 때만 벌점을 준다', () => {
+  it('freedom은 무기가 낮으면 차이 전부, 높으면 차이의 절반을 벌점으로 준다', () => {
     expect(scoreWeapon(profile({ freedom: 75 }), weapon('w', { freedom: 25 })).maxMismatch).toBe(50);
-    expect(scoreWeapon(profile({ freedom: 25 }), weapon('w', { freedom: 100 })).score).toBe(100);
+    expect(scoreWeapon(profile({ freedom: 25 }), weapon('w', { freedom: 100 })).maxMismatch).toBe(37.5);
+    expect(scoreWeapon(profile({ freedom: 60 }), weapon('w', { freedom: 60 })).score).toBe(100);
   });
 
   it('complexity·management는 무기가 높으면 차이 전부, 낮으면 차이의 절반을 벌점으로 준다', () => {
