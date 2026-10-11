@@ -5,14 +5,14 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_Weapon"
     },
-    "exported_at": "2026-10-08T13:21:39.174Z",
-    "converted_at": "2026-10-08T13:21:39.226Z"
+    "exported_at": "2026-10-11T07:45:49.707Z",
+    "converted_at": "2026-10-11T07:45:49.756Z"
   },
   "weapons": [
     {
       "weapon_id": "great_sword",
       "weapon_name": "대검",
-      "attack": 100,
+      "attack": 90,
       "freedom": 30,
       "complexity": 30,
       "management": 5,
@@ -21,10 +21,10 @@
     {
       "weapon_id": "long_sword",
       "weapon_name": "태도",
-      "attack": 55,
+      "attack": 50,
       "freedom": 55,
       "complexity": 75,
-      "management": 75,
+      "management": 60,
       "counter": 95
     },
     {
@@ -42,13 +42,13 @@
       "attack": 10,
       "freedom": 95,
       "complexity": 35,
-      "management": 70,
+      "management": 45,
       "counter": 55
     },
     {
       "weapon_id": "hammer",
       "weapon_name": "해머",
-      "attack": 85,
+      "attack": 90,
       "freedom": 75,
       "complexity": 30,
       "management": 15,
@@ -84,7 +84,7 @@
     {
       "weapon_id": "switch_axe",
       "weapon_name": "슬래시액스",
-      "attack": 75,
+      "attack": 85,
       "freedom": 35,
       "complexity": 70,
       "management": 90,
@@ -93,7 +93,7 @@
     {
       "weapon_id": "charge_blade",
       "weapon_name": "차지액스",
-      "attack": 90,
+      "attack": 75,
       "freedom": 40,
       "complexity": 100,
       "management": 100,
@@ -102,7 +102,7 @@
     {
       "weapon_id": "insect_glaive",
       "weapon_name": "조충곤",
-      "attack": 45,
+      "attack": 65,
       "freedom": 80,
       "complexity": 75,
       "management": 95,
@@ -120,7 +120,7 @@
     {
       "weapon_id": "heavy_bowgun",
       "weapon_name": "헤비보우건",
-      "attack": 55,
+      "attack": 65,
       "freedom": 40,
       "complexity": 15,
       "management": 75,
@@ -133,7 +133,7 @@
       "freedom": 85,
       "complexity": 40,
       "management": 70,
-      "counter": 80
+      "counter": 70
     }
   ]
 }

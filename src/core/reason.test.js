@@ -17,9 +17,16 @@ const weapon = (weapon_id, values) => ({
 const profile = (values) => ({ attack: 50, freedom: 50, complexity: 50, management: 50, counter: 50, ...values });
 const text = (html) => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
+// 기획 예시를 작성할 때의 무기 기준값. 시트 데이터가 보정돼도 예시 검산이 흔들리지 않도록 고정한다.
+const EXAMPLE_WEAPONS = [
+  weapon('gunlance', { weapon_name: '건랜스', attack: 80, freedom: 35, complexity: 70, management: 70, counter: 55 }),
+  weapon('great_sword', { weapon_name: '대검', attack: 100, freedom: 30, complexity: 30, management: 5, counter: 30 }),
+  weapon('lance', { weapon_name: '랜스', attack: 20, freedom: 65, complexity: 35, management: 10, counter: 100 }),
+];
+
 describe('추천 이유 — 기획 예시 검산(사용자 73·21·57·56·23)', () => {
   const user = { attack: 73, freedom: 21, complexity: 57, management: 56, counter: 23 };
-  const ranked = rankWeapons(wilds.weapons, user);
+  const ranked = rankWeapons(EXAMPLE_WEAPONS, user);
   const [winner, runner] = ranked.map(({ weapon: w }) => w);
   const reason = buildRecommendationReason(user, winner, runner);
 
@@ -72,12 +79,12 @@ describe('추천 이유 — 기획 예시 검산(사용자 73·21·57·56·23)',
 
   it('같은 입력은 같은 모델을 만들고 순위 계산을 바꾸지 않는다', () => {
     expect(buildRecommendationReason(user, winner, runner)).toEqual(reason);
-    expect(rankWeapons(wilds.weapons, user)).toEqual(ranked);
+    expect(rankWeapons(EXAMPLE_WEAPONS, user)).toEqual(ranked);
   });
 
   it('같은 프로필과 1·2순위를 가진 공유 결과는 같은 이유를 만든다', () => {
     const code = encodeShareCode({ weaponIds: ranked.slice(0, 3).map(({ weapon: w }) => w.weapon_id), profile: user, nickname: '헌터' });
-    const shared = decodeShareCode(code, wilds.weapons);
+    const shared = decodeShareCode(code, EXAMPLE_WEAPONS);
     expect(buildRecommendationReason(shared.profile, shared.weapons[0], shared.weapons[1])).toEqual(reason);
   });
 });
