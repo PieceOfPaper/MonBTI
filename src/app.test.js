@@ -130,6 +130,10 @@ describe('화면', () => {
     for (const short of ['한방', '자유', '복잡', '관리', '반격']) expect(html).toContain(`<span class="guide__short">${short}</span>`);
     expect(html).toContain('href="#/wilds"');
     expect(html).toContain('href="#/"');
+    // 최종 추천은 한방·반격의 비중을 낮춘 가중 합산이며, 결과에서 1순위 추천 이유를 알려 준다.
+    expect(html).not.toContain('똑같은 비중');
+    expect(html).toContain('한방과 반격은');
+    expect(html).toContain('1순위 무기가 왜 추천됐는지');
   });
 
   it('작품 선택 화면은 작품 이름 대신 로고를 보여 주고 이름은 대체 텍스트로 남긴다', () => {
@@ -173,11 +177,15 @@ describe('화면', () => {
     expect(renderResult(testGame, { ...result, nickname: '<b>' })).toContain('&lt;b&gt;에게 어울리는 무기');
   });
 
-  it('결과 화면은 1~3순위 무기와 1순위 강조, 짧은 기준 이름을 보여 준다', () => {
+  it('결과 화면은 상단에 순위 표기 없이 1순위를 크게, 아래에 같은 크기의 1~3순위 비교 버튼과 짧은 기준 이름을 보여 준다', () => {
     const html = renderResult(testGame, result);
-    expect(html.match(/class="rank rank--/g)).toHaveLength(3);
-    expect(html).toContain('rank--1');
-    expect(html).toContain('aria-pressed="true"');
+    const winner = html.slice(html.indexOf('class="winner__main"'), html.indexOf('class="quote"'));
+    expect(winner).toContain(`<strong class="winner__name">${result.weapons[0].weapon_name}</strong>`);
+    expect(winner).not.toContain('순위');
+    expect(html.match(/<li class="rank">/g)).toHaveLength(3);
+    expect(html).not.toContain('rank--1');
+    expect(html).toContain('<span class="rank__label">1순위</span>');
+    expect(html).toContain('data-select="0" aria-pressed="true"');
     for (const short of ['한방', '자유', '복잡', '관리', '반격']) expect(html).toContain(short);
     expect(html).not.toContain('axis__description');
   });
@@ -191,25 +199,29 @@ describe('화면', () => {
     expect(html).toContain('<td>80</td>');
   });
 
-  it('결과 화면은 선택한 무기의 소개 영상과 두 가지 공유 버튼을 제공한다', () => {
+  it('결과 화면은 비교 대상과 관계없이 1순위 무기의 소개 영상과 두 가지 공유 버튼을 제공한다', () => {
     const html = renderResult(testGame, result, { selectedIndex: 1 });
-    expect(html).toContain(`data-video-id="${result.weapons[1].videoId}"`);
+    expect(html).toContain(`data-video-id="${result.weapons[0].videoId}"`);
+    expect(html).not.toContain(`data-video-id="${result.weapons[1].videoId}"`);
     expect(html).toContain('data-action="share-image"');
     expect(html).toContain('data-action="share-link"');
     expect(html).toContain('data-action="restart"');
   });
 
-  it('결과 화면은 그래프 아래에 제목 없이 공식 소개 문구 인용과 출처, 소개 영상을 한 영역으로 보여 준다', () => {
-    const weapon = result.weapons[1];
+  it('결과 화면은 1순위 무기 바로 아래에 공식 소개 문구 인용과 출처를, 그래프 아래에 제목 없이 소개 영상을 보여 준다', () => {
+    const weapon = result.weapons[0];
     const html = renderResult(testGame, result, { selectedIndex: 1 });
     expect(html).toContain(`<blockquote>${weapon.description.join('<br />').replaceAll("'", '&#39;')}</blockquote>`);
     expect(html).toContain('출처: 몬스터헌터 와일즈 공식 사이트</figcaption>');
     expect(html).not.toContain('소개</h2>');
     expect(html).not.toContain('소개 영상</h2>');
-    const order = ['id="compare-title"', 'class="quote"', 'class="video"'].map((mark) => html.indexOf(mark));
+    const order = ['class="winner__name"', 'class="quote"', 'id="compare-title"', 'class="video"'].map((mark) => html.indexOf(mark));
     expect(order[0]).toBeGreaterThan(-1);
     expect(order).toEqual([...order].sort((a, b) => a - b));
+    const winner = html.slice(html.indexOf('class="winner"'), html.indexOf('class="result__section'));
+    expect(winner).toContain('class="quote"');
     const intro = html.slice(html.indexOf('class="result__section intro"'));
+    expect(intro).not.toContain('class="quote"');
     expect(intro.indexOf('class="video"')).toBeLessThan(intro.indexOf('</section>'));
   });
 

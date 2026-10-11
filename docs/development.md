@@ -15,11 +15,13 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `scripts/json-output.js` | 시각을 제외한 데이터 변경 판단 |
 | `src/data/<작품 ID>/` | 생성된 무기·질문 JSON. 직접 편집하지 않음 |
 | `src/games/index.js` | 작품 등록과 작품별 데이터·표시 자료 연결 |
-| `src/games/<작품 ID>/media.js` | 작품 로고, 무기별 아이콘·소개 영상 ID |
+| `src/games/<작품 ID>/media.js` | 작품 로고, 무기별 아이콘·캐릭터 이미지·소개 영상 ID |
+| `src/games/<작품 ID>/characters.js` | 결과 상단 배경 캐릭터 이미지의 무기별 배치와 출처 |
 | `src/games/<작품 ID>/descriptions.js` | 무기별 공식 소개 문구와 출처 |
 | `src/assets/games/<작품 ID>/` | 작품 로고 파일 |
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
-| `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
+| `src/assets/characters/<작품 ID>/` | 무기별 캐릭터 이미지 파일(`<weapon_id>_a·_b.webp`) |
+| `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
 | `src/ui/views.js` | 화면 마크업(작품 선택·검사 설명·이름 입력·질문·결과) |
 | `src/ui/radar.js` | 오각형 방사형 차트 위치 계산과 SVG |
 | `src/ui/share-image.js` | 공유 이미지(캔버스). 공유할 때만 불러옴 |
@@ -100,18 +102,16 @@ Codex를 설치·인증한 환경에서는 저장소 루트에서 `codex`를, Cl
 - 동시에 작업한다면 별도 브랜치 또는 worktree에서 작업하고 같은 파일의 동시 편집을 피합니다.
 - 개인 설정과 인증 정보는 로컬에 둡니다. 공통 규칙은 AGENTS.md에서만 수정합니다.
 
-## 다음 구현 작업 — 결과 추천 이유
+## 결과 추천 이유 구현
 
-‘왜 이 무기인가요?’의 데이터 구조, 선택 규칙, 문장 틀, 예외 처리와 테스트 조건은 [결과 추천 이유 설계](result-reason.md)에 확정했습니다. 아직 사이트에는 구현하지 않았습니다.
+‘왜 이 무기인가요?’는 [결과 추천 이유 설계](result-reason.md)에 따라 구현되어 있습니다.
 
-- `src/core/recommend.js`: 기존 순위를 바꾸지 않고 축별 불일치 상세값을 제공
-- `src/core/reason.js`: 1·2순위 비교와 표시 항목 선택을 담당하는 순수 함수
-- `src/core/reason-copy.js`: 축·방향별 한국어 문장 틀
+- `src/core/recommend.js`: 축별 불일치(`AXIS_MISMATCH`)와 최종 축 가중치(`AXIS_WEIGHTS`)로 점수를 계산하고, `scoreWeapon`이 축별 상세값을 함께 돌려줌
+- `src/core/reason.js`: 1·2순위 비교와 표시 항목 선택을 담당하는 순수 함수(`buildRecommendationReason`)와 임계값 상수
+- `src/core/reason-copy.js`: 축·방향별 한국어 문장 틀과 조사 선택
 - `src/app.js`: 정상 결과와 공유 결과의 1·2순위로 이유 모델 생성
-- `src/ui/views.js`: 순위 아래·차트 위에 추천 이유 렌더링
-- 테스트: 현재 순위 불변, 임계값 경계, 동점, 미측정 축, 공유 결과, 중복 문구와 HTML 이스케이프 확인
-
-구현 후 `npm test`와 `npm run build`를 실행하고, 상세 기획의 상태와 관련 문서를 ‘구현 완료’로 갱신합니다.
+- `src/ui/views.js`: `renderRecommendationReason`이 1순위 표시 아래·비교 버튼 위에 렌더링. 비교 버튼은 `renderComparisonView`로 기준 비교 영역만 다시 그림
+- 테스트(`src/core/reason.test.js`): 기획 예시 회귀, 순위 불변, 임계값 경계, 동점, 미측정 축, 공유 결과, 중복 문구와 HTML 이스케이프
 
 ## 기본 파일 설정
 

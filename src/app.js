@@ -2,6 +2,7 @@
 // 경로 대신 #/<작품 ID>, #/<작품 ID>/guide, #/<작품 ID>/result, #/<작품 ID>/share/<코드> 형식을 사용한다.
 // 외부로 공유하는 링크만 ?r=<작품 ID>.<코드> 형식이며, 열면 내부 해시 주소로 바꾼다(core/share.js).
 import { AXIS_IDS } from './core/axes.js';
+import { buildRecommendationReason } from './core/reason.js';
 import { recommendWeapons, remainingWeapons } from './core/recommend.js';
 import {
   computeAxisProfile, computeAxisTotals, firstUnansweredIndex, isComplete, sanitizeAnswers, setAnswer,
@@ -13,7 +14,8 @@ import {
 } from './core/share.js';
 import { findGame, supportedGames } from './games/index.js';
 import {
-  renderEmpty, renderGameSelection, renderGuide, renderNameForm, renderQuestion, renderResult, renderVideoPlayer,
+  escapeHtml, renderComparisonView, renderEmpty, renderGameSelection, renderGuide, renderNameForm, renderQuestion, renderResult,
+  renderVideoPlayer,
 } from './ui/views.js';
 
 function safeDecode(text) {
@@ -215,31 +217,38 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
     });
   }
 
-  function showResult(game, result, { shared = false, selectedIndex = 0, othersOpen = false } = {}) {
+  function showResult(game, result, { shared = false } = {}) {
     const others = remainingWeapons(game.weapons, result.profile, result.weapons);
-    const selected = [...result.weapons, ...others][selectedIndex];
-    root.innerHTML = renderResult(game, result, { selectedIndex, shared, others, othersOpen });
+    const ranked = [...result.weapons, ...others];
+    const winner = result.weapons[0];
+    const who = escapeHtml(result.nickname || FALLBACK_NICKNAME);
+    // 추천 이유는 정상·공유 결과 모두 결과에 담긴 1·2순위로 만든다. 순위를 다시 정하지 않는다.
+    const reason = buildRecommendationReason(result.profile, winner, result.weapons[1]);
+    root.innerHTML = renderResult(game, result, { shared, others, reason });
     const status = root.querySelector('.share__status');
     const say = (message) => { status.textContent = message; };
 
-    root.querySelectorAll('[data-select]').forEach((button) => {
+    // 비교 대상 버튼은 기준 비교(차트·표)만 바꾼다. 1순위 표시·추천 이유·소개 영상은 그대로 둔다.
+    const buttons = [...root.querySelectorAll('[data-select]')];
+    buttons.forEach((button) => {
       button.addEventListener('click', () => {
-        const index = Number(button.dataset.select);
-        if (index === selectedIndex) return;
-        showResult(game, result, { shared, selectedIndex: index, othersOpen });
-        root.querySelector(`[data-select="${index}"]`)?.focus();
+        if (button.getAttribute('aria-pressed') === 'true') return;
+        buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
+        root.querySelector('#compare-view').innerHTML = renderComparisonView(
+          result.profile, ranked[Number(button.dataset.select)], who,
+        );
       });
     });
 
     root.querySelector('[data-action="toggle-others"]')?.addEventListener('click', (event) => {
-      othersOpen = !othersOpen;
-      event.currentTarget.setAttribute('aria-expanded', String(othersOpen));
-      root.querySelector('#other-weapons').hidden = !othersOpen;
+      const open = event.currentTarget.getAttribute('aria-expanded') !== 'true';
+      event.currentTarget.setAttribute('aria-expanded', String(open));
+      root.querySelector('#other-weapons').hidden = !open;
     });
 
     root.querySelector('[data-action="play-video"]')?.addEventListener('click', (event) => {
       const box = event.currentTarget.closest('.video');
-      box.innerHTML = renderVideoPlayer(box.dataset.videoId, `${selected.weapon_name} 소개 영상`);
+      box.innerHTML = renderVideoPlayer(box.dataset.videoId, `${winner.weapon_name} 소개 영상`);
     });
 
     root.querySelector('[data-action="share-link"]').addEventListener('click', async () => {

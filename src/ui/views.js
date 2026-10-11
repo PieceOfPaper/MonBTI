@@ -1,6 +1,9 @@
 // 화면 마크업. 상태를 받아 문자열을 돌려주며 이벤트 연결은 app.js가 맡는다.
 import { AXES } from '../core/axes.js';
 import { FALLBACK_NICKNAME, NICKNAME_MAX_LENGTH } from '../core/nickname.js';
+import {
+  REASON_TITLE, SECTION_TITLES, advantagesCopy, cautionCopy, closestCopy, leadText, tradeoffCopy,
+} from '../core/reason-copy.js';
 import { RESPONSES } from '../core/responses.js';
 import { renderRadarSvg } from './radar.js';
 
@@ -112,9 +115,31 @@ function weaponIcon(weapon, className) {
     : `<span class="${className} ${className}--text" aria-hidden="true">${escapeHtml(weapon.weapon_name.slice(0, 1))}</span>`;
 }
 
+// 결과 상단의 1순위 무기. 순위 표기와 상자 없이 아이콘 뒤의 빛과 큰 이름으로 강조하고, 바로 아래에 공식 소개 문구를 인용한다.
+// 뒤에는 공식 사이트 배치를 따른 무기별 캐릭터 이미지를 흐리게 깐다(장식용이라 화면 낭독기에서 숨김).
+function renderWinnerArt(weapon) {
+  if (!weapon.characters?.length) return '';
+  const images = weapon.characters.map(({ src, top, left, width }) => `
+        <img src="${escapeHtml(src)}" alt="" style="top: ${top}%; left: ${left}%; width: ${width}%;" />`).join('');
+  return `<div class="winner__art" aria-hidden="true"><div class="winner__frame">${images}
+      </div></div>`;
+}
+
+function renderWinner(weapon) {
+  return `<div class="winner">
+      ${renderWinnerArt(weapon)}
+      <div class="winner__main">
+        ${weaponIcon(weapon, 'winner__icon')}
+        <strong class="winner__name">${escapeHtml(weapon.weapon_name)}</strong>
+      </div>
+      ${renderQuote(weapon)}
+    </div>`;
+}
+
+// 비교할 무기를 고르는 1~3순위 버튼. 세 버튼은 같은 크기이며 누르면 기준 비교만 바뀐다.
 function renderRanking(weapons, selectedIndex) {
   return weapons.map((weapon, index) => `
-      <li class="rank rank--${index + 1}">
+      <li class="rank">
         <button class="rank__button" type="button" data-select="${index}" aria-pressed="${index === selectedIndex}">
           <span class="rank__label">${RANK_LABELS[index]}</span>
           ${weaponIcon(weapon, 'rank__icon')}
@@ -123,7 +148,7 @@ function renderRanking(weapons, selectedIndex) {
       </li>`).join('');
 }
 
-// 1~3순위 아래의 접히는 '나머지 무기' 목록. 순위 번호는 4순위부터 이어지고, 누르면 그 무기와 비교한다.
+// 1~3순위 버튼 아래의 접히는 '나머지 무기' 목록. 순위 번호는 4순위부터 이어지고, 누르면 그 무기와 비교한다.
 function renderOthers(others, selectedIndex, open) {
   if (others.length === 0) return '';
   const items = others.map((weapon, offset) => {
@@ -142,17 +167,45 @@ function renderOthers(others, selectedIndex, open) {
     </div>`;
 }
 
+// 1순위 추천 이유(core/reason.js 모델). 다른 무기를 선택해도 바뀌지 않으며, 없는 항목은 자리를 두지 않는다.
+// weapons는 결과의 1~3순위이며 이름을 찾는 데만 쓴다. 문장은 원문으로 만든 뒤 한 번에 이스케이프한다.
+export function renderRecommendationReason(reason, weapons) {
+  if (!reason) return '';
+  const nameOf = (id) => weapons.find(({ weapon_id }) => weapon_id === id)?.weapon_name ?? '';
+  const winnerName = nameOf(reason.winnerId);
+  const runnerName = nameOf(reason.runnerUpId);
+  const part = (title, lines) => (lines.length === 0 ? '' : `
+        <div class="reason__part">
+          <h3>${escapeHtml(title)}</h3>
+          ${lines.map((line) => `<p>${escapeHtml(line)}</p>`).join('')}
+        </div>`);
+  const closest = closestCopy(reason, winnerName);
+  const advantages = [advantagesCopy(reason, runnerName)].filter(Boolean);
+  const cautions = [cautionCopy(reason, runnerName)].filter(Boolean);
+  // 낯선 점과 다른 축에서 2순위가 더 가까우면 1순위 비교 옆에, 비교가 없으면 낯선 점 옆에 붙인다.
+  const tradeoff = tradeoffCopy(reason, runnerName);
+  const tradeoffs = [];
+  if (tradeoff) (advantages.length ? advantages : cautions.length ? cautions : tradeoffs).push(tradeoff);
+  return `<section class="result__section reason" aria-labelledby="reason-title">
+      <h2 id="reason-title">${REASON_TITLE}</h2>
+      <p class="reason__lead">${escapeHtml(leadText(reason, winnerName, runnerName))}</p>${part(closest.title, [closest.text])}${
+  part(SECTION_TITLES.advantages, advantages)}${
+  part(SECTION_TITLES.caution, cautions)}${
+  part(SECTION_TITLES.tradeoff, tradeoffs)}
+    </section>`;
+}
+
 const formatValue = (value) => (value === null ? '측정 안 됨' : String(Math.round(value)));
 
-function renderComparison(profile, weapon, who) {
+// 선택한 무기와 나의 기준 비교(차트·표). 비교 대상 버튼을 누르면 이 부분만 다시 그린다.
+export function renderComparisonView(profile, weapon, who) {
   const chart = renderRadarSvg(
     [{ values: weapon, className: 'radar__series--weapon' }, { values: profile, className: 'radar__series--me' }],
     { label: `${who} 점수와 ${escapeHtml(weapon.weapon_name)} 기준 비교` },
   );
   const rows = AXES.map(({ id, short }) => `
           <tr><th scope="row">${short}</th><td>${formatValue(profile[id])}</td><td>${formatValue(weapon[id])}</td></tr>`).join('');
-  return `<section class="result__section" aria-labelledby="compare-title">
-      <h2 id="compare-title">${who} vs ${escapeHtml(weapon.weapon_name)}</h2>
+  return `<h3 id="compare-title" class="compare__title">${who} vs ${escapeHtml(weapon.weapon_name)}</h3>
       <div class="compare">
         <figure class="compare__chart">${chart}
           <figcaption class="legend">
@@ -165,11 +218,23 @@ function renderComparison(profile, weapon, who) {
           <tbody>${rows}
           </tbody>
         </table>
+      </div>`;
+}
+
+// 비교 대상 버튼(1~3순위와 나머지 무기)과 기준 비교.
+function renderComparison(result, others, selected, selectedIndex, othersOpen, who) {
+  return `<section class="result__section" aria-labelledby="compare-section-title">
+      <h2 id="compare-section-title">무기별 기준 비교</h2>
+      <ol class="ranking" aria-label="추천 무기 순위">${renderRanking(result.weapons, selectedIndex)}
+      </ol>
+      ${renderOthers(others, selectedIndex, othersOpen)}
+      <div class="compare-view" id="compare-view" aria-live="polite">
+      ${renderComparisonView(result.profile, selected, who)}
       </div>
     </section>`;
 }
 
-// 선택한 무기의 공식 소개 문구(인용)와 소개 영상을 제목 없이 한 영역으로 보여 준다.
+// 1순위 무기의 공식 소개 문구(인용). 결과 상단의 1순위 무기 아래에 둔다.
 function renderQuote(weapon) {
   if (!weapon.description?.length) return '';
   const lines = weapon.description.map(escapeHtml).join('<br />');
@@ -195,12 +260,11 @@ function renderVideo(weapon) {
       <p class="video__credit">출처: 캡콤아시아 공식 유튜브</p>`;
 }
 
+// 1순위 무기의 소개 영상. 제목 없이 기준 비교 아래에 두며 비교 대상을 바꿔도 그대로 둔다.
 function renderIntro(weapon) {
-  const quote = renderQuote(weapon);
   const video = renderVideo(weapon);
-  if (!quote && !video) return '';
-  return `<section class="result__section intro" aria-label="${escapeHtml(weapon.weapon_name)} 소개">
-      ${quote}
+  if (!video) return '';
+  return `<section class="result__section intro" aria-label="${escapeHtml(weapon.weapon_name)} 소개 영상">
       ${video}
     </section>`;
 }
@@ -211,10 +275,14 @@ export function renderVideoPlayer(videoId, title) {
 }
 
 // result: { weapons: [1~3순위], profile: { 축: 0~100 | null }, nickname: 표시 이름 }
-// others는 4순위 이후 무기이며 selectedIndex는 1순위부터 이어지는 전체 순위의 위치다.
+// others는 4순위 이후 무기이며 selectedIndex는 기준 비교에 처음 보여 줄 무기의 전체 순위 위치다.
 // shared가 참이면 공유 링크로 연 결과이며 다시 하기 대신 검사 시작을 안내한다.
-export function renderResult(game, result, { selectedIndex = 0, shared = false, others = [], othersOpen = false } = {}) {
-  const selected = [...result.weapons, ...others][selectedIndex] ?? result.weapons[0];
+// reason은 1순위 추천 이유 모델이며 없으면 그 영역을 생략한다.
+export function renderResult(game, result, {
+  selectedIndex = 0, shared = false, others = [], othersOpen = false, reason = null,
+} = {}) {
+  const winner = result.weapons[0];
+  const selected = [...result.weapons, ...others][selectedIndex] ?? winner;
   const who = escapeHtml(result.nickname || FALLBACK_NICKNAME);
   const actions = shared
     ? `<a class="button" href="#/${game.id}" data-action="start" data-start-quiz="${game.id}">나도 검사하기</a>`
@@ -223,11 +291,10 @@ export function renderResult(game, result, { selectedIndex = 0, shared = false, 
   return `<section class="result" aria-labelledby="result-title">
     <p class="eyebrow">${escapeHtml(game.name)}</p>
     <h1 id="result-title" tabindex="-1">${who}에게 어울리는 무기</h1>
-    <ol class="ranking" aria-label="추천 무기 순위">${renderRanking(result.weapons, selectedIndex)}
-    </ol>
-    ${renderOthers(others, selectedIndex, othersOpen)}
-    ${renderComparison(result.profile, selected, who)}
-    ${renderIntro(selected)}
+    ${renderWinner(winner)}
+    ${renderRecommendationReason(reason, result.weapons)}
+    ${renderComparison(result, others, selected, selectedIndex, othersOpen, who)}
+    ${renderIntro(winner)}
     <section class="result__section share-section" aria-labelledby="share-title">
       <h2 id="share-title">결과 공유하기</h2>
       <div class="share">
@@ -269,7 +336,7 @@ export function renderGuide(game) {
         <li>질문 ${questionCount}개에 답해요. 질문 순서는 검사할 때마다 섞여요.</li>
         <li>각 질문에 ‘전혀 그렇지 않다’부터 ‘매우 그렇다’까지 여섯 단계 중 하나를 골라요. 가운데 답은 없으니 조금이라도 더 가까운 쪽을 고르면 돼요.</li>
         <li>정답은 없어요. 잘하는 것보다 <strong>하고 싶은 것</strong>을 기준으로 답해 주세요.</li>
-        <li>답을 마치면 ${weaponCount}가지 무기 중 나와 잘 맞는 무기 세 가지를 순서대로 보여 줘요.</li>
+        <li>답을 마치면 ${weaponCount}가지 무기 중 나와 잘 맞는 무기 세 가지를 순서대로 보여 주고, 1순위 무기가 왜 추천됐는지도 함께 알려 줘요.</li>
       </ul>
     </section>
     <section aria-labelledby="guide-axes">
@@ -277,7 +344,7 @@ export function renderGuide(game) {
       <p>답변으로 다섯 가지 기준마다 나의 점수를 0~100으로 매기고, 무기마다 정해 둔 같은 기준의 값과 비교해요.</p>
       <ul class="guide__axes">${axes}
       </ul>
-      <p>다섯 기준을 똑같은 비중으로 합쳐서 가장 잘 맞는 무기부터 순위를 정해요.</p>
+      <p>다섯 기준을 합쳐서 가장 잘 맞는 무기부터 순위를 정해요. 한방과 반격은 어느 쪽으로 달라도 차이를 모두 반영하기 때문에, 다른 세 기준과 영향이 비슷해지도록 조금 낮은 비중으로 합쳐요.</p>
     </section>
     <section aria-labelledby="guide-not">
       <h2 id="guide-not">이런 것은 보지 않아요</h2>

@@ -1,6 +1,7 @@
 // 무기 추천 계산. 공식은 docs/test-design.md의 '무기 적합도와 추천 순위'를 따른다.
 // 사용자 점수(0~100)와 무기 기준값(0~100)의 축별 불일치를 구하고,
-// 측정된 축의 적합도(100 - 불일치)를 같은 비중으로 평균해 무기 점수로 쓴다.
+// 측정된 축의 적합도(100 - 불일치)를 축별 최종 가중치로 가중 평균해 무기 점수로 쓴다.
+import { AXIS_IDS } from './axes.js';
 
 export const RECOMMENDATION_COUNT = 3;
 
@@ -18,20 +19,57 @@ export const AXIS_MISMATCH = {
   counter: (user, weapon) => Math.abs(user - weapon),
 };
 
-// 무기 하나의 점수. 미측정(null) 축은 평균에서 뺀다. 측정된 축이 없으면 score는 null이다.
-export function scoreWeapon(profile, weapon) {
-  const mismatches = Object.entries(AXIS_MISMATCH)
-    .filter(([axis]) => profile[axis] !== null && profile[axis] !== undefined)
-    .map(([axis, mismatch]) => mismatch(profile[axis], weapon[axis]));
-  if (mismatches.length === 0) return { score: null, maxMismatch: null };
-  const fits = mismatches.map((mismatch) => 100 - mismatch);
-  return {
-    score: fits.reduce((sum, fit) => sum + fit, 0) / fits.length,
-    maxMismatch: Math.max(...mismatches),
-  };
+// 최종 합산 가중치(DEC-044). 양방향 차이를 모두 반영하는 attack·counter의 실질 비중을 낮춘다.
+export const AXIS_WEIGHTS = {
+  attack: 0.75,
+  freedom: 1,
+  complexity: 1,
+  management: 1,
+  counter: 0.75,
+};
+
+const isMeasured = (value) => value !== null && value !== undefined;
+
+function axisDirection(user, weapon) {
+  if (weapon < user) return 'lower';
+  if (weapon > user) return 'higher';
+  return 'equal';
 }
 
-// 반올림하지 않은 점수 내림차순. 동점이면 최대 단일 축 불일치가 작은 무기, 다시 같으면 시트 행 순서.
+// 무기 하나의 점수와 축별 상세값. 추천 순위와 추천 이유(core/reason.js)가 같은 계산을 쓴다.
+// mismatch·fit은 성향 거리, weight·weightedMismatch·weightedFit은 최종 점수와 순위 기여도에 쓴다.
+// 미측정(null) 축은 axes와 가중치 합에서 뺀다. 측정된 축이 없으면 score는 null이다.
+export function scoreWeapon(profile, weapon) {
+  const axes = {};
+  let weightSum = 0;
+  let weightedFitSum = 0;
+  let maxMismatch = null;
+  for (const axis of AXIS_IDS) {
+    const user = profile[axis];
+    if (!isMeasured(user)) continue;
+    const mismatch = AXIS_MISMATCH[axis](user, weapon[axis]);
+    const fit = 100 - mismatch;
+    const weight = AXIS_WEIGHTS[axis];
+    axes[axis] = {
+      user,
+      weapon: weapon[axis],
+      direction: axisDirection(user, weapon[axis]),
+      mismatch,
+      fit,
+      weight,
+      weightedMismatch: weight * mismatch,
+      weightedFit: weight * fit,
+    };
+    weightSum += weight;
+    weightedFitSum += weight * fit;
+    maxMismatch = maxMismatch === null ? mismatch : Math.max(maxMismatch, mismatch);
+  }
+  if (weightSum === 0) return { score: null, maxMismatch: null, weightSum: 0, axes };
+  return { score: weightedFitSum / weightSum, maxMismatch, weightSum, axes };
+}
+
+// 반올림하지 않은 점수 내림차순. 동점이면 가중치를 적용하지 않은 최대 단일 축 불일치가 작은 무기,
+// 다시 같으면 시트 행 순서.
 export function rankWeapons(weapons, profile) {
   return weapons
     .map((weapon, order) => ({ weapon, order, ...scoreWeapon(profile, weapon) }))

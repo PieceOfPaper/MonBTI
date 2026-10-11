@@ -12,3 +12,4 @@
 - [파일:와일즈로고.png — 나무위키](https://namu.wiki/w/%ED%8C%8C%EC%9D%BC:%EC%99%80%EC%9D%BC%EC%A6%88%EB%A1%9C%EA%B3%A0.png)
 - [몬스터헌터 와일즈 무기/액션 소개 시리즈 — YouTube](https://youtube.com/playlist?list=PLOqThOCwYwiUYYNdcRuhvjjyhAkhrZgCM&si=9JUD71OLi654f5mL)
 - [HUNTING — 몬스터헌터 와일즈 공식 사이트](https://www.monsterhunter.com/wilds/ko-kr/hunting/)
+- [WEAPONS — 몬스터헌터 와일즈 공식 사이트](https://www.monsterhunter.com/wilds/ko-kr/hunting/weapon/)
