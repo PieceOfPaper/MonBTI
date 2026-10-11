@@ -60,6 +60,7 @@ MBTI 검사처럼 질문에 답하는 경험을 제공하며, 기존 유저에�
 | [기획 문서 안내](docs/README.md) | 문서 구성과 관리 원칙 |
 | [프로젝트 기획](docs/project-plan.md) | 대상, 목적, 작품 선택 흐름, 범위 |
 | [검사 설계](docs/test-design.md) | 질문·분류·추천 설계와 미정 항목 |
+| [페르소나 테스트 기획](docs/persona-test-plan.md) | 대표 성향·문항 응답·추천 영역 회귀 테스트 구현 사양 |
 | [결과 추천 이유 설계](docs/result-reason.md) | ‘왜 이 무기인가요?’의 계산·문장·화면·테스트 명세 |
 | [질문 작성 가이드](docs/question-guide.md) | 일상 질문의 표현, 다축 해석과 문항 검토 기준 |
 | [시트 데이터 설계](docs/data-schema.md) | 원본 시트, 열 정의, JSON 변환·반영 규칙 |

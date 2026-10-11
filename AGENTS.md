@@ -6,6 +6,7 @@
 
 - README.md, docs/project-plan.md, docs/decisions.md를 읽고 현재 방향을 확인합니다.
 - 검사 관련 작업은 docs/test-design.md, docs/data-schema.md, docs/references.md도 읽습니다.
+- 페르소나·추천 분포·응답 시나리오 테스트 작업은 docs/persona-test-plan.md도 읽습니다.
 - 질문을 만들거나 수정·검토할 때는 docs/question-guide.md를 먼저 읽고 따릅니다.
 - 실행 방법과 기술 상태는 docs/development.md에서 확인합니다.
 - 사용자의 현재 명시적 지시를 우선합니다. 제안이나 과거 대화를 확정 기획으로 간주하지 않습니다.
