@@ -275,7 +275,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
         // 캔버스 코드는 공유할 때만 불러온다.
         const { drawShareImage } = await import('./ui/share-image.js');
         const siteUrl = `${location.host}${location.pathname}`;
-        const blob = await drawShareImage({ gameName: game.name, result, siteUrl });
+        const blob = await drawShareImage({ gameName: game.name, result, reason, weapons: game.weapons, siteUrl });
         const file = new File([blob], 'monbti-result.png', { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {
           say('');

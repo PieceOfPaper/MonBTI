@@ -112,6 +112,8 @@ legend { padding: 0; margin-bottom: 1.5rem; }
 .winner__icon { width: clamp(7rem, 30vw, 10rem); height: clamp(7rem, 30vw, 10rem); padding: 1rem; object-fit: contain; background: radial-gradient(circle, rgb(216 239 134 / .28) 0%, rgb(216 239 134 / .08) 55%, transparent 72%); filter: drop-shadow(0 0 .9rem rgb(216 239 134 / .35)); }
 .winner__icon--text { display: grid; place-items: center; border-radius: 50%; color: #d8ef86; font-size: 3rem; font-weight: 800; }
 .winner__name { color: #d8ef86; font-size: clamp(2.5rem, 11vw, 3.75rem); line-height: 1.15; letter-spacing: -.01em; text-shadow: 0 0 1.5rem rgb(216 239 134 / .35); word-break: keep-all; overflow-wrap: anywhere; }
+.difficulty { display: flex; align-items: center; gap: .5rem; margin: 0; color: #d5ddd7; font-size: .95rem; font-weight: 700; text-shadow: 0 1px .4rem #172119, 0 0 1rem #172119; }
+.difficulty__stars { color: #d8ef86; font-size: 1.15rem; letter-spacing: .12em; }
 .winner .quote { margin: 0 auto; }
 .winner .quote blockquote { text-shadow: 0 1px .4rem #172119, 0 0 1rem #172119; }
 

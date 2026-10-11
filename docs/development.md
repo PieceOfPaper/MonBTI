@@ -2,7 +2,7 @@
 
 ## 현재 상태
 
-저장소에는 작품 선택·이름 입력·질문·결과(1~3순위·나머지 무기·차트·소개 문구·영상·공유) 화면, 시트 변환기, 기획 문서, AI 작업 지침 및 GitHub Pages 배포 기반이 있습니다.
+저장소에는 작품 선택·이름 입력·질문·결과(1~3순위·입문 난이도·나머지 무기·차트·소개 문구·영상·공유) 화면, 시트 변환기, 기획 문서, AI 작업 지침 및 GitHub Pages 배포 기반이 있습니다.
 Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테스트에는 Vitest를 사용합니다.
 정적 산출물은 `dist/`에 생성되며 GitHub Pages에서 `/MonBTI/` 경로로 제공되도록 설정되어 있습니다.
 
@@ -24,10 +24,11 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `src/assets/games/<작품 ID>/` | 작품 로고 파일 |
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
 | `src/assets/characters/<작품 ID>/` | 무기별 캐릭터 이미지 파일(`<weapon_id>_a·_b.webp`) |
-| `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
+| `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 입문 난이도 별표(`difficulty.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
 | `src/ui/views.js` | 화면 마크업(작품 선택·검사 설명·이름 입력·질문·결과) |
 | `src/ui/radar.js` | 오각형 방사형 차트 위치 계산과 SVG |
-| `src/ui/share-image.js` | 공유 이미지(캔버스). 공유할 때만 불러옴 |
+| `src/ui/result-content.js` | 결과 화면과 공유 이미지가 함께 쓰는 표시 내용(제목·입문 난이도·소개 문구·추천 이유·기준 비교) |
+| `src/ui/share-image.js` | 공유 이미지(캔버스). `result-content.js`의 내용을 결과 화면과 같은 순서로 그림. 공유할 때만 불러옴 |
 | `src/app.js` | 해시 라우팅, 표시 이름·답변·질문 순서 상태와 세션 저장, 결과·공유 동작 |
 
 ## 로컬 개발 및 검증

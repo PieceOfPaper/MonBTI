@@ -7,6 +7,7 @@ import { renderGameSelection, renderGuide, renderNameForm, renderQuestion, rende
 import { decodeShareCode } from './core/share.js';
 import { decodeNickname, encodeNickname, normalizeNickname } from './core/nickname.js';
 import { remainingWeapons } from './core/recommend.js';
+import { difficultyLabel, difficultyStars } from './core/difficulty.js';
 
 const wilds = supportedGames[0];
 // 화면·저장 테스트는 편집 가능한 원본 시트의 문항 ID·가중치와 분리한다.
@@ -223,6 +224,17 @@ describe('화면', () => {
     const intro = html.slice(html.indexOf('class="result__section intro"'));
     expect(intro).not.toContain('class="quote"');
     expect(intro.indexOf('class="video"')).toBeLessThan(intro.indexOf('</section>'));
+  });
+
+  it('결과 화면은 1순위 무기 이름 아래에 작품 전체 무기 기준의 입문 난이도 별표를 보여 준다', () => {
+    const html = renderResult(testGame, result);
+    const main = html.slice(html.indexOf('class="winner__main"'), html.indexOf('class="quote"'));
+    const stars = difficultyStars(result.weapons[0], testGame.weapons);
+    expect(main.indexOf('class="winner__name"')).toBeLessThan(main.indexOf('class="difficulty"'));
+    expect(main).toContain('<span class="difficulty__label">입문 난이도</span>');
+    expect(main).toContain(`aria-label="5단계 중 ${stars}단계">${difficultyLabel(stars)}</span>`);
+    expect(html.match(/class="difficulty"/g)).toHaveLength(1);
+    expect(renderResult(testGame, result, { shared: true })).toContain(difficultyLabel(stars));
   });
 
   it('결과 화면은 1~3순위 아래 접힌 나머지 무기 목록을 4순위부터 보여 주고 선택할 수 있다', () => {

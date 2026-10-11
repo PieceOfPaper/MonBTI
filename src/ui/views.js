@@ -1,11 +1,11 @@
 // 화면 마크업. 상태를 받아 문자열을 돌려주며 이벤트 연결은 app.js가 맡는다.
 import { AXES } from '../core/axes.js';
-import { FALLBACK_NICKNAME, NICKNAME_MAX_LENGTH } from '../core/nickname.js';
-import {
-  REASON_TITLE, SECTION_TITLES, advantagesCopy, cautionCopy, closestCopy, leadText, tradeoffCopy,
-} from '../core/reason-copy.js';
+import { NICKNAME_MAX_LENGTH } from '../core/nickname.js';
 import { RESPONSES } from '../core/responses.js';
 import { renderRadarSvg } from './radar.js';
+import {
+  COMPARE_SECTION_TITLE, RANK_LABELS, comparisonRows, difficultyContent, displayName, quoteContent, reasonContent, resultTitle,
+} from './result-content.js';
 
 export function escapeHtml(value) {
   return String(value)
@@ -107,8 +107,6 @@ export function renderQuestion(game, index, answers) {
   </section>`;
 }
 
-const RANK_LABELS = ['1순위', '2순위', '3순위'];
-
 function weaponIcon(weapon, className) {
   return weapon.icon
     ? `<img class="${className}" src="${escapeHtml(weapon.icon)}" alt="" width="100" height="100" />`
@@ -125,12 +123,22 @@ function renderWinnerArt(weapon) {
       </div></div>`;
 }
 
-function renderWinner(weapon) {
+// 입문 난이도: 같은 작품 무기 사이의 상대평가 별표. 별 글자 대신 단계를 읽어 주도록 화면 낭독기용 이름을 붙인다.
+function renderDifficulty(weapon, weapons) {
+  const { title, label, spoken } = difficultyContent(weapon, weapons);
+  return `<p class="difficulty">
+          <span class="difficulty__label">${title}</span>
+          <span class="difficulty__stars" role="img" aria-label="${spoken}">${label}</span>
+        </p>`;
+}
+
+function renderWinner(weapon, weapons) {
   return `<div class="winner">
       ${renderWinnerArt(weapon)}
       <div class="winner__main">
         ${weaponIcon(weapon, 'winner__icon')}
         <strong class="winner__name">${escapeHtml(weapon.weapon_name)}</strong>
+        ${renderDifficulty(weapon, weapons)}
       </div>
       ${renderQuote(weapon)}
     </div>`;
@@ -167,35 +175,21 @@ function renderOthers(others, selectedIndex, open) {
     </div>`;
 }
 
-// 1순위 추천 이유(core/reason.js 모델). 다른 무기를 선택해도 바뀌지 않으며, 없는 항목은 자리를 두지 않는다.
-// weapons는 결과의 1~3순위이며 이름을 찾는 데만 쓴다. 문장은 원문으로 만든 뒤 한 번에 이스케이프한다.
+// 1순위 추천 이유. 다른 무기를 선택해도 바뀌지 않으며, 없는 항목은 자리를 두지 않는다.
+// 내용은 result-content.js가 원문으로 만들고 여기서 한 번에 이스케이프한다.
 export function renderRecommendationReason(reason, weapons) {
-  if (!reason) return '';
-  const nameOf = (id) => weapons.find(({ weapon_id }) => weapon_id === id)?.weapon_name ?? '';
-  const winnerName = nameOf(reason.winnerId);
-  const runnerName = nameOf(reason.runnerUpId);
-  const part = (title, lines) => (lines.length === 0 ? '' : `
+  const content = reasonContent(reason, weapons);
+  if (!content) return '';
+  const parts = content.parts.map(({ title, lines }) => `
         <div class="reason__part">
           <h3>${escapeHtml(title)}</h3>
           ${lines.map((line) => `<p>${escapeHtml(line)}</p>`).join('')}
-        </div>`);
-  const closest = closestCopy(reason, winnerName);
-  const advantages = [advantagesCopy(reason, runnerName)].filter(Boolean);
-  const cautions = [cautionCopy(reason, runnerName)].filter(Boolean);
-  // 낯선 점과 다른 축에서 2순위가 더 가까우면 1순위 비교 옆에, 비교가 없으면 낯선 점 옆에 붙인다.
-  const tradeoff = tradeoffCopy(reason, runnerName);
-  const tradeoffs = [];
-  if (tradeoff) (advantages.length ? advantages : cautions.length ? cautions : tradeoffs).push(tradeoff);
+        </div>`).join('');
   return `<section class="result__section reason" aria-labelledby="reason-title">
-      <h2 id="reason-title">${REASON_TITLE}</h2>
-      <p class="reason__lead">${escapeHtml(leadText(reason, winnerName, runnerName))}</p>${part(closest.title, [closest.text])}${
-  part(SECTION_TITLES.advantages, advantages)}${
-  part(SECTION_TITLES.caution, cautions)}${
-  part(SECTION_TITLES.tradeoff, tradeoffs)}
+      <h2 id="reason-title">${escapeHtml(content.title)}</h2>
+      <p class="reason__lead">${escapeHtml(content.lead)}</p>${parts}
     </section>`;
 }
-
-const formatValue = (value) => (value === null ? '측정 안 됨' : String(Math.round(value)));
 
 // 선택한 무기와 나의 기준 비교(차트·표). 비교 대상 버튼을 누르면 이 부분만 다시 그린다.
 export function renderComparisonView(profile, weapon, who) {
@@ -203,8 +197,8 @@ export function renderComparisonView(profile, weapon, who) {
     [{ values: weapon, className: 'radar__series--weapon' }, { values: profile, className: 'radar__series--me' }],
     { label: `${who} 점수와 ${escapeHtml(weapon.weapon_name)} 기준 비교` },
   );
-  const rows = AXES.map(({ id, short }) => `
-          <tr><th scope="row">${short}</th><td>${formatValue(profile[id])}</td><td>${formatValue(weapon[id])}</td></tr>`).join('');
+  const rows = comparisonRows(profile, weapon).map(({ short, me, weapon: value }) => `
+          <tr><th scope="row">${short}</th><td>${me}</td><td>${value}</td></tr>`).join('');
   return `<h3 id="compare-title" class="compare__title">${who} vs ${escapeHtml(weapon.weapon_name)}</h3>
       <div class="compare">
         <figure class="compare__chart">${chart}
@@ -224,7 +218,7 @@ export function renderComparisonView(profile, weapon, who) {
 // 비교 대상 버튼(1~3순위와 나머지 무기)과 기준 비교.
 function renderComparison(result, others, selected, selectedIndex, othersOpen, who) {
   return `<section class="result__section" aria-labelledby="compare-section-title">
-      <h2 id="compare-section-title">무기별 기준 비교</h2>
+      <h2 id="compare-section-title">${COMPARE_SECTION_TITLE}</h2>
       <ol class="ranking" aria-label="추천 무기 순위">${renderRanking(result.weapons, selectedIndex)}
       </ol>
       ${renderOthers(others, selectedIndex, othersOpen)}
@@ -236,11 +230,10 @@ function renderComparison(result, others, selected, selectedIndex, othersOpen, w
 
 // 1순위 무기의 공식 소개 문구(인용). 결과 상단의 1순위 무기 아래에 둔다.
 function renderQuote(weapon) {
-  if (!weapon.description?.length) return '';
-  const lines = weapon.description.map(escapeHtml).join('<br />');
-  const credit = weapon.descriptionSource
-    ? `<figcaption class="quote__credit">출처: ${escapeHtml(weapon.descriptionSource)}</figcaption>`
-    : '';
+  const quote = quoteContent(weapon);
+  if (!quote) return '';
+  const lines = quote.lines.map(escapeHtml).join('<br />');
+  const credit = quote.credit ? `<figcaption class="quote__credit">${escapeHtml(quote.credit)}</figcaption>` : '';
   return `<figure class="quote">
         <blockquote>${lines}</blockquote>
         ${credit}
@@ -283,15 +276,16 @@ export function renderResult(game, result, {
 } = {}) {
   const winner = result.weapons[0];
   const selected = [...result.weapons, ...others][selectedIndex] ?? winner;
-  const who = escapeHtml(result.nickname || FALLBACK_NICKNAME);
+  const name = displayName(result.nickname);
+  const who = escapeHtml(name);
   const actions = shared
     ? `<a class="button" href="#/${game.id}" data-action="start" data-start-quiz="${game.id}">나도 검사하기</a>`
     : `<button class="button button--ghost" type="button" data-action="restart">처음부터 다시 하기</button>`;
 
   return `<section class="result" aria-labelledby="result-title">
     <p class="eyebrow">${escapeHtml(game.name)}</p>
-    <h1 id="result-title" tabindex="-1">${who}에게 어울리는 무기</h1>
-    ${renderWinner(winner)}
+    <h1 id="result-title" tabindex="-1">${escapeHtml(resultTitle(name))}</h1>
+    ${renderWinner(winner, game.weapons)}
     ${renderRecommendationReason(reason, result.weapons)}
     ${renderComparison(result, others, selected, selectedIndex, othersOpen, who)}
     ${renderIntro(winner)}
@@ -336,7 +330,7 @@ export function renderGuide(game) {
         <li>질문 ${questionCount}개에 답해요. 질문 순서는 검사할 때마다 섞여요.</li>
         <li>각 질문에 ‘전혀 그렇지 않다’부터 ‘매우 그렇다’까지 여섯 단계 중 하나를 골라요. 가운데 답은 없으니 조금이라도 더 가까운 쪽을 고르면 돼요.</li>
         <li>정답은 없어요. 잘하는 것보다 <strong>하고 싶은 것</strong>을 기준으로 답해 주세요.</li>
-        <li>답을 마치면 ${weaponCount}가지 무기 중 나와 잘 맞는 무기 세 가지를 순서대로 보여 주고, 1순위 무기가 왜 추천됐는지도 함께 알려 줘요.</li>
+        <li>답을 마치면 ${weaponCount}가지 무기 중 나와 잘 맞는 무기 세 가지를 순서대로 보여 주고, 1순위 무기가 왜 추천됐는지도 함께 알려 줘요. 1순위 무기에는 입문 난이도를 별 다섯 개로 보여 주는데, 같은 작품의 무기끼리 비교한 값이라 추천 순위와는 상관없어요.</li>
       </ul>
     </section>
     <section aria-labelledby="guide-axes">
