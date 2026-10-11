@@ -60,7 +60,7 @@ MBTI 검사처럼 질문에 답하는 경험을 제공하며, 기존 유저에�
 | [기획 문서 안내](docs/README.md) | 문서 구성과 관리 원칙 |
 | [프로젝트 기획](docs/project-plan.md) | 대상, 목적, 작품 선택 흐름, 범위 |
 | [검사 설계](docs/test-design.md) | 질문·분류·추천 설계와 미정 항목 |
-| [페르소나 테스트 기획](docs/persona-test-plan.md) | 대표 성향·문항 응답·추천 영역 회귀 테스트 구현 사양 |
+| [페르소나 테스트 기획](docs/persona-test-plan.md) | 대표 성향·문항 응답·추천 영역 회귀 테스트 사양과 기대값 |
 | [결과 추천 이유 설계](docs/result-reason.md) | ‘왜 이 무기인가요?’의 계산·문장·화면·테스트 명세 |
 | [질문 작성 가이드](docs/question-guide.md) | 일상 질문의 표현, 다축 해석과 문항 검토 기준 |
 | [시트 데이터 설계](docs/data-schema.md) | 원본 시트, 열 정의, JSON 변환·반영 규칙 |
@@ -78,6 +78,33 @@ npm run dev
 ```
 
 검증과 배포 절차는 [개발 및 AI 협업](docs/development.md)에서 확인합니다.
+
+## 테스트
+
+시트를 수정했다면 먼저 최신 데이터로 변환합니다. 테스트는 배포용 `src/data/wilds/*.json`을 읽습니다.
+
+```sh
+npm run data:convert
+```
+
+| 명령 | 내용 |
+| --- | --- |
+| `npm test` | 전체 단위 테스트. 페르소나 테스트 포함 |
+| `npm run test:personas` | 페르소나 테스트만 실행: 기대 추천, 실제 답변의 점수 재현, 무기 기준점, ±5 인접값 |
+| `npm run analyze:personas` | 페르소나별 점수·답변·1~5순위, 인접값 변화, 무기별 추천 영역 비율과 경고·실패 보고서 |
+| `npm run analyze:personas -- --step 5` | 더 촘촘한 추천 영역 분석(약 25초) |
+| `npm run sim:results` | 모의 응답으로 추정한 무기별 추천 비율 |
+| `npm run build` | 배포 빌드 확인 |
+
+데이터를 고치기 전후 결과는 다음처럼 비교합니다. 저장한 파일은 커밋하지 않습니다.
+
+```sh
+npm run analyze:personas -- --save before.json      # 수정 전 저장
+npm run data:convert                                # 시트 수정 후 변환
+npm run analyze:personas -- --baseline before.json  # 무기별 비율 증감 확인
+```
+
+기대 추천이 바뀌어 실패하면 의도한 변화인지 확인합니다. 의도한 변화라면 `tests/personas/wilds-personas.js`의 `expected`를 갱신하고, 아니라면 문구 → 질문 가중치 → 무기 값 → 추천 공식 순서로 원인을 좁힙니다. 반영 전에는 `npm test`와 `npm run build`를 통과해야 합니다. 자세한 기준은 [페르소나 테스트 기획](docs/persona-test-plan.md)을 따릅니다.
 
 ## 문서 갱신 원칙
 

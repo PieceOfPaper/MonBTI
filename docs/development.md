@@ -14,6 +14,8 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `scripts/sheet-converter.js` | 열 이름 매핑과 변환 오류 검증 |
 | `scripts/json-output.js` | 시각을 제외한 데이터 변경 판단 |
 | `scripts/simulate-results.js`, `scripts/result-distribution.js` | 밸런싱용 무기 추천 비율 시뮬레이션. 사이트에는 포함하지 않음 |
+| `tests/personas/` | 페르소나 fixture(`wilds-personas.js`), 응답 자동 탐색(`answer-search.js`), 실행기(`persona-runner.js`), 회귀 테스트(`persona.test.js`) |
+| `scripts/persona-report.js` | 페르소나별 순위·인접값·무기 기준점·추천 영역 분포 보고서 |
 | `src/data/<작품 ID>/` | 생성된 무기·질문 JSON. 직접 편집하지 않음 |
 | `src/games/index.js` | 작품 등록과 작품별 데이터·표시 자료 연결 |
 | `src/games/<작품 ID>/media.js` | 작품 로고, 무기별 아이콘·캐릭터 이미지·소개 영상 ID |
@@ -73,6 +75,23 @@ npm run sim:results -- --json
 - `persona`: 축별 취향을 0~100에서 고르게 뽑고, 질문 가중치 방향의 기대 동의 정도에 표준편차 `--noise`(기본 0.3)의 흔들림을 더해 가장 가까운 응답을 고릅니다.
 - 출력: 무기별 1순위 비율, 3순위 이내 비율, 평균 순위, 1순위가 된 사용자의 평균 축 점수. 균등 기준(1/무기 수)의 2배 초과는 ▲, 절반 미만은 ▼로 표시합니다.
 - 결과는 가정한 응답 모형의 추정치이며 실제 사용자 분포를 뜻하지 않습니다. 같은 seed는 같은 결과를 냅니다.
+
+## 페르소나 테스트
+
+[페르소나 테스트 기획](persona-test-plan.md)의 구현입니다. 사이트 빌드에는 포함되지 않으며 `src/core`의 점수·추천 함수와 배포용 `src/data/<작품 ID>/*.json`을 그대로 사용합니다. 시트를 수정했다면 `npm run data:convert`를 먼저 실행합니다.
+
+```sh
+npm run test:personas
+npm run analyze:personas
+npm run analyze:personas -- --step 5
+npm run analyze:personas -- --save base.json
+npm run analyze:personas -- --baseline base.json
+```
+
+- `test:personas`: fixture 형식, 실제 응답 재현 오차, 확정 기대 추천, 결정성, ±5 인접값의 상위 3개 공통 무기, 무기 기준점을 검사합니다. 일반 `npm test`에도 포함됩니다.
+- `analyze:personas`: 페르소나별 목표·응답 프로필과 오차, 자동 생성한 응답, 1~5순위, 인접값 변화, 무기 기준점, 간격 10의 추천 영역 분포와 경고·실패를 출력합니다. 실패가 있으면 종료 코드 1입니다. 간격 10은 약 1초, 간격 5는 약 25초 걸립니다.
+- `--save`로 저장한 분포 파일은 비교용 산출물이므로 커밋하지 않습니다.
+- 질문이 여러 축을 측정하도록 바뀌면 응답 자동 탐색이 오류를 냅니다. 그때는 기획에 따라 빔 탐색이나 답변 fixture 방식으로 바꿉니다.
 
 ## CI 및 GitHub Pages 배포
 

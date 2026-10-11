@@ -10,7 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "data:convert": "node scripts/convert-sheet.js",
-    "sim:results": "node scripts/simulate-results.js"
+    "sim:results": "node scripts/simulate-results.js",
+    "test:personas": "vitest run tests/personas",
+    "analyze:personas": "node scripts/persona-report.js"
   },
   "devDependencies": {
     "read-excel-file": "^9.3.10",
