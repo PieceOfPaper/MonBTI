@@ -13,6 +13,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `scripts/convert-sheet.js` | 원본 시트 XLSX를 읽어 작품별 JSON 생성 |
 | `scripts/sheet-converter.js` | 열 이름 매핑과 변환 오류 검증 |
 | `scripts/json-output.js` | 시각을 제외한 데이터 변경 판단 |
+| `scripts/simulate-results.js`, `scripts/result-distribution.js` | 밸런싱용 무기 추천 비율 시뮬레이션. 사이트에는 포함하지 않음 |
 | `src/data/<작품 ID>/` | 생성된 무기·질문 JSON. 직접 편집하지 않음 |
 | `src/games/index.js` | 작품 등록과 작품별 데이터·표시 자료 연결 |
 | `src/games/<작품 ID>/media.js` | 작품 로고, 무기별 아이콘·캐릭터 이미지·소개 영상 ID |
@@ -57,6 +58,21 @@ npm run data:convert
 ```
 
 `package-lock.json`은 재현 가능한 설치를 위해 커밋합니다. `node_modules/`, `dist/`, 테스트 산출물은 커밋하지 않습니다.
+
+## 무기 추천 비율 시뮬레이션
+
+질문·무기 수치를 조정할 때 현재 데이터에서 무기별 추천 비율을 확인하는 밸런싱 도구입니다. 사이트 빌드에는 포함되지 않으며, 점수 계산은 사이트와 같은 `src/core` 함수를 사용합니다.
+
+```sh
+npm run sim:results
+npm run sim:results -- --model persona --noise 0.5 --samples 50000 --seed 7
+npm run sim:results -- --json
+```
+
+- `uniform`: 모든 질문에 여섯 응답을 고르게 무작위 선택합니다. 축 점수가 50 근처에 몰립니다.
+- `persona`: 축별 취향을 0~100에서 고르게 뽑고, 질문 가중치 방향의 기대 동의 정도에 표준편차 `--noise`(기본 0.3)의 흔들림을 더해 가장 가까운 응답을 고릅니다.
+- 출력: 무기별 1순위 비율, 3순위 이내 비율, 평균 순위, 1순위가 된 사용자의 평균 축 점수. 균등 기준(1/무기 수)의 2배 초과는 ▲, 절반 미만은 ▼로 표시합니다.
+- 결과는 가정한 응답 모형의 추정치이며 실제 사용자 분포를 뜻하지 않습니다. 같은 seed는 같은 결과를 냅니다.
 
 ## CI 및 GitHub Pages 배포
 

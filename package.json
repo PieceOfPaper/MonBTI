@@ -9,7 +9,8 @@
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "data:convert": "node scripts/convert-sheet.js"
+    "data:convert": "node scripts/convert-sheet.js",
+    "sim:results": "node scripts/simulate-results.js"
   },
   "devDependencies": {
     "read-excel-file": "^9.3.10",
