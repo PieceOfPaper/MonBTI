@@ -32,25 +32,25 @@ describe('추천 이유 — 기획 예시 검산(사용자 73·21·57·56·23)',
 
   it('건랜스가 1순위, 대검이 2순위이며 점수는 기획 검산과 같다', () => {
     expect([winner.weapon_id, runner.weapon_id]).toEqual(['gunlance', 'great_sword']);
-    expect(ranked[0].score).toBeCloseTo(85.9444444444, 8);
+    expect(ranked[0].score).toBeCloseTo(88.5555555556, 8);
     expect(ranked[1].score).toBeCloseTo(84.6666666667, 8);
   });
 
   it('잘 맞는 점·1순위가 된 이유·낯설 수 있는 점·2순위가 더 가까운 점을 고른다', () => {
     expect(reason).toMatchObject({
-      winnerId: 'gunlance', runnerUpId: 'great_sword', comparisonStatus: 'normal', gapLevel: 'close', weightSum: 4.5,
+      winnerId: 'gunlance', runnerUpId: 'great_sword', comparisonStatus: 'normal', gapLevel: 'moderate', weightSum: 4.5,
       closest: [
         { axis: 'attack', mismatch: 7, band: 'very-close', direction: 'higher' },
         { axis: 'freedom', mismatch: 7, band: 'very-close', direction: 'higher' },
       ],
       advantages: [
+        { axis: 'management', rawAmount: 17.5, weightedAmount: 17.5, winnerMismatch: 8, runnerMismatch: 25.5, strength: 'strong' },
         { axis: 'attack', rawAmount: 20, weightedAmount: 15, winnerMismatch: 7, runnerMismatch: 27, strength: 'strong' },
-        { axis: 'management', rawAmount: 11.5, weightedAmount: 11.5, winnerMismatch: 14, runnerMismatch: 25.5 },
       ],
       tradeoff: { axis: 'counter', amount: 25, winnerMismatch: 32, runnerMismatch: 7 },
       caution: { axis: 'counter', mismatch: 32, band: 'far', direction: 'higher' },
     });
-    expect(reason.scoreGap).toBeCloseTo(1.2777777778, 8);
+    expect(reason.scoreGap).toBeCloseTo(3.8888888889, 8);
   });
 
   it('축별 순위 기여도의 합은 최종 점수 차이와 같다', () => {
@@ -66,9 +66,9 @@ describe('추천 이유 — 기획 예시 검산(사용자 73·21·57·56·23)',
     const html = renderRecommendationReason(reason, [winner, runner]);
     const body = text(html);
     expect(body).toContain('왜 이 무기인가요?');
-    expect(body).toContain('건랜스와 대검은 거의 비슷한 후보예요.');
+    expect(body).toContain('대검도 가까운 후보지만 건랜스가 조금 더 잘 맞아요.');
     expect(body).toContain('건랜스는 한방 성향과 행동을 바꾸는 속도가 취향과 가깝습니다.');
-    expect(body).toContain('대검보다 한방과 관리 기준에서 특히 더 가까웠지만, 전체 점수 차이는 작아 근소하게 1순위가 됐어요.');
+    expect(body).toContain('대검보다 관리와 한방 기준에서 특히 더 가까워 1순위가 됐어요.');
     expect(body).toContain('다만 원하는 것보다 받아치는 플레이의 비중이 높아 처음에는 낯설 수 있어요. 이 기준은 2순위인 대검이 더 가깝습니다.');
     // 같은 축(반격)의 2순위 우위 문장을 따로 반복하지 않는다.
     expect(body).not.toContain('반격 기준은 2순위인');
@@ -93,12 +93,14 @@ describe('추천 이유 — 계산 규칙', () => {
   it('원래 불일치는 추천 계산과 같은 함수를 쓰고, 상대 우위에만 축 가중치를 곱한다', () => {
     const user = profile({});
     const winner = weapon('w', {});
-    const runner = weapon('r', { attack: 70, management: 70 });
+    const runner = weapon('r', { attack: 70, management: 75 });
     const reason = buildRecommendationReason(user, winner, runner);
     const byAxis = Object.fromEntries(reason.advantages.map((item) => [item.axis, item]));
     expect(byAxis.attack).toMatchObject({ rawAmount: 20, weightedAmount: 15 });
-    expect(byAxis.management).toMatchObject({ rawAmount: 20, weightedAmount: 20 });
-    // 가중치가 큰 관리가 먼저 온다.
+    // 관리 초과 부담 25는 3구간 누적으로 5 + 7.5 + 5 = 17.5다.
+    expect(byAxis.management).toMatchObject({ rawAmount: 17.5, weightedAmount: 17.5 });
+    expect(byAxis.management.runnerMismatch).toBe(AXIS_MISMATCH.management(50, 75));
+    // 가중 상대 우위가 큰 관리가 먼저 온다.
     expect(reason.advantages.map(({ axis }) => axis)).toEqual(['management', 'attack']);
     expect(byAxis.attack.runnerMismatch).toBe(AXIS_MISMATCH.attack(50, 70));
   });

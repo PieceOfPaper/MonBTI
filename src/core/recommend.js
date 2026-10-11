@@ -6,9 +6,15 @@ import { AXIS_IDS } from './axes.js';
 export const RECOMMENDATION_COUNT = 3;
 
 // 축별 불일치. attack·counter는 대칭 취향 거리다. freedom은 무기가 사용자보다 낮은 차이는 전부,
-// 높은 차이는 절반만 본다. complexity·management는 반대로 높은 차이는 전부, 낮은 차이는 절반만 본다.
+// 높은 차이는 절반만 본다. complexity·management는 낮은 차이는 절반만 보고, 높은 초과 부담에는
+// 처음 10점 50%·다음 10점 75%·20점 초과분 100%를 앞 구간부터 누적한다(DEC-054).
 const LOWER_DEMAND_RATE = 0.5;
-const demandMismatch = (user, weapon) => Math.max(0, weapon - user) + LOWER_DEMAND_RATE * Math.max(0, user - weapon);
+export function excessDemandMismatch(excess) {
+  const d = Math.max(0, excess);
+  return 0.5 * Math.min(d, 10) + 0.75 * Math.min(Math.max(d - 10, 0), 10) + Math.max(d - 20, 0);
+}
+const demandMismatch = (user, weapon) =>
+  excessDemandMismatch(weapon - user) + LOWER_DEMAND_RATE * Math.max(0, user - weapon);
 const freedomMismatch = (user, weapon) => Math.max(0, user - weapon) + LOWER_DEMAND_RATE * Math.max(0, weapon - user);
 
 export const AXIS_MISMATCH = {

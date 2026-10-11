@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  AXIS_WEIGHTS, rankWeapons, recommendWeapons, remainingWeapons, scoreWeapon,
+  AXIS_MISMATCH, AXIS_WEIGHTS, excessDemandMismatch, rankWeapons, recommendWeapons, remainingWeapons, scoreWeapon,
 } from './recommend.js';
 
 const weapon = (weapon_id, values) => ({
@@ -23,11 +23,37 @@ describe('축별 불일치', () => {
     expect(scoreWeapon(profile({ freedom: 60 }), weapon('w', { freedom: 60 })).score).toBe(100);
   });
 
-  it('complexity·management는 무기가 높으면 차이 전부, 낮으면 차이의 절반을 벌점으로 준다', () => {
+  it('complexity·management는 무기가 낮으면 차이의 절반, 높으면 3구간 누적으로 벌점을 준다', () => {
     for (const axis of ['complexity', 'management']) {
-      expect(scoreWeapon(profile({ [axis]: 25 }), weapon('w', { [axis]: 100 })).maxMismatch).toBe(75);
+      // 초과 부담 75: 10 × 0.5 + 10 × 0.75 + 55 = 67.5
+      expect(scoreWeapon(profile({ [axis]: 25 }), weapon('w', { [axis]: 100 })).maxMismatch).toBe(67.5);
       expect(scoreWeapon(profile({ [axis]: 100 }), weapon('w', { [axis]: 0 })).maxMismatch).toBe(50);
       expect(scoreWeapon(profile({ [axis]: 60 }), weapon('w', { [axis]: 60 })).score).toBe(100);
+    }
+  });
+
+  it('초과 부담 3구간은 경계에서 이어지고 앞 구간부터 누적한다', () => {
+    expect([0, 5, 10, 15, 20, 30].map(excessDemandMismatch)).toEqual([0, 2.5, 5, 8.75, 12.5, 22.5]);
+    expect(excessDemandMismatch(-10)).toBe(0);
+    for (const edge of [10, 20]) {
+      expect(excessDemandMismatch(edge - 1e-9)).toBeCloseTo(excessDemandMismatch(edge), 8);
+      expect(excessDemandMismatch(edge + 1e-9)).toBeCloseTo(excessDemandMismatch(edge), 8);
+    }
+    for (const axis of ['complexity', 'management']) {
+      expect([0, 5, 10, 15, 20, 30].map((d) => AXIS_MISMATCH[axis](50, 50 + d))).toEqual([0, 2.5, 5, 8.75, 12.5, 22.5]);
+    }
+  });
+
+  it('3구간은 복잡·관리의 무기 > 사용자에만 적용한다', () => {
+    for (const axis of ['complexity', 'management']) {
+      expect(AXIS_MISMATCH[axis](80, 50)).toBe(15);
+      expect(AXIS_MISMATCH[axis](50, 15)).toBe(17.5);
+    }
+    expect(AXIS_MISMATCH.freedom(80, 50)).toBe(30);
+    expect(AXIS_MISMATCH.freedom(50, 80)).toBe(15);
+    for (const axis of ['attack', 'counter']) {
+      expect(AXIS_MISMATCH[axis](50, 65)).toBe(15);
+      expect(AXIS_MISMATCH[axis](65, 50)).toBe(15);
     }
   });
 
@@ -46,10 +72,10 @@ describe('축별 불일치', () => {
     // 한방 불일치 40(적합도 60×0.75) + 자유 불일치 0(적합도 100×1) → 145 / 1.75
     const user = { attack: 40, freedom: 50, complexity: null, management: null, counter: null };
     expect(scoreWeapon(user, weapon('w', { attack: 0 })).score).toBeCloseTo(145 / 1.75, 10);
-    // 같은 원래 불일치 20이라도 관리 축은 한방 축보다 점수를 더 많이 깎는다.
+    // 같은 원래 불일치 20이라도 관리 축(낮은 요구, 50%)과 한방 축의 가중 감점이 다르다.
     const all = profile({});
     const byAttack = scoreWeapon(all, weapon('a', { attack: 70 })).score;
-    const byManagement = scoreWeapon(all, weapon('m', { management: 70 })).score;
+    const byManagement = scoreWeapon(all, weapon('m', { management: 10 })).score;
     expect(byAttack).toBeCloseTo(100 - 15 / 4.5, 10);
     expect(byManagement).toBeCloseTo(100 - 20 / 4.5, 10);
   });
