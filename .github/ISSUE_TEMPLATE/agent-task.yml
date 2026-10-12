@@ -1,0 +1,60 @@
+name: 조사·구현 작업
+description: Codex 또는 Claude Code가 재현하고 검증할 수 있는 작업을 정의합니다.
+title: "[작업] "
+body:
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 작업 단계
+      description: 조사·제안은 확정 데이터나 추천 공식을 임의로 변경하는 승인이 아닙니다.
+      options:
+        - 조사
+        - 개선안 제안
+        - 구현 승인
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 문제와 목표
+      description: 현재 동작, 기대 동작, 이 작업으로 확인하거나 바꿀 범위를 적어 주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 관련 피드백과 재현 자료
+      description: 연결할 이슈, 공유 결과 주소, 현재 수치, 재현 명령을 적어 주세요.
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 변경 범위와 제외 범위
+      placeholder: 질문 가중치만 비교하며 무기 점수와 종합 공식은 변경하지 않습니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 조건
+      description: 작업이 끝났다고 판단할 수 있는 측정 가능한 조건을 적어 주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: 검증 방법
+      description: 테스트 명령, 비교할 페르소나, 전후 분포와 회귀 기준을 적어 주세요.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: approval
+    attributes:
+      label: 구현 승인 확인
+      options:
+        - label: 구현 승인 작업이라면 원본 시트·추천 공식·제품 방향 중 변경이 허용된 범위를 본문에 명시했습니다.
