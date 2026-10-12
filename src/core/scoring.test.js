@@ -8,8 +8,8 @@ const q = (id, order, weights) => ({
 });
 
 describe('응답 계수', () => {
-  it('응답 1~6을 -1·-0.6·-0.2·0.2·0.6·1로 바꾼다', () => {
-    expect([1, 2, 3, 4, 5, 6].map(responseCoefficient)).toEqual([-1, -0.6, -0.2, 0.2, 0.6, 1]);
+  it('응답 1~6을 -1·-0.7·-0.3·0.3·0.7·1로 바꾼다', () => {
+    expect([1, 2, 3, 4, 5, 6].map(responseCoefficient)).toEqual([-1, -0.7, -0.3, 0.3, 0.7, 1]);
   });
 
   it('1~6 정수가 아닌 응답을 거부한다', () => {
@@ -19,8 +19,8 @@ describe('응답 계수', () => {
   });
 
   it('양수·음수 가중치의 부호와 크기를 반영한다', () => {
-    expect([1, 2, 3, 4, 5, 6].map((r) => contribution(100, r))).toEqual([-100, -60, -20, 20, 60, 100]);
-    expect([1, 2, 3, 4, 5, 6].map((r) => contribution(50, r))).toEqual([-50, -30, -10, 10, 30, 50]);
+    expect([1, 2, 3, 4, 5, 6].map((r) => contribution(100, r))).toEqual([-100, -70, -30, 30, 70, 100]);
+    expect([1, 2, 3, 4, 5, 6].map((r) => contribution(50, r))).toEqual([-50, -35, -15, 15, 35, 50]);
     expect([1, 6].map((r) => contribution(-100, r))).toEqual([100, -100]);
   });
 });
@@ -51,14 +51,14 @@ describe('축별 합산', () => {
 
   it('무응답 문항은 합산에서 제외하며 응답 1과 다르다', () => {
     const questions = [q('a', 1, { counter: 80 }), q('b', 2, { counter: 40 })];
-    expect(computeAxisTotals(questions, { a: 5 }).counter).toEqual({ total: 48, count: 1, maxAbs: 80 });
+    expect(computeAxisTotals(questions, { a: 5 }).counter).toEqual({ total: 56, count: 1, maxAbs: 80 });
     expect(computeAxisTotals(questions, {}).counter.total).toBeNull();
   });
 
   it('여러 문항의 소수 가중치를 반올림 없이 더한다', () => {
     const questions = [q('a', 1, { management: 33.3 }), q('b', 2, { management: -12.5 })];
     const totals = computeAxisTotals(questions, { a: 5, b: 2 });
-    expect(totals.management.total).toBeCloseTo(33.3 * 0.6 + 12.5 * 0.6, 10);
+    expect(totals.management.total).toBeCloseTo(33.3 * 0.7 + 12.5 * 0.7, 10);
   });
 });
 
@@ -69,7 +69,7 @@ describe('답변 관리', () => {
     let answers = setAnswer({}, questions, 'a', 6);
     answers = setAnswer(answers, questions, 'a', 2);
     expect(answers).toEqual({ a: 2 });
-    expect(computeAxisTotals(questions, answers).attack.total).toBe(-60);
+    expect(computeAxisTotals(questions, answers).attack.total).toBe(-70);
   });
 
   it('존재하지 않는 질문과 잘못된 응답을 거부한다', () => {
@@ -92,6 +92,12 @@ describe('답변 관리', () => {
 });
 
 describe('사용자 점수 정규화', () => {
+  it('조금 그렇다·그렇다는 단일 양수 문항에서 각각 65·85가 된다', () => {
+    const questions = [q('a', 1, { attack: 100 })];
+    expect(computeAxisProfile(computeAxisTotals(questions, { a: 4 })).attack).toBe(65);
+    expect(computeAxisProfile(computeAxisTotals(questions, { a: 5 })).attack).toBe(85);
+  });
+
   it('합산값을 가능한 최대 크기 기준으로 0~100에 놓고 미측정 축은 null로 둔다', () => {
     const questions = [q('a', 1, { attack: 100, freedom: -50 }), q('b', 2, { attack: 50 })];
     const profile = computeAxisProfile(computeAxisTotals(questions, { a: 6, b: 1 }));

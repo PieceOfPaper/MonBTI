@@ -196,8 +196,8 @@ describe('화면', () => {
     expect(html).toContain('radar__series--me');
     expect(html).toContain('radar__series--weapon');
     expect(html).toContain('측정 안 됨');
-    // 응답 5 → attack 50 + 50 × 60/100 = 80
-    expect(html).toContain('<td>80</td>');
+    // 응답 5 → attack 50 + 50 × 70/100 = 85
+    expect(html).toContain('<td>85</td>');
   });
 
   it('결과 화면은 비교 대상과 관계없이 1순위 무기의 소개 영상과 두 가지 공유 버튼을 제공한다', () => {
