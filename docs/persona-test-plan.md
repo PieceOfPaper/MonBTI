@@ -156,7 +156,7 @@
 
 새 작품이나 새 버전 검사를 사이트 작품 설정에 등록하는 작업에는 그 검사의 페르소나 회귀 테스트 구현을 함께 포함합니다. 페르소나 묶음이 없는 작품이 등록되면 `npm test`가 실패합니다.
 
-1. `npm run data:convert`로 새 검사의 `src/data/<작품 ID>/*.json`을 만듭니다.
+1. `scripts/convert-sheet.js`의 `GAMES`에 검사 내부 이름(원본 탭 접두사)과 작품 ID를 추가하고 검사별 데이터 갱신 워크플로(`.github/workflows/refresh-data-<작품 ID의 _를 -로>.yml`)를 만든 뒤, `npm run data:convert -- --sheet <이름>`으로 새 검사의 `src/data/<작품 ID>/*.json`을 만듭니다.
 2. `tests/personas/<작품>-personas.js` fixture를 만듭니다. 기존 검사의 fixture를 복사해 시작할 수 있지만 서로 참조하지 않는 독립 파일로 두고, 다섯 축을 모두 지정합니다.
 3. `tests/personas/suites.js`에 fixture와 판정 규칙을 등록합니다. 판정 규칙은 사이트 작품 설정과 같아야 합니다(예: `centralResult`).
 4. 새 검사에만 있는 규칙이 있으면 그 규칙의 경계를 확인하는 페르소나와 기대값 항목을 추가하고, 테스트가 결과 화면과 같은 최종 결과로 판정하는지 확인합니다.

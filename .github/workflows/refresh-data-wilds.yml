@@ -1,0 +1,24 @@
+name: 시트 데이터 갱신 — Wilds
+
+# 기존 와일즈 검사. V2 완성 전까지 질문 문구·오타 수정 등에만 사용한다.
+# Wilds_Weapon·Wilds_Question 탭만 검증·변환하고 src/data/wilds/만 커밋한 뒤 Pages 배포를 실행한다.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# 일반 Pages 배포와 같은 그룹에서 실행해 배포가 겹치지 않게 한다.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    permissions:
+      contents: write
+      actions: write
+    uses: ./.github/workflows/refresh-data.yml
+    with:
+      sheet: Wilds
+      game_id: wilds

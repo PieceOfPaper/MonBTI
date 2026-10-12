@@ -1,0 +1,24 @@
+name: 시트 데이터 갱신 — Wilds_V2
+
+# 와일즈 V2 개발 검사.
+# Wilds_V2_Weapon·Wilds_V2_Question 탭만 검증·변환하고 src/data/wilds_v2/만 커밋한 뒤 Pages 배포를 실행한다.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# 일반 Pages 배포와 같은 그룹에서 실행해 배포가 겹치지 않게 한다.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    permissions:
+      contents: write
+      actions: write
+    uses: ./.github/workflows/refresh-data.yml
+    with:
+      sheet: Wilds_V2
+      game_id: wilds_v2

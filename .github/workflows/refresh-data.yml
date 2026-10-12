@@ -1,15 +1,22 @@
-name: 시트 데이터 갱신
+name: 시트 데이터 갱신 (공통)
 
+# 검사별 갱신 워크플로(refresh-data-<작품 ID>.yml)가 호출하는 공통 작업이다. 직접 실행하지 않는다.
+# 선택한 검사의 원본 탭만 내려받아 검증·변환하고, 그 검사의 데이터 파일만 커밋한 뒤 Pages 배포를 실행한다.
+# 동시 실행 그룹(pages)은 호출하는 워크플로에서 정한다.
 on:
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      sheet:
+        description: 검사 내부 이름이자 원본 탭 접두사(예 Wilds_V2)
+        required: true
+        type: string
+      game_id:
+        description: 사이트 작품 ID이자 src/data/<작품 ID>/ 경로(예 wilds_v2)
+        required: true
+        type: string
 
 permissions:
   contents: read
-
-# 일반 Pages 배포와 같은 그룹에서 실행해 배포가 겹치지 않게 한다.
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   refresh:
@@ -36,21 +43,26 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: 최신 시트 검증 및 JSON 변환
-        run: npm run data:convert -- --if-changed
+      - name: ${{ inputs.sheet }} 시트 검증 및 JSON 변환
+        env:
+          SHEET: ${{ inputs.sheet }}
+        run: npm run data:convert -- --sheet "$SHEET" --if-changed
       - run: npm test
       - run: npm run build
       - name: 데이터 변경만 커밋
+        env:
+          SHEET: ${{ inputs.sheet }}
+          GAME_ID: ${{ inputs.game_id }}
         run: |
-          git add -- src/data/wilds/weapons.json src/data/wilds/questions.json src/data/wilds_v2/weapons.json src/data/wilds_v2/questions.json
+          git add -- "src/data/$GAME_ID/weapons.json" "src/data/$GAME_ID/questions.json"
           if git diff --cached --quiet; then
-            echo "데이터 변경이 없습니다. 현재 데이터로 다시 배포합니다." >> "$GITHUB_STEP_SUMMARY"
+            echo "$SHEET 데이터 변경이 없습니다. 현재 데이터로 다시 배포합니다." >> "$GITHUB_STEP_SUMMARY"
           else
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m '시트의 최신 무기·질문 데이터 반영'
+            git commit -m "시트의 최신 무기·질문 데이터 반영 ($SHEET)"
             git push origin HEAD:main
-            echo "최신 시트 데이터 파일을 main에 반영했습니다." >> "$GITHUB_STEP_SUMMARY"
+            echo "최신 $SHEET 시트 데이터 파일을 main에 반영했습니다." >> "$GITHUB_STEP_SUMMARY"
           fi
       # 이 실행에서 직접 배포하면 Pages 배포 버전이 데이터 커밋이 아니라 실행을 시작한 커밋이 되어,
       # 같은 커밋의 푸시 배포와 겹치면 새 데이터가 반영되지 않을 수 있다.

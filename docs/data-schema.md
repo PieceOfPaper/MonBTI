@@ -154,10 +154,12 @@ JSON에는 질문별 선택지·분기 대상·응답별 점수표를 만들지 
 npm run data:convert                     # 원본 시트를 XLSX로 내려받아 변환
 npm run data:convert -- --input 파일.xlsx  # 직접 내보낸 XLSX를 변환
 npm run data:convert -- --if-changed       # 실질 데이터가 바뀐 파일만 갱신
+npm run data:convert -- --sheet Wilds_V2   # 한 검사의 탭만 검증·변환(Wilds 또는 Wilds_V2)
 ```
 
 내려받기는 시트의 현재 공유 설정에서 XLSX 내보내기 주소에 접근할 수 있을 때만 동작합니다. 실패하면 시트에서 XLSX를 직접 내보내 `--input`으로 지정합니다.
-모든 작품의 두 탭을 먼저 검증하고, 오류가 하나라도 있으면 행 번호와 함께 출력한 뒤 JSON을 쓰지 않습니다.
+`--sheet`의 값은 검사의 내부 이름으로, 원본 탭 접두사(`<이름>_Weapon`·`<이름>_Question`)와 같습니다. 현재 `Wilds`는 `src/data/wilds/`, `Wilds_V2`는 `src/data/wilds_v2/`로 변환합니다. 사이트 작품 ID(`wilds`·`wilds_v2`)는 공유 링크와 저장소 키에 쓰이므로 바꾸지 않습니다. `--sheet`를 생략하면 모든 검사를 변환합니다.
+선택한 검사의 두 탭을 먼저 모두 검증하고, 오류가 하나라도 있으면 행 번호와 함께 출력한 뒤 JSON을 쓰지 않습니다.
 `--input`을 사용할 때 내보낸 시각은 파일의 수정 시각으로 기록합니다.
 `--if-changed`는 `exported_at`·`converted_at` 두 시각만 비교에서 제외합니다. 데이터·원본 ID·탭·형식 버전이 같으면 기존 파일과 기록 시각을 보존하고, 달라졌으면 새 데이터와 시각을 기록합니다. 다운로드는 60초 안에 완료되지 않으면 중단합니다.
 
@@ -201,8 +203,8 @@ npm run data:convert -- --if-changed       # 실질 데이터가 바뀐 파일�
 버튼으로 반영할 때:
 
 1. 원본 시트에서 수치·문항을 수정합니다.
-2. [Actions → 시트 데이터 갱신](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data.yml)에서 **Run workflow**를 누르고 `main`으로 실행합니다.
-3. 자동 다운로드·검증·변환·테스트·빌드가 성공하면 작품별 `weapons.json`·`questions.json` 변경만 커밋합니다. 변경이 없으면 커밋을 생략합니다.
+2. 고친 검사의 워크플로 — [시트 데이터 갱신 — Wilds_V2](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data-wilds-v2.yml) 또는 [시트 데이터 갱신 — Wilds](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data-wilds.yml) — 에서 **Run workflow**를 누르고 `main`으로 실행합니다.
+3. 자동 다운로드·검증·변환·테스트·빌드가 성공하면 그 검사의 `weapons.json`·`questions.json` 변경만 커밋합니다. 다른 검사의 탭은 읽지 않으며, 변경이 없으면 커밋을 생략합니다.
 4. 이어서 **Deploy GitHub Pages** 워크플로가 최신 `main`을 빌드해 배포합니다. 배포 실행이 성공한 뒤 사이트를 확인합니다.
 
 로컬에서 반영할 때:

@@ -102,15 +102,16 @@ npm run analyze:personas -- --baseline base.json
 
 - `.github/workflows/ci.yml`은 풀 리퀘스트와 `main` 브랜치 푸시에서 의존성을 고정 설치하고 테스트와 빌드를 실행합니다.
 - `.github/workflows/deploy-pages.yml`은 `main` 브랜치 푸시 또는 수동 실행에서 최신 `main`을 빌드해 GitHub Pages에 배포합니다.
-- `.github/workflows/refresh-data.yml`은 **시트 데이터 갱신** 버튼으로 최신 원본을 내려받아 검증·변환하고, 테스트·빌드가 성공하면 작품별 무기·질문 데이터 파일(`src/data/wilds/`, `src/data/wilds_v2/`)만 `main`에 커밋한 뒤 `deploy-pages.yml`을 최신 `main`으로 실행해 배포합니다. 두 워크플로는 `pages` 동시 실행 그룹을 공유하므로 배포는 갱신 실행과 진행 중인 다른 배포가 끝난 뒤 시작합니다.
+- 시트 데이터 갱신은 검사별 워크플로로 나뉩니다. `.github/workflows/refresh-data-wilds.yml`(**시트 데이터 갱신 — Wilds**)과 `refresh-data-wilds-v2.yml`(**시트 데이터 갱신 — Wilds_V2**)은 버튼으로 실행하는 진입점이고, 공통 작업 `refresh-data.yml`(`workflow_call`)을 검사 내부 이름(`sheet`)과 작품 ID(`game_id`)로 호출합니다. 공통 작업은 최신 원본을 내려받아 그 검사의 탭만 검증·변환하고(`npm run data:convert -- --sheet <이름> --if-changed`), 테스트·빌드가 성공하면 `src/data/<작품 ID>/`의 무기·질문 데이터 파일만 `main`에 커밋한 뒤 `deploy-pages.yml`을 최신 `main`으로 실행해 배포합니다. 검사별 워크플로와 배포 워크플로는 `pages` 동시 실행 그룹을 공유하므로 배포는 갱신 실행과 진행 중인 다른 배포가 끝난 뒤 시작합니다.
+- 새 검사를 추가하면 `scripts/convert-sheet.js`의 `GAMES`와 `refresh-data-<작품 ID의 _를 -로>.yml` 진입점을 함께 추가합니다. `scripts/convert-sheet.test.js`가 사이트 작품·변환 대상·워크플로의 대응을 확인합니다.
 - GitHub 저장소의 **Settings → Pages → Build and deployment**에서 Source를 **GitHub Actions**로 한 번 선택해야 합니다. 이 설정은 워크플로 파일만으로 대신할 수 없습니다.
 - 정상 배포 주소는 `https://pieceofpaper.github.io/MonBTI/`입니다. 저장소 이름을 바꾸면 `vite.config.js`의 `base`도 같은 경로로 바꿉니다.
 
 ## 버튼으로 시트 데이터 반영
 
 1. 원본 시트의 무기·질문을 편집합니다.
-2. [Actions → 시트 데이터 갱신](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data.yml)을 엽니다.
-3. **Run workflow**에서 브랜치를 **main**으로 선택하고 실행합니다. 별도 입력값은 없습니다.
+2. 고친 검사의 워크플로를 엽니다. 와일즈 V2는 [시트 데이터 갱신 — Wilds_V2](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data-wilds-v2.yml), 기존 와일즈는 [시트 데이터 갱신 — Wilds](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data-wilds.yml)입니다. 기존 와일즈 갱신은 V2 완성 전까지 질문 문구·오타 수정처럼 수치를 바꾸지 않는 수정에 씁니다.
+3. **Run workflow**에서 브랜치를 **main**으로 선택하고 실행합니다. 별도 입력값은 없습니다. 다른 검사의 탭은 읽지 않으므로 그 탭의 오류나 변경에 영향을 받지 않습니다.
 4. `refresh`가 성공하면 이어서 시작되는 [Deploy GitHub Pages](https://github.com/PieceOfPaper/MonBTI/actions/workflows/deploy-pages.yml) 실행이 성공했는지 확인한 뒤 [사이트](https://pieceofpaper.github.io/MonBTI/)에서 확인합니다. 페이지는 최대 10분 캐시되므로 이전 내용이 보이면 강력 새로고침합니다.
 
 현재 시트는 로그인 없이 XLSX 다운로드가 가능하므로 별도 인증 Secret을 요구하지 않습니다. 시트 공유 설정은 변경하지 않습니다. 접근이 막히면 해당 단계에서 실패하며, 직접 내보낸 XLSX를 사용하는 로컬 절차로 반영할 수 있습니다.
