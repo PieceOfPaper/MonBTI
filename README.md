@@ -95,6 +95,7 @@ npm run data:convert
 | `npm run test:personas` | 페르소나 테스트만 실행: 기대 추천, 실제 답변의 점수 재현, 무기 기준점, ±5 인접값 |
 | `npm run analyze:personas` | 페르소나별 점수·답변·1~5순위, 인접값 변화, 무기별 추천 영역 비율과 경고·실패 보고서 |
 | `npm run analyze:personas -- --step 5` | 더 촘촘한 추천 영역 분석(약 25초) |
+| `npm run analyze:personas -- --game wilds_v2` | 와일즈 V2 보고서. 중앙형 응답 특별 결과를 포함한 최종 순위로 판정 |
 | `npm run sim:results` | 모의 응답으로 추정한 무기별 추천 비율 |
 | `npm run build` | 배포 빌드 확인 |
 
@@ -106,7 +107,7 @@ npm run data:convert                                # 시트 수정 후 변환
 npm run analyze:personas -- --baseline before.json  # 무기별 비율 증감 확인
 ```
 
-기대 추천이 바뀌어 실패하면 의도한 변화인지 확인합니다. 의도한 변화라면 `tests/personas/wilds-personas.js`의 `expected`를 갱신하고, 아니라면 문구 → 질문 가중치 → 무기 값 → 추천 공식 순서로 원인을 좁힙니다. 반영 전에는 `npm test`와 `npm run build`를 통과해야 합니다. 자세한 기준은 [페르소나 테스트 기획](docs/persona-test-plan.md)을 따릅니다.
+기대 추천이 바뀌어 실패하면 의도한 변화인지 확인합니다. 의도한 변화라면 해당 작품 fixture(`tests/personas/wilds-personas.js`, V2는 `wilds-v2-personas.js`)의 `expected`를 갱신하고, 아니라면 문구 → 질문 가중치 → 무기 값 → 추천 공식 순서로 원인을 좁힙니다. 반영 전에는 `npm test`와 `npm run build`를 통과해야 합니다. 자세한 기준은 [페르소나 테스트 기획](docs/persona-test-plan.md)을 따릅니다.
 
 ## 문서 갱신 원칙
 

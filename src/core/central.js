@@ -62,6 +62,21 @@ export function centralRecommendation(weapons, profile, count = RECOMMENDATION_C
   return [winner, ...rest.slice(0, count - 1)];
 }
 
+// 결과 화면 순서의 전체 무기 순위. centralResult가 켜져 있고 중앙형 응답이면 특별 결과 1~3순위 뒤에
+// 원래 순위의 나머지 무기를 이어 붙이고, 아니면 rankWeapons 그대로다. 각 항목의 점수는 원래 점수다.
+// 사이트 결과(app.js buildResult)와 같은 판정을 시뮬레이터·페르소나 테스트에서 쓰기 위한 함수다.
+export function finalRanking(weapons, profile, { centralResult = false } = {}) {
+  const ranked = rankWeapons(weapons, profile);
+  if (!centralResult || !isCentralProfile(profile)) return { ranked, central: false };
+  const top = centralRecommendation(weapons, profile);
+  const topIds = new Set(top.map(({ weapon_id }) => weapon_id));
+  const byId = new Map(ranked.map((entry) => [entry.weapon.weapon_id, entry]));
+  return {
+    ranked: [...top.map(({ weapon_id }) => byId.get(weapon_id)), ...ranked.filter(({ weapon }) => !topIds.has(weapon.weapon_id))],
+    central: true,
+  };
+}
+
 // 설명 모델. 1순위가 확대 점수에서 다른 무기를 앞선 축과 원래 점수 순위를 계산해 둔다.
 // 비교 대상은 확대 점수 순위에서 1순위를 뺀 첫 무기다. 축별 우위는 축 가중치가 반영된 불일치 차이
 // w_a × (D_비교,a - D_1순위,a)이며, 0보다 큰 축을 큰 순서로 최대 maxAxes개 고른다.

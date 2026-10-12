@@ -1,10 +1,13 @@
 // 페르소나 실행기: 직접 입력 프로필과 실제 응답 프로필의 추천, 무기 기준점, 인접값, 추천 영역을 계산한다.
 // 사양은 docs/persona-test-plan.md를 따른다. 추천 점수는 src/core/recommend.js를 그대로 사용한다.
+// rules.centralResult는 사이트의 작품 설정 centralResult와 같다. 켜져 있으면 결과 화면과 같은 최종 순위
+// (중앙형 응답 특별 결과, src/core/central.js)로 기대값·인접값·기준점·추천 영역을 판정한다.
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AXES, AXIS_IDS } from '../../src/core/axes.js';
-import { RECOMMENDATION_COUNT, rankWeapons } from '../../src/core/recommend.js';
+import { centralDeviation, finalRanking } from '../../src/core/central.js';
+import { RECOMMENDATION_COUNT } from '../../src/core/recommend.js';
 import { searchAnswers } from './answer-search.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -32,10 +35,13 @@ export async function loadGameData(game = 'wilds') {
   };
 }
 
-const EXPECTATION_KEYS = ['directTop1', 'directTop3Includes', 'answerTop1', 'answerTop3Includes'];
+const RANK_EXPECTATION_KEYS = ['directTop1', 'directTop3Includes', 'answerTop1', 'answerTop3Includes'];
+// 중앙형 응답 특별 결과 적용 여부의 기대값(true·false). centralResult가 켜진 작품에서만 쓴다.
+const CENTRAL_EXPECTATION_KEYS = ['directCentral', 'answerCentral'];
+const EXPECTATION_KEYS = [...RANK_EXPECTATION_KEYS, ...CENTRAL_EXPECTATION_KEYS];
 
 // fixture 형식 오류 목록. 비어 있으면 통과다.
-export function validatePersonas(personas, weapons) {
+export function validatePersonas(personas, weapons, rules = {}) {
   const errors = [];
   const weaponIds = new Set(weapons.map(({ weapon_id }) => weapon_id));
   const seen = new Set();
@@ -67,7 +73,13 @@ export function validatePersonas(personas, weapons) {
     for (const key of Object.keys(persona?.expected ?? {})) {
       if (!EXPECTATION_KEYS.includes(key)) errors.push(`${label}: expected에 알 수 없는 항목 '${key}'가 있습니다.`);
     }
-    for (const key of EXPECTATION_KEYS) {
+    for (const key of CENTRAL_EXPECTATION_KEYS) {
+      const value = persona?.expected?.[key];
+      if (value === undefined) continue;
+      if (typeof value !== 'boolean') errors.push(`${label}: expected.${key}는 true 또는 false여야 합니다.`);
+      else if (!rules.centralResult) errors.push(`${label}: expected.${key}는 중앙형 특별 결과를 쓰는 작품에서만 쓸 수 있습니다.`);
+    }
+    for (const key of RANK_EXPECTATION_KEYS) {
       const list = persona?.expected?.[key];
       if (list === undefined) continue;
       if (!Array.isArray(list)) {
@@ -82,28 +94,36 @@ export function validatePersonas(personas, weapons) {
   return errors;
 }
 
-// 보고·비교용 순위 항목. 점수는 반올림하지 않는다.
-export function ranking(weapons, profile) {
-  return rankWeapons(weapons, profile).map(({ weapon, score, maxMismatch }) => ({
+// 결과 화면 순서의 보고·비교용 순위 항목. 점수는 원래 점수이며 반올림하지 않는다.
+// 중앙형 특별 결과가 적용되면 central이 true이고 1순위가 점수 1위가 아닐 수 있다.
+export function ranking(weapons, profile, rules = {}) {
+  const { ranked, central } = finalRanking(weapons, profile, rules);
+  return Object.assign(ranked.map(({ weapon, score, maxMismatch }) => ({
     weapon_id: weapon.weapon_id,
     weapon_name: weapon.weapon_name,
     score,
     maxMismatch,
-  }));
+  })), { central });
 }
 
 const topIds = (ranked, count = RECOMMENDATION_COUNT) => ranked.slice(0, count).map(({ weapon_id }) => weapon_id);
-const gapOf = (ranked) => (ranked.length > 1 ? ranked[0].score - ranked[1].score : null);
+// 1·2순위 점수 차이. 특별 결과는 점수 순서가 아니므로 차이를 매기지 않는다.
+const gapOf = (ranked) => (!ranked.central && ranked.length > 1 ? ranked[0].score - ranked[1].score : null);
 
-export function runPersona(persona, { questions, weapons }) {
-  const directRanking = ranking(weapons, persona.targetProfile);
+const summarize = (ranked, profile) => ({
+  ranking: ranked,
+  gap: gapOf(ranked),
+  central: ranked.central,
+  deviation: centralDeviation(profile),
+});
+
+export function runPersona(persona, { questions, weapons, rules = {} }) {
   const search = searchAnswers(questions, persona.targetProfile);
-  const answerRanking = ranking(weapons, search.profile);
   return {
     persona,
     tolerance: { ...DEFAULT_TOLERANCE, ...persona.tolerance },
-    direct: { profile: persona.targetProfile, ranking: directRanking, gap: gapOf(directRanking) },
-    answer: { ...search, ranking: answerRanking, gap: gapOf(answerRanking) },
+    direct: { profile: persona.targetProfile, ...summarize(ranking(weapons, persona.targetProfile, rules), persona.targetProfile) },
+    answer: { ...search, ...summarize(ranking(weapons, search.profile, rules), search.profile) },
   };
 }
 
@@ -118,6 +138,12 @@ export function checkPersona(result) {
   if (answer.meanAbsoluteError > tolerance.meanAbsoluteError) {
     failures.push(`평균 절대 오차 ${fmt(answer.meanAbsoluteError)} > 허용 ${tolerance.meanAbsoluteError}`);
   }
+  for (const [kind, part] of [['direct', result.direct], ['answer', answer]]) {
+    const central = expected[`${kind}Central`];
+    if (central !== undefined && central !== part.central) {
+      failures.push(`${kind}Central: 중앙형 특별 결과 ${part.central ? '적용' : '미적용'}(중앙 이탈도 ${fmt(part.deviation)}), 기대 ${central ? '적용' : '미적용'}`);
+    }
+  }
   for (const [kind, ranked] of [['direct', result.direct.ranking], ['answer', answer.ranking]]) {
     const top1 = expected[`${kind}Top1`];
     if (top1?.length && !top1.includes(ranked[0].weapon_id)) {
@@ -130,7 +156,10 @@ export function checkPersona(result) {
   return failures;
 }
 
-export const hasExpectations = (persona) => EXPECTATION_KEYS.some((key) => persona.expected?.[key]?.length);
+export const hasExpectations = (persona) => RANK_EXPECTATION_KEYS.some((key) => persona.expected?.[key]?.length)
+  || CENTRAL_EXPECTATION_KEYS.some((key) => typeof persona.expected?.[key] === 'boolean');
+
+const centralNote = (part) => (part.central ? ` [중앙형 특별 결과, 이탈도 ${fmt(part.deviation)}]` : '');
 
 // 실패를 고칠 때 바로 판단할 수 있도록 목표·실제 프로필, 축별 오차, 순위를 함께 보여 준다.
 export function describePersonaResult(result, count = 5) {
@@ -142,8 +171,8 @@ export function describePersonaResult(result, count = 5) {
     `  목표 프로필: ${axes(direct.profile)}`,
     `  응답 프로필: ${axes(answer.profile)}`,
     `  축별 오차:   ${axes(answer.axisErrors)} (최대 ${fmt(answer.maxAxisError)}, 평균 ${fmt(answer.meanAbsoluteError)})`,
-    `  직접 순위:   ${ranks(direct.ranking)}`,
-    `  응답 순위:   ${ranks(answer.ranking)}`,
+    `  직접 순위:   ${ranks(direct.ranking)}${centralNote(direct)}`,
+    `  응답 순위:   ${ranks(answer.ranking)}${centralNote(answer)}`,
   ].join('\n');
 }
 
@@ -165,10 +194,11 @@ export function personaWarnings(result) {
 }
 
 // 각 무기의 기준값을 그대로 프로필로 쓸 때의 1순위. 다섯 값이 같은 무기는 중복으로 따로 보고한다.
-export function checkWeaponAnchors(weapons) {
+// 특별 결과가 적용되는 기준점은 결과 화면과 같은 최종 1순위로 판정한다.
+export function checkWeaponAnchors(weapons, rules = {}) {
   const key = (w) => AXIS_IDS.map((axis) => w[axis]).join(',');
   return weapons.map((weapon) => {
-    const ranked = ranking(weapons, weapon);
+    const ranked = ranking(weapons, weapon, rules);
     const duplicates = weapons
       .filter((other) => other !== weapon && key(other) === key(weapon))
       .map(({ weapon_id }) => weapon_id);
@@ -180,6 +210,7 @@ export function checkWeaponAnchors(weapons) {
       gap: gapOf(ranked),
       runnerUp: ranked[1]?.weapon_id ?? null,
       duplicates,
+      central: ranked.central,
       ok: ranked[0].weapon_id === weapon.weapon_id,
     };
   });
@@ -188,14 +219,14 @@ export function checkWeaponAnchors(weapons) {
 const clamp = (value) => Math.min(100, Math.max(0, value));
 
 // 한 번에 한 축만 바꿔 1순위·상위 3개 변화를 본다.
-export function analyzeNeighborhood(weapons, profile, deltas = NEIGHBOR_DELTAS) {
-  const base = ranking(weapons, profile);
+export function analyzeNeighborhood(weapons, profile, { rules = {}, deltas = NEIGHBOR_DELTAS } = {}) {
+  const base = ranking(weapons, profile, rules);
   const baseTop = topIds(base);
   const variations = [];
   for (const axis of AXIS_IDS) {
     for (const delta of deltas) {
       const value = clamp(profile[axis] + delta);
-      const ranked = ranking(weapons, { ...profile, [axis]: value });
+      const ranked = ranking(weapons, { ...profile, [axis]: value }, rules);
       const top = topIds(ranked);
       variations.push({
         axis,
@@ -203,6 +234,8 @@ export function analyzeNeighborhood(weapons, profile, deltas = NEIGHBOR_DELTAS) 
         value,
         top1: ranked[0].weapon_id,
         top1Changed: ranked[0].weapon_id !== base[0].weapon_id,
+        central: ranked.central,
+        centralChanged: ranked.central !== base.central,
         top3: top,
         overlap: top.filter((id) => baseTop.includes(id)).length,
         entered: top.filter((id) => !baseTop.includes(id)),
@@ -228,7 +261,12 @@ export function analyzeNeighborhood(weapons, profile, deltas = NEIGHBOR_DELTAS) 
     };
     return [axis, { minus: along(-1), plus: along(1) }];
   }));
-  return { base: { top1: base[0].weapon_id, top3: baseTop, gap: gapOf(base) }, variations, firstChange, stableRange };
+  return {
+    base: { top1: base[0].weapon_id, top3: baseTop, gap: gapOf(base), central: base.central },
+    variations,
+    firstChange,
+    stableRange,
+  };
 }
 
 // ±5에서 상위 3개가 하나도 겹치지 않는 변화(실패 조건).
@@ -236,15 +274,18 @@ export const disjointSmallChanges = (neighborhood) => neighborhood.variations
   .filter(({ delta, overlap }) => Math.abs(delta) === 5 && overlap === 0);
 
 // 다섯 축의 0~100을 step 간격으로 순회한 기하학적 추천 영역. 실제 사용자 분포가 아니다.
-export function analyzeDistribution(weapons, step = 10) {
+// 중앙형 특별 결과를 쓰는 작품은 결과 화면과 같은 최종 순위로 세고, 특별 결과가 적용된 프로필 수를 함께 센다.
+export function analyzeDistribution(weapons, step = 10, rules = {}) {
   if (!Number.isInteger(step) || step <= 0 || 100 % step !== 0) throw new Error('간격은 100의 약수인 양의 정수여야 합니다.');
   const values = Array.from({ length: 100 / step + 1 }, (_, i) => i * step);
   const counts = Object.fromEntries(weapons.map(({ weapon_id }) => [weapon_id, { first: 0, top: 0 }]));
   const profile = {};
   let total = 0;
+  let centrals = 0;
   const visit = (depth) => {
     if (depth === AXIS_IDS.length) {
-      const ranked = rankWeapons(weapons, profile);
+      const { ranked, central } = finalRanking(weapons, profile, rules);
+      if (central) centrals += 1;
       counts[ranked[0].weapon.weapon_id].first += 1;
       for (const { weapon } of ranked.slice(0, RECOMMENDATION_COUNT)) counts[weapon.weapon_id].top += 1;
       total += 1;
@@ -259,6 +300,8 @@ export function analyzeDistribution(weapons, step = 10) {
   return {
     step,
     total,
+    centralResult: Boolean(rules.centralResult),
+    centrals,
     weapons: weapons.map(({ weapon_id, weapon_name }) => {
       const { first, top } = counts[weapon_id];
       return { weapon_id, weapon_name, first, top, firstRate: first / total, topRate: top / total };

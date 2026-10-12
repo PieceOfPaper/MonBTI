@@ -46,6 +46,7 @@
 - 질문, 무기 특성, 결과 문구와 점수 계산을 분리하고, 작품별 데이터가 섞이지 않게 구성합니다.
 - 결과 표시 내용(문구·값·항목)은 `src/ui/result-content.js`에서만 만들고 결과 화면(`src/ui/views.js`)과 공유 이미지(`src/ui/share-image.js`)가 함께 사용합니다. 한쪽에만 문구나 값을 따로 만들지 않고, `src/ui/result-content.test.js`의 일치 검사에 새 항목을 추가합니다.
 - 무기·질문 원본은 MonBTI_테이블의 작품별 탭입니다. 무기 기준 필드와 질문 가중치 필드는 attack, freedom, complexity, management, counter로 통일합니다. Wilds_Question은 질문당 한 행입니다. 무기 값은 0~100 특성값, 질문 값은 -100~100 가중치이며 axis·reverse는 사용하지 않습니다. 열 정의·미측정 값·JSON 변환 규칙은 docs/data-schema.md를 따릅니다. 임시 여부를 구분하는 필드는 두지 않습니다.
+- 새 검사(새 작품이나 `wilds_v2` 같은 새 버전)를 `src/games/index.js`에 등록할 때는 같은 작업에서 그 검사의 페르소나 회귀 테스트도 구현합니다. 작품별 fixture(`tests/personas/<작품>-personas.js`)를 만들어 `tests/personas/suites.js`에 판정 규칙과 함께 등록하고, 데이터로 순위를 계산·검토한 뒤 기대값을 정하며, `npm test`와 `npm run analyze:personas -- --game <작품 ID>`의 실패가 없는지 확인합니다. 기존 검사의 fixture를 복사해 시작하더라도 서로 참조하지 않는 독립 파일로 둡니다. 세부 기준은 docs/persona-test-plan.md의 ‘새 검사를 추가할 때’를 따릅니다.
 - 실제 명령과 의존성이 생긴 뒤 개발 문서에 실행·검증·빌드 명령을 기록합니다. 존재하지 않는 명령을 실행했다고 보고하지 않습니다.
 - 문서 변경은 내용 일관성, 상대 링크와 변경 내용을 확인합니다.
 - 계산 구현은 동점, 답변 수정, 미완료 답변을 확인합니다. 화면 구현은 모바일, 키보드 사용, 새로고침과 공유 링크를 확인합니다.

@@ -3,7 +3,7 @@ import { buildResult, sharedResult, shareUrl } from '../app.js';
 import { supportedGames } from '../games/index.js';
 import { renderGuide, renderResult } from '../ui/views.js';
 import {
-  amplifyProfile, breakCenterTies, buildCentralModel, centralDeviation, centralRecommendation, isCentralProfile,
+  amplifyProfile, breakCenterTies, buildCentralModel, centralDeviation, centralRecommendation, finalRanking, isCentralProfile,
 } from './central.js';
 import { rankWeapons, recommendWeapons } from './recommend.js';
 import { decodeShareCode, encodeShareCode } from './share.js';
@@ -102,6 +102,15 @@ describe('특별 결과 순위', () => {
     expect(model.forcedAxes).toEqual(['freedom', 'complexity', 'management', 'counter']);
     expect(model.deviation).toBeCloseTo(1.6);
   });
+
+  it('결과 화면 순서의 전체 순위는 특별 결과 1~3순위 뒤에 원래 순위의 나머지를 잇는다', () => {
+    const ids = ({ ranked }) => ranked.map(({ weapon: { weapon_id } }) => weapon_id);
+    expect(ids(finalRanking(weapons, lean, { centralResult: true }))).toEqual(['b', 'a', 'c', 'd']);
+    expect(finalRanking(weapons, lean, { centralResult: true }).central).toBe(true);
+    expect(finalRanking(weapons, lean)).toEqual({ ranked: rankWeapons(weapons, lean), central: false });
+    const far = profileOf(90, 90, 50, 50, 50);
+    expect(finalRanking(weapons, far, { centralResult: true })).toEqual({ ranked: rankWeapons(weapons, far), central: false });
+  });
 });
 
 describe('설명 모델의 축 선택', () => {
@@ -141,6 +150,15 @@ describe('작품별 적용', () => {
     const after = buildResult(v2, flat(v2));
     expect(after.central).toBeTruthy();
     expect(after.weapons).toEqual(centralRecommendation(v2.weapons, after.profile));
+  });
+
+  it('finalRanking의 앞 세 무기는 사이트 결과(buildResult)의 1~3순위와 같다', () => {
+    const top = (game, answers) => finalRanking(game.weapons, buildResult(game, answers).profile, game)
+      .ranked.slice(0, 3).map(({ weapon }) => weapon);
+    const mixed = (game) => Object.fromEntries(game.questions.map(({ question_id }, i) => [question_id, i % 2 ? 1 : 6]));
+    for (const game of [wilds, v2]) {
+      for (const answers of [flat(game), mixed(game)]) expect(top(game, answers)).toEqual(buildResult(game, answers).weapons);
+    }
   });
 
   it('특별 결과의 profile과 그래프는 원래 점수를 쓴다', () => {

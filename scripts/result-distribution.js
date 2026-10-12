@@ -3,8 +3,8 @@
 import { AXIS_IDS } from '../src/core/axes.js';
 import { RESPONSES, responseCoefficient } from '../src/core/responses.js';
 import { computeAxisProfile, computeAxisTotals } from '../src/core/scoring.js';
-import { centralRecommendation, isCentralProfile } from '../src/core/central.js';
-import { RECOMMENDATION_COUNT, rankWeapons } from '../src/core/recommend.js';
+import { finalRanking } from '../src/core/central.js';
+import { RECOMMENDATION_COUNT } from '../src/core/recommend.js';
 
 const RESPONSE_VALUES = RESPONSES.map(({ value }) => value);
 const COEFFICIENTS = RESPONSE_VALUES.map(responseCoefficient);
@@ -59,17 +59,6 @@ export const ANSWER_MODELS = {
   },
 };
 
-// central이 참이면 사이트의 작품 설정 centralResult처럼 중앙형 응답에 특별 결과(src/core/central.js)를 적용한다.
-// 특별 결과의 순위는 1~3순위 뒤에 원래 순위의 나머지 무기를 이어 붙인 것이다.
-function finalRanking(weapons, profile, central) {
-  const ranked = rankWeapons(weapons, profile);
-  if (!central || !isCentralProfile(profile)) return { ranked, special: false };
-  const top = centralRecommendation(weapons, profile);
-  const topIds = new Set(top.map(({ weapon_id }) => weapon_id));
-  const rest = ranked.filter(({ weapon }) => !topIds.has(weapon.weapon_id));
-  return { ranked: [...top.map((weapon) => ({ weapon })), ...rest], special: true };
-}
-
 // samples번 모의 응답을 만들어 무기별 1순위·3순위 이내 횟수, 순위 합, 1순위가 된 사용자의 축 점수 합을 센다.
 export function simulateDistribution({ questions, weapons, model, samples, seed = 1, noise = 0.3, central = false }) {
   const answer = ANSWER_MODELS[model];
@@ -88,7 +77,8 @@ export function simulateDistribution({ questions, weapons, model, samples, seed 
 
   for (let i = 0; i < samples; i += 1) {
     const profile = computeAxisProfile(computeAxisTotals(questions, answer(questions, random, { noise })));
-    const { ranked, special } = finalRanking(weapons, profile, central);
+    // central이 참이면 사이트의 작품 설정 centralResult처럼 중앙형 응답에 특별 결과를 적용한다.
+    const { ranked, central: special } = finalRanking(weapons, profile, { centralResult: central });
     if (special) specials += 1;
     ranked.forEach(({ weapon }, rank) => {
       const entry = byId.get(weapon.weapon_id);
