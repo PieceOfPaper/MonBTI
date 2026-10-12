@@ -17,7 +17,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `tests/personas/` | 페르소나 fixture(`wilds-personas.js`), 응답 자동 탐색(`answer-search.js`), 실행기(`persona-runner.js`), 회귀 테스트(`persona.test.js`) |
 | `scripts/persona-report.js` | 페르소나별 순위·인접값·무기 기준점·추천 영역 분포 보고서 |
 | `src/data/<작품 ID>/` | 생성된 무기·질문 JSON. 직접 편집하지 않음 |
-| `src/games/index.js` | 작품 등록과 작품별 데이터·표시 자료 연결 |
+| `src/games/index.js` | 작품 등록과 작품별 데이터·표시 자료 연결. 등록 순서가 작품 선택 화면 순서이며, `development: true`인 검사는 ‘개발 중인 검사’ 접이식 목록에 표시. `tag`는 같은 로고를 쓰는 검사의 구분 표시(예: `V2`) |
 | `src/games/<작품 ID>/media.js` | 작품 로고, 무기별 아이콘·캐릭터 이미지·소개 영상 ID |
 | `src/games/<작품 ID>/characters.js` | 결과 상단 배경 캐릭터 이미지의 무기별 배치와 출처 |
 | `src/games/<작품 ID>/descriptions.js` | 무기별 공식 소개 문구와 출처 |
@@ -25,7 +25,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
 | `src/assets/characters/<작품 ID>/` | 무기별 캐릭터 이미지 파일(`<weapon_id>_a·_b.webp`) |
 | `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 입문 난이도 별표(`difficulty.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
-| `src/ui/views.js` | 화면 마크업(작품 선택·검사 설명·이름 입력·질문·결과) |
+| `src/ui/views.js` | 화면 마크업(작품 선택과 개발 중인 검사 목록·검사 설명·이름 입력·질문·결과) |
 | `src/ui/radar.js` | 오각형 방사형 차트 위치 계산과 SVG |
 | `src/ui/result-content.js` | 결과 화면과 공유 이미지가 함께 쓰는 표시 내용(제목·입문 난이도·소개 문구·추천 이유·기준 비교) |
 | `src/ui/share-image.js` | 공유 이미지(캔버스). `result-content.js`의 내용을 결과 화면과 같은 순서로 그림. 공유할 때만 불러옴 |
@@ -98,7 +98,7 @@ npm run analyze:personas -- --baseline base.json
 
 - `.github/workflows/ci.yml`은 풀 리퀘스트와 `main` 브랜치 푸시에서 의존성을 고정 설치하고 테스트와 빌드를 실행합니다.
 - `.github/workflows/deploy-pages.yml`은 `main` 브랜치 푸시 또는 수동 실행에서 최신 `main`을 빌드해 GitHub Pages에 배포합니다.
-- `.github/workflows/refresh-data.yml`은 **시트 데이터 갱신** 버튼으로 최신 원본을 내려받아 검증·변환하고, 테스트·빌드가 성공하면 데이터 두 파일만 `main`에 커밋한 뒤 `deploy-pages.yml`을 최신 `main`으로 실행해 배포합니다. 두 워크플로는 `pages` 동시 실행 그룹을 공유하므로 배포는 갱신 실행과 진행 중인 다른 배포가 끝난 뒤 시작합니다.
+- `.github/workflows/refresh-data.yml`은 **시트 데이터 갱신** 버튼으로 최신 원본을 내려받아 검증·변환하고, 테스트·빌드가 성공하면 작품별 무기·질문 데이터 파일(`src/data/wilds/`, `src/data/wilds_v2/`)만 `main`에 커밋한 뒤 `deploy-pages.yml`을 최신 `main`으로 실행해 배포합니다. 두 워크플로는 `pages` 동시 실행 그룹을 공유하므로 배포는 갱신 실행과 진행 중인 다른 배포가 끝난 뒤 시작합니다.
 - GitHub 저장소의 **Settings → Pages → Build and deployment**에서 Source를 **GitHub Actions**로 한 번 선택해야 합니다. 이 설정은 워크플로 파일만으로 대신할 수 없습니다.
 - 정상 배포 주소는 `https://pieceofpaper.github.io/MonBTI/`입니다. 저장소 이름을 바꾸면 `vite.config.js`의 `base`도 같은 경로로 바꿉니다.
 

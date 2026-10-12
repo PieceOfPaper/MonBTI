@@ -11,6 +11,10 @@
 - 작품 키: `wilds`
 - 무기 탭: `Wilds_Weapon` — sheetId `1001`
 - 질문 탭: `Wilds_Question` — sheetId `1002`
+- 개발 중인 와일즈 V2 작품 키: `wilds_v2`
+  - 무기 탭: `Wilds_V2_Weapon` — sheetId `1661331336`
+  - 질문 탭: `Wilds_V2_Question` — sheetId `1489388738`
+  - 2026-10-12에 `Wilds_Weapon`·`Wilds_Question`을 복제해 만들었습니다. 열 구조와 입력 규칙은 아래 와일즈 탭 설명과 같고, 이후 V2 개발에 맞춰 따로 편집합니다. 질문 ID는 작품 안에서만 고유하면 되므로 복제한 `wilds_q…` ID를 그대로 쓸 수 있습니다.
 - 기존 `시트1`은 유지하며 와일즈 데이터로 읽지 않습니다.
 - 스프레드시트 파일명이나 탭의 위치 대신 스프레드시트 ID와 정확한 탭 이름으로 대상을 확인합니다.
 
@@ -123,6 +127,7 @@ GitHub Pages 정적 사이트에 맞춰 **시트에서 내보낸 데이터를 �
 
 - `src/data/wilds/weapons.json`: 무기 행을 객체 배열로 변환
 - `src/data/wilds/questions.json`: 질문당 한 객체로 변환하고 `question_order`로 정렬
+- `src/data/wilds_v2/weapons.json`·`src/data/wilds_v2/questions.json`: 와일즈 V2 탭을 같은 규칙으로 변환
 
 ### 변환 규칙
 
@@ -197,7 +202,7 @@ npm run data:convert -- --if-changed       # 실질 데이터가 바뀐 파일�
 
 1. 원본 시트에서 수치·문항을 수정합니다.
 2. [Actions → 시트 데이터 갱신](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data.yml)에서 **Run workflow**를 누르고 `main`으로 실행합니다.
-3. 자동 다운로드·검증·변환·테스트·빌드가 성공하면 `weapons.json`·`questions.json` 변경만 커밋합니다. 변경이 없으면 커밋을 생략합니다.
+3. 자동 다운로드·검증·변환·테스트·빌드가 성공하면 작품별 `weapons.json`·`questions.json` 변경만 커밋합니다. 변경이 없으면 커밋을 생략합니다.
 4. 이어서 **Deploy GitHub Pages** 워크플로가 최신 `main`을 빌드해 배포합니다. 배포 실행이 성공한 뒤 사이트를 확인합니다.
 
 로컬에서 반영할 때:

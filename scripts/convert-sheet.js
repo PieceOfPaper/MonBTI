@@ -15,6 +15,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 const GAMES = [
   { id: 'wilds', weaponSheet: 'Wilds_Weapon', questionSheet: 'Wilds_Question' },
+  { id: 'wilds_v2', weaponSheet: 'Wilds_V2_Weapon', questionSheet: 'Wilds_V2_Question' },
 ];
 
 async function loadWorkbook(input) {

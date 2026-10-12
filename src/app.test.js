@@ -20,14 +20,15 @@ const testGame = {
 };
 
 describe('작품 데이터', () => {
-  it('현재 지원하는 작품은 와일즈뿐이다', () => {
-    expect(supportedGames.map(({ id }) => id)).toEqual(['wilds']);
+  it('현재 검사는 와일즈이고, 와일즈 V2는 개발 중인 검사로 등록한다', () => {
+    expect(supportedGames.map(({ id }) => id)).toEqual(['wilds', 'wilds_v2']);
+    expect(supportedGames.filter(({ development }) => development).map(({ id }) => id)).toEqual(['wilds_v2']);
   });
 
-  it('와일즈 질문 JSON은 question_order로 정렬되어 있고 무기 기준값은 0~100이다', () => {
-    const orders = wilds.questions.map(({ question_order }) => question_order);
+  it.each(supportedGames.map((game) => [game.id, game]))('%s 질문 JSON은 question_order로 정렬되어 있고 무기 기준값은 0~100이다', (_, game) => {
+    const orders = game.questions.map(({ question_order }) => question_order);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
-    for (const weapon of wilds.weapons) {
+    for (const weapon of game.weapons) {
       for (const axis of ['attack', 'freedom', 'complexity', 'management', 'counter']) {
         expect(weapon[axis]).toBeGreaterThanOrEqual(0);
         expect(weapon[axis]).toBeLessThanOrEqual(100);
@@ -109,6 +110,24 @@ describe('화면', () => {
     expect(own).not.toContain('data-action="review"');
     expect(own).toContain('data-action="restart"');
     expect(own).not.toContain('data-start-quiz');
+  });
+
+  it('개발 중인 검사는 접힌 ‘개발 중인 검사’ 목록 안에 따로 보여 준다', () => {
+    const html = renderGameSelection(supportedGames);
+    const [main, dev] = html.split('<details class="game-dev">');
+    expect(main).toContain('href="#/wilds"');
+    expect(main).not.toContain('href="#/wilds_v2"');
+    expect(dev).toContain('<summary>개발 중인 검사');
+    expect(dev).toContain('href="#/wilds_v2" data-game-id="wilds_v2" data-start-quiz="wilds_v2"');
+    expect(dev).toContain('href="#/wilds_v2/guide"');
+    expect(dev).toContain('<span class="game-card__tag">V2</span>');
+    expect(html).not.toMatch(/<details class="game-dev" open/);
+  });
+
+  it('개발 중인 검사가 없으면 접이식 목록을 만들지 않는다', () => {
+    const html = renderGameSelection(supportedGames.filter(({ development }) => !development));
+    expect(html).not.toContain('game-dev');
+    expect(html).not.toContain('개발 중인 검사');
   });
 
   it('작품 선택 화면은 검사 옆에 검사 설명 링크를 제공한다', () => {
@@ -326,6 +345,8 @@ describe('추천과 공유 링크', () => {
     expect(shareParamToHash(`?r=${encodeURIComponent(new URL(url).searchParams.get('r'))}`)).toBe(hash);
     expect(shareParamToHash('')).toBeNull();
     expect(shareParamToHash('?r=wilds')).toBeNull();
+    // 작품 ID의 밑줄(wilds_v2)도 공유 주소에서 유지한다.
+    expect(shareParamToHash('?r=wilds_v2.abc')).toBe('#/wilds_v2/share/abc');
   });
 
   it('이름을 정리하고 공유 코드용으로 되돌릴 수 있게 바꾼다', () => {

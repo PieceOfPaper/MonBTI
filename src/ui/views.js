@@ -22,21 +22,33 @@ const IMAGE_ICON = `<svg class="share__icon" viewBox="0 0 24 24" aria-hidden="tr
 const LINK_ICON = `<svg class="share__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
 const YOUTUBE_ICON = `<svg class="credit__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#ff0033" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#fff" d="M9.545 15.568V8.432L15.818 12z"/></svg>`;
 
-export function renderGameSelection(games) {
-  const choices = games
-    .map(({ id, name, logo, description }) => `
+function renderGameChoice({ id, name, logo, description, tag, development }) {
+  return `
       <li><a class="game-card" href="#/${id}" data-game-id="${id}" data-start-quiz="${id}">
-        <span class="game-card__label">현재 검사 가능</span>
+        <span class="game-card__label">${development ? '개발 중' : '현재 검사 가능'}${tag ? ` <span class="game-card__tag">${escapeHtml(tag)}</span>` : ''}</span>
         ${logo
           ? `<img class="game-card__logo" src="${escapeHtml(logo)}" alt="${escapeHtml(name)}" />`
-          : `<strong>${escapeHtml(name)}</strong>`}<span>${escapeHtml(description)}</span>
-      </a><a class="button button--ghost game-guide" href="#/${id}/guide" aria-label="${escapeHtml(name)} 검사 설명">검사 설명</a></li>`)
-    .join('');
+          : `<strong>${escapeHtml(name)}</strong>`}<span class="game-card__description">${escapeHtml(description)}</span>
+      </a><a class="button button--ghost game-guide" href="#/${id}/guide" aria-label="${escapeHtml(name)} 검사 설명">검사 설명</a></li>`;
+}
+
+// 개발 중인 검사는 기본으로 접어 둔 목록에 따로 보여 주고, 없으면 목록 자체를 만들지 않는다.
+export function renderGameSelection(games) {
+  const choices = games.filter(({ development }) => !development).map(renderGameChoice).join('');
+  const developing = games.filter(({ development }) => development);
+  const developingList = developing.length
+    ? `<details class="game-dev">
+      <summary>개발 중인 검사 <span class="game-dev__count">${developing.length}</span></summary>
+      <p class="game-dev__note">아직 만들고 있는 검사예요. 질문·무기 수치와 결과가 예고 없이 바뀔 수 있어요.</p>
+      <ul class="game-list game-list--dev" aria-label="개발 중인 검사 선택">${developing.map(renderGameChoice).join('')}</ul>
+    </details>`
+    : '';
 
   return `<section class="hero" aria-labelledby="page-title">
     <p class="eyebrow">MONBTI</p><h1 id="page-title" tabindex="-1">어떤 무기가 나와 잘 맞을까?</h1>
     <p>어려운 게임 용어 없이, 나의 플레이 취향부터 알아봅니다.</p>
-    <ul class="game-list" aria-label="검사할 작품 선택">${choices}</ul>
+    ${choices ? `<ul class="game-list" aria-label="검사할 작품 선택">${choices}</ul>` : ''}
+    ${developingList}
     <footer class="credit">
       <p class="credit__by">
         <span>Made by <strong>종잇장</strong></span>
