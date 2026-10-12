@@ -1,0 +1,79 @@
+name: 추천 결과·편향 제보
+description: 추천 결과가 납득되지 않거나 특정 무기가 자주 나오는 사례를 기록합니다.
+title: "[피드백] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        재현 가능한 비교를 위해 검사 결과와 응답 배경을 함께 남겨 주세요.
+        공유 결과 주소에는 표시 이름이 포함될 수 있으니 공개해도 되는 정보인지 먼저 확인해 주세요.
+
+  - type: dropdown
+    id: tester_type
+    attributes:
+      label: 검사자 구분
+      options:
+        - 몬스터헌터 입문자
+        - 기존 시리즈 유저
+        - 기타
+    validations:
+      required: true
+
+  - type: input
+    id: result_url
+    attributes:
+      label: 공유 결과 주소 또는 검사 날짜
+      description: 공유 주소가 없다면 검사한 날짜와 당시 데이터 버전을 적어 주세요.
+      placeholder: https://pieceofpaper.github.io/MonBTI/?r=...
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 검사자 배경과 기대
+      description: 기존 유저라면 주무기·경험 무기, 입문자라면 기대했던 전투 감각을 적어 주세요.
+      placeholder: 주무기는 대검이고 여러 무기를 사용합니다. 묵직한 한 방을 선호합니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: result
+    attributes:
+      label: 추천 결과
+      description: 가능하면 1~3순위와 결과 화면의 축 점수를 함께 적어 주세요.
+      placeholder: 1순위 수렵피리, 2순위 ..., 한방 50 / 자유 45 / ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: fit
+    attributes:
+      label: 결과 납득도
+      options:
+        - 잘 맞음
+        - 일부 맞음
+        - 맞지 않음
+        - 판단하기 어려움
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: 그렇게 판단한 이유
+      description: 무기 이름보다 결과 설명 중 맞거나 어긋난 부분을 중심으로 적어 주세요.
+
+  - type: textarea
+    id: retest
+    attributes:
+      label: 다시 검사했다면 달라진 점
+      description: 답을 더 극단적으로 고른 경우처럼 응답 방식을 바꿨다면 결과 변화를 적어 주세요.
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: 확인 사항
+      options:
+        - label: 공개 이슈에 불필요한 개인정보를 포함하지 않았습니다.
+          required: true
+        - label: 현재 main과 데이터가 바뀌면 같은 응답의 결과도 달라질 수 있음을 확인했습니다.
+          required: true
