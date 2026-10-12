@@ -30,6 +30,7 @@ const COLORS = {
   rank: '#1f2d25',
   rankSelected: '#2a3d2e',
   shadow: '#172119',
+  badge: '#f2c14e',
 };
 
 function loadImage(src) {
@@ -183,6 +184,27 @@ function winnerHeight(ctx, winner) {
   return height + 40;
 }
 
+// 결과 화면의 .winner__badge와 같은 기울어진 물음표 원. (x, y)는 원의 중심이다.
+function drawBadge(ctx, badge, x, y) {
+  const radius = 38;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate((14 * Math.PI) / 180);
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetY = 4;
+  ctx.beginPath();
+  ctx.arc(0, 0, radius, 0, Math.PI * 2);
+  ctx.fillStyle = COLORS.badge;
+  ctx.fill();
+  ctx.shadowColor = 'transparent';
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = COLORS.background;
+  ctx.stroke();
+  text(ctx, badge.mark, 0, 2, { size: 54, weight: 900, color: COLORS.background, align: 'center' });
+  ctx.restore();
+}
+
 function drawWinner(ctx, winner, assets, top) {
   const { weapon, difficulty, quote } = winner;
   const height = winnerHeight(ctx, winner);
@@ -197,9 +219,10 @@ function drawWinner(ctx, winner, assets, top) {
   ctx.fillStyle = glow;
   ctx.fillRect(cx - ICON, y - ICON / 2, ICON * 2, ICON * 2);
   drawIcon(ctx, assets.icons[0], weapon, cx - ICON / 2 + 24, y + 24, ICON - 48);
+  if (winner.badge) drawBadge(ctx, winner.badge, cx + ICON / 2 - 46, y + ICON - 46);
   y += ICON + 20;
 
-  fitText(ctx, weapon.weapon_name, cx, y + 65, INNER, { size: 124, weight: 800, color: COLORS.highlight, align: 'center', shadow: true });
+  fitText(ctx, winner.name, cx, y + 65, INNER, { size: 124, weight: 800, color: COLORS.highlight, align: 'center', shadow: true });
   y += 130 + 12;
 
   // 입문 난이도: '입문 난이도' + 별표를 가운데 한 줄로.
@@ -235,8 +258,8 @@ function drawReason(ctx, reason, top) {
   let y = top;
   hr(ctx, y);
   y += 48;
-  text(ctx, reason.title, PAD, y + 26, { size: 46, weight: 800 });
-  y += 52 + 32;
+  // 중앙형 특별 결과의 제목처럼 긴 제목은 화면처럼 여러 줄로 나눈다.
+  y = paragraph(ctx, reason.title, PAD, y, INNER, { size: 46, weight: 800, color: COLORS.text, lineHeight: 52 / 46 }) + 32;
   y = paragraph(ctx, reason.lead, PAD, y, INNER, { size: 36, weight: 700, color: COLORS.text });
   const padding = 36;
   for (const part of reason.parts) {

@@ -16,7 +16,7 @@ function shareTexts(content) {
   const { winner, reason, comparison } = content;
   return [
     content.gameName, content.title,
-    winner.weapon.weapon_name, winner.difficulty.title, winner.difficulty.label,
+    winner.weapon.weapon_name, winner.name, winner.difficulty.title, winner.difficulty.label,
     ...(winner.quote?.lines ?? []), winner.quote?.credit,
     reason?.title, reason?.lead, ...(reason?.parts ?? []).flatMap(({ title, lines }) => [title, ...lines]),
     comparison.title, comparison.subtitle, ...comparison.legend,
@@ -39,11 +39,29 @@ describe('결과 화면과 공유 이미지', () => {
     expect(missing).toEqual([]);
   });
 
+  it('중앙형 특별 결과: 공유 이미지의 특별 안내와 모든 값이 결과 화면 첫 상태에 있다', () => {
+    const v2 = supportedGames.find(({ id }) => id === 'wilds_v2');
+    const result = buildResult(v2, Object.fromEntries(v2.questions.map(({ question_id }) => [question_id, 4])), '종잇장');
+    expect(result.central).toBeTruthy();
+    const html = plain(renderResult(v2, result));
+    const content = shareContent({ gameName: v2.name, result, reason: null, weapons: v2.weapons });
+    expect(content.reason.title).toBe('혹시 이미 몬스터헌터 숙련자이거나 취향을 잘 안 타는 사람인가요?');
+    // 1순위 아이콘의 물음표 표시도 두 출력에 같이 있다.
+    expect(content.winner.badge).toEqual({ mark: '?', label: '확신하기 어려운 추천' });
+    expect(content.winner.name).toBe(`${result.weapons[0].weapon_name}?`);
+    expect(renderResult(v2, result)).toContain(`<strong class="winner__name">${result.weapons[0].weapon_name}?</strong>`);
+    expect(renderResult(v2, result)).toContain('<span class="winner__badge" role="img" aria-label="확신하기 어려운 추천"');
+    expect(shareTexts(content).filter((value) => !html.includes(value))).toEqual([]);
+  });
+
   it('결과 화면과 같은 순서(1순위 → 추천 이유 → 1~3순위 기준 비교)와 1순위 비교 대상으로 구성한다', () => {
     const [, result] = cases[0];
     const reason = buildRecommendationReason(result.profile, result.weapons[0], result.weapons[1]);
     const content = shareContent({ gameName: wilds.name, result, reason, weapons: wilds.weapons });
     expect(Object.keys(content)).toEqual(['gameName', 'who', 'title', 'winner', 'reason', 'comparison']);
+    expect(content.winner.badge).toBeNull();
+    expect(content.winner.name).toBe(result.weapons[0].weapon_name);
+    expect(renderResult(wilds, result, { reason })).not.toContain('winner__badge');
     expect(content.comparison.weapon).toBe(result.weapons[0]);
     expect(content.comparison.ranking.map(({ selected }) => selected)).toEqual([true, false, false]);
     expect(content.winner.weapon.characters?.length).toBeGreaterThan(0);

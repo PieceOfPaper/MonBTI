@@ -1,10 +1,11 @@
 // 화면 마크업. 상태를 받아 문자열을 돌려주며 이벤트 연결은 app.js가 맡는다.
 import { AXES } from '../core/axes.js';
+import { AMPLIFY_FACTOR } from '../core/central.js';
 import { NICKNAME_MAX_LENGTH } from '../core/nickname.js';
 import { RESPONSES } from '../core/responses.js';
 import { renderRadarSvg } from './radar.js';
 import {
-  COMPARE_SECTION_TITLE, RANK_LABELS, comparisonRows, difficultyContent, displayName, quoteContent, reasonContent, resultTitle,
+  COMPARE_SECTION_TITLE, RANK_LABELS, comparisonRows, difficultyContent, displayName, winnerBadge, winnerName, quoteContent, reasonContent, resultReasonContent, resultTitle,
 } from './result-content.js';
 
 export function escapeHtml(value) {
@@ -144,12 +145,17 @@ function renderDifficulty(weapon, weapons) {
         </p>`;
 }
 
-function renderWinner(weapon, weapons) {
+// badge는 중앙형 특별 결과의 물음표 표시(result-content.js의 winnerBadge)이며 없으면 아이콘만 둔다.
+// name은 크게 보여 주는 이름(result-content.js의 winnerName)이며 특별 결과면 끝에 물음표가 붙는다.
+function renderWinner(weapon, weapons, badge = null, name = weapon.weapon_name) {
+  const icon = badge
+    ? `<span class="winner__icon-wrap">${weaponIcon(weapon, 'winner__icon')}<span class="winner__badge" role="img" aria-label="${escapeHtml(badge.label)}" title="${escapeHtml(badge.label)}">${escapeHtml(badge.mark)}</span></span>`
+    : weaponIcon(weapon, 'winner__icon');
   return `<div class="winner">
       ${renderWinnerArt(weapon)}
       <div class="winner__main">
-        ${weaponIcon(weapon, 'winner__icon')}
-        <strong class="winner__name">${escapeHtml(weapon.weapon_name)}</strong>
+        ${icon}
+        <strong class="winner__name">${escapeHtml(name)}</strong>
         ${renderDifficulty(weapon, weapons)}
       </div>
       ${renderQuote(weapon)}
@@ -190,7 +196,11 @@ function renderOthers(others, selectedIndex, open) {
 // 1순위 추천 이유. 다른 무기를 선택해도 바뀌지 않으며, 없는 항목은 자리를 두지 않는다.
 // 내용은 result-content.js가 원문으로 만들고 여기서 한 번에 이스케이프한다.
 export function renderRecommendationReason(reason, weapons) {
-  const content = reasonContent(reason, weapons);
+  return renderReasonContent(reasonContent(reason, weapons));
+}
+
+// 설명 영역(추천 이유 또는 중앙형 특별 결과 안내)을 그린다. 내용은 result-content.js가 만든다.
+function renderReasonContent(content) {
   if (!content) return '';
   const parts = content.parts.map(({ title, lines }) => `
         <div class="reason__part">
@@ -279,7 +289,8 @@ export function renderVideoPlayer(videoId, title) {
   return `<iframe src="${src}" title="${escapeHtml(title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
 }
 
-// result: { weapons: [1~3순위], profile: { 축: 0~100 | null }, nickname: 표시 이름 }
+// result: { weapons: [1~3순위], profile: { 축: 0~100 | null }, nickname: 표시 이름, central?: 중앙형 특별 결과 모델 }
+// central이 있으면 추천 이유 대신 중앙형 특별 결과 안내를 보여 준다.
 // others는 4순위 이후 무기이며 selectedIndex는 기준 비교에 처음 보여 줄 무기의 전체 순위 위치다.
 // shared가 참이면 공유 링크로 연 결과이며 다시 하기 대신 검사 시작을 안내한다.
 // reason은 1순위 추천 이유 모델이며 없으면 그 영역을 생략한다.
@@ -297,8 +308,8 @@ export function renderResult(game, result, {
   return `<section class="result" aria-labelledby="result-title">
     <p class="eyebrow">${escapeHtml(game.name)}</p>
     <h1 id="result-title" tabindex="-1">${escapeHtml(resultTitle(name))}</h1>
-    ${renderWinner(winner, game.weapons)}
-    ${renderRecommendationReason(reason, result.weapons)}
+    ${renderWinner(winner, game.weapons, winnerBadge(result), winnerName(result))}
+    ${renderReasonContent(resultReasonContent(result, reason))}
     ${renderComparison(result, others, selected, selectedIndex, othersOpen, who)}
     ${renderIntro(winner)}
     <section class="result__section share-section" aria-labelledby="share-title">
@@ -314,6 +325,20 @@ export function renderResult(game, result, {
       <a class="button button--ghost" href="#/">작품 선택으로</a>
     </div>
   </section>`;
+}
+
+// 중앙형 응답 특별 결과(core/central.js)를 쓰는 검사의 설명.
+function renderCentralGuide() {
+  return `
+    <section aria-labelledby="guide-central">
+      <h2 id="guide-central">다섯 기준이 모두 가운데에 가까우면</h2>
+      <p>다섯 기준이 평균적으로 가운데(50)에서 10점 이내로만 떨어져 있으면 뚜렷한 취향이 보이지 않는다고 보고 <strong>특별 결과</strong>를 보여 줘요.</p>
+      <ul class="guide__list">
+        <li>1순위는 답변에서 살짝 기운 쪽을 ${AMPLIFY_FACTOR}배로 키워서 고른 무기예요. 재미로 고른 결과라 평소보다 잘 맞지 않을 수 있어요.</li>
+        <li>2·3순위는 키우기 전 원래 답변으로 계산한 가장 가까운 무기예요.</li>
+        <li>그래프와 표는 키우기 전 실제 답변 점수를 보여 줘요.</li>
+      </ul>
+    </section>`;
 }
 
 // 검사 설명. 누구를 위한 검사인지, 어떻게 답하고 어떤 기준으로 무기를 고르는지 게임 지식 없이 읽을 수 있게 쓴다.
@@ -351,7 +376,7 @@ export function renderGuide(game) {
       <ul class="guide__axes">${axes}
       </ul>
       <p>다섯 기준을 합쳐서 가장 잘 맞는 무기부터 순위를 정해요. 한방과 반격은 어느 쪽으로 달라도 차이를 모두 반영하기 때문에, 다른 세 기준과 영향이 비슷해지도록 조금 낮은 비중으로 합쳐요.</p>
-    </section>
+    </section>${game.centralResult ? renderCentralGuide() : ''}
     <section aria-labelledby="guide-not">
       <h2 id="guide-not">이런 것은 보지 않아요</h2>
       <ul class="guide__list">

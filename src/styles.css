@@ -127,6 +127,11 @@ legend { padding: 0; margin-bottom: 1.5rem; }
 .winner__frame img { position: absolute; height: auto; filter: grayscale(.3); }
 .winner__main { display: grid; justify-items: center; gap: .5rem; }
 .winner__icon { width: clamp(7rem, 30vw, 10rem); height: clamp(7rem, 30vw, 10rem); padding: 1rem; object-fit: contain; background: radial-gradient(circle, rgb(216 239 134 / .28) 0%, rgb(216 239 134 / .08) 55%, transparent 72%); filter: drop-shadow(0 0 .9rem rgb(216 239 134 / .35)); }
+.winner__icon-wrap { position: relative; display: inline-block; }
+/* 중앙형 특별 결과: 1순위 아이콘 오른쪽 아래의 기울어진 물음표. 확신하기 어려운 추천이라는 느낌을 준다. */
+.winner__badge { position: absolute; right: .35rem; bottom: .35rem; display: grid; place-items: center; width: 3rem; height: 3rem; border: 3px solid #18231e; border-radius: 50%; color: #18231e; background: #f2c14e; font-size: 1.95rem; font-weight: 900; line-height: 1; transform: rotate(14deg); box-shadow: 0 .2rem .6rem rgb(0 0 0 / .45); animation: winner-badge-wobble 2.4s ease-in-out infinite; }
+@keyframes winner-badge-wobble { 0%, 70%, 100% { transform: rotate(14deg); } 78% { transform: rotate(-8deg); } 86% { transform: rotate(20deg); } 94% { transform: rotate(6deg); } }
+@media (prefers-reduced-motion: reduce) { .winner__badge { animation: none; } }
 .winner__icon--text { display: grid; place-items: center; border-radius: 50%; color: #d8ef86; font-size: 3rem; font-weight: 800; }
 .winner__name { color: #d8ef86; font-size: clamp(2.5rem, 11vw, 3.75rem); line-height: 1.15; letter-spacing: -.01em; text-shadow: 0 0 1.5rem rgb(216 239 134 / .35); word-break: keep-all; overflow-wrap: anywhere; }
 .difficulty { display: flex; align-items: center; gap: .5rem; margin: 0; color: #d5ddd7; font-size: .95rem; font-weight: 700; text-shadow: 0 1px .4rem #172119, 0 0 1rem #172119; }

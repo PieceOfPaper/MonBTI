@@ -24,7 +24,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `src/assets/games/<작품 ID>/` | 작품 로고 파일 |
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
 | `src/assets/characters/<작품 ID>/` | 무기별 캐릭터 이미지 파일(`<weapon_id>_a·_b.webp`) |
-| `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 입문 난이도 별표(`difficulty.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
+| `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 와일즈 V2의 중앙형 응답 특별 결과(`central.js`·`central-copy.js`), 입문 난이도 별표(`difficulty.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
 | `src/ui/views.js` | 화면 마크업(작품 선택과 개발 중인 검사 목록·검사 설명·이름 입력·질문·결과) |
 | `src/ui/radar.js` | 오각형 방사형 차트 위치 계산과 SVG |
 | `src/ui/result-content.js` | 결과 화면과 공유 이미지가 함께 쓰는 표시 내용(제목·입문 난이도·소개 문구·추천 이유·기준 비교) |
@@ -70,11 +70,13 @@ npm run data:convert
 npm run sim:results
 npm run sim:results -- --model persona --noise 0.5 --samples 50000 --seed 7
 npm run sim:results -- --json
+npm run sim:results -- --game wilds_v2 --central
 ```
 
 - `uniform`: 모든 질문에 여섯 응답을 고르게 무작위 선택합니다. 축 점수가 50 근처에 몰립니다.
 - `persona`: 축별 취향을 0~100에서 고르게 뽑고, 질문 가중치 방향의 기대 동의 정도에 표준편차 `--noise`(기본 0.3)의 흔들림을 더해 가장 가까운 응답을 고릅니다.
 - 출력: 무기별 1순위 비율, 3순위 이내 비율, 평균 순위, 1순위가 된 사용자의 평균 축 점수. 균등 기준(1/무기 수)의 2배 초과는 ▲, 절반 미만은 ▼로 표시합니다.
+- `--central`: 사이트의 작품 설정 `centralResult`처럼 중앙형 응답 특별 결과를 적용합니다. 현재 이 규칙을 쓰는 와일즈 V2를 확인할 때 함께 지정하며, 특별 결과 비율을 함께 출력합니다.
 - 결과는 가정한 응답 모형의 추정치이며 실제 사용자 분포를 뜻하지 않습니다. 같은 seed는 같은 결과를 냅니다.
 
 ## 페르소나 테스트

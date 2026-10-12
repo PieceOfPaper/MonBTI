@@ -12,6 +12,7 @@ const withMedia = (weapons, media) => weapons.map((weapon) => ({ ...weapon, ...m
 // tag는 같은 로고를 쓰는 검사를 구분하는 짧은 표시다.
 // 와일즈 V2는 개발 중인 다음 버전 검사로, 무기·질문 원본을 Wilds_V2_* 탭으로 분리하고 표시 자료는 와일즈 것을 함께 쓴다.
 // 개발이 끝나면 development를 지우고 기존 와일즈보다 위에 등록한다.
+// centralResult가 true인 검사는 중앙형 응답에 특별 결과를 보여 준다(core/central.js, GitHub 이슈 #1). 현재 와일즈 V2에만 적용한다.
 export const supportedGames = [
   {
     id: 'wilds',
@@ -26,6 +27,7 @@ export const supportedGames = [
     name: '몬스터헌터 와일즈 V2',
     tag: 'V2',
     development: true,
+    centralResult: true,
     logo: wildsLogo,
     description: '다음 버전으로 준비 중인 와일즈 검사예요.',
     questions: wildsV2Questions.questions,

@@ -2,6 +2,7 @@
 //   npm run sim:results                                  두 응답 모형을 모두 계산
 //   npm run sim:results -- --model persona --noise 0.5   한 모형만, 흔들림 지정
 //   npm run sim:results -- --samples 50000 --seed 7 --json
+//   npm run sim:results -- --game wilds_v2 --central       중앙형 응답 특별 결과를 적용(와일즈 V2)
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,7 +39,8 @@ function formatResult(result) {
     `■ ${MODEL_LABELS[result.model]}`,
     `  표본 ${result.samples.toLocaleString()}회 · seed ${result.seed}${result.noise === null ? '' : ` · 흔들림 ${result.noise}`}`
       + ` · 균등 기준 1순위 ${percent(fair)}, ${RECOMMENDATION_COUNT}순위 이내 ${percent(RECOMMENDATION_COUNT / count)}`,
-    `  1·2순위 점수 동점(행 순서 등으로 결정) ${percent(result.ties / result.samples)}`,
+    `  1·2순위 점수 동점(행 순서 등으로 결정) ${percent(result.ties / result.samples)}`
+      + (result.central ? ` · 중앙형 특별 결과 ${percent(result.specials / result.samples)}` : ''),
     '',
     `  ${padEnd('무기', nameWidth)}    1순위  ${RECOMMENDATION_COUNT}위내  평균순위 │ ${padEnd('1순위 비율', 22)}${profileHeader}  ← 1순위가 된 사용자의 평균 축 점수`,
   ];
@@ -66,6 +68,7 @@ async function main() {
       seed: { type: 'string', default: '1' },
       noise: { type: 'string', default: '0.3' },
       json: { type: 'boolean', default: false },
+      central: { type: 'boolean', default: false },
     },
   });
   const models = values.model === 'all' ? Object.keys(ANSWER_MODELS) : [values.model];
@@ -76,7 +79,7 @@ async function main() {
   if (!Number.isFinite(noise) || noise < 0) throw new Error('--noise는 0 이상이어야 합니다.');
 
   const data = await loadData(values.game);
-  const results = models.map((model) => simulateDistribution({ ...data, model, samples, seed, noise }));
+  const results = models.map((model) => simulateDistribution({ ...data, model, samples, seed, noise, central: values.central }));
   if (values.json) {
     console.log(JSON.stringify(results, null, 2));
     return;

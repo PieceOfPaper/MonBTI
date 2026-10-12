@@ -25,6 +25,15 @@ describe('추천 비율 시뮬레이션', () => {
     expect(sum('topRate')).toBeCloseTo(2);
   });
 
+  it('central을 켜면 중앙형 응답 수를 세고, 비율 합은 그대로 유지한다', () => {
+    const off = simulateDistribution({ questions, weapons, model: 'uniform', samples: 500, seed: 3 });
+    const on = simulateDistribution({ questions, weapons, model: 'uniform', samples: 500, seed: 3, central: true });
+    expect(off.specials).toBe(0);
+    expect(on.specials).toBeGreaterThan(0);
+    expect(on.weapons.reduce((total, weapon) => total + weapon.firstRate, 0)).toBeCloseTo(1);
+    expect(on.weapons.reduce((total, weapon) => total + weapon.topRate, 0)).toBeCloseTo(2);
+  });
+
   it('같은 seed는 같은 결과를 낸다', () => {
     const run = () => simulateDistribution({ questions, weapons, model: 'persona', samples: 300, seed: 9 });
     expect(run()).toEqual(run());

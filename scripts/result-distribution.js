@@ -3,6 +3,7 @@
 import { AXIS_IDS } from '../src/core/axes.js';
 import { RESPONSES, responseCoefficient } from '../src/core/responses.js';
 import { computeAxisProfile, computeAxisTotals } from '../src/core/scoring.js';
+import { centralRecommendation, isCentralProfile } from '../src/core/central.js';
 import { RECOMMENDATION_COUNT, rankWeapons } from '../src/core/recommend.js';
 
 const RESPONSE_VALUES = RESPONSES.map(({ value }) => value);
@@ -58,8 +59,19 @@ export const ANSWER_MODELS = {
   },
 };
 
+// central이 참이면 사이트의 작품 설정 centralResult처럼 중앙형 응답에 특별 결과(src/core/central.js)를 적용한다.
+// 특별 결과의 순위는 1~3순위 뒤에 원래 순위의 나머지 무기를 이어 붙인 것이다.
+function finalRanking(weapons, profile, central) {
+  const ranked = rankWeapons(weapons, profile);
+  if (!central || !isCentralProfile(profile)) return { ranked, special: false };
+  const top = centralRecommendation(weapons, profile);
+  const topIds = new Set(top.map(({ weapon_id }) => weapon_id));
+  const rest = ranked.filter(({ weapon }) => !topIds.has(weapon.weapon_id));
+  return { ranked: [...top.map((weapon) => ({ weapon })), ...rest], special: true };
+}
+
 // samples번 모의 응답을 만들어 무기별 1순위·3순위 이내 횟수, 순위 합, 1순위가 된 사용자의 축 점수 합을 센다.
-export function simulateDistribution({ questions, weapons, model, samples, seed = 1, noise = 0.3 }) {
+export function simulateDistribution({ questions, weapons, model, samples, seed = 1, noise = 0.3, central = false }) {
   const answer = ANSWER_MODELS[model];
   if (!answer) throw new Error(`알 수 없는 응답 모형입니다: ${model}`);
   const random = createRandom(seed);
@@ -72,10 +84,12 @@ export function simulateDistribution({ questions, weapons, model, samples, seed 
   }));
   const byId = new Map(stats.map((entry) => [entry.weapon.weapon_id, entry]));
   let ties = 0;
+  let specials = 0;
 
   for (let i = 0; i < samples; i += 1) {
     const profile = computeAxisProfile(computeAxisTotals(questions, answer(questions, random, { noise })));
-    const ranked = rankWeapons(weapons, profile);
+    const { ranked, special } = finalRanking(weapons, profile, central);
+    if (special) specials += 1;
     ranked.forEach(({ weapon }, rank) => {
       const entry = byId.get(weapon.weapon_id);
       entry.rankSum += rank + 1;
@@ -84,7 +98,7 @@ export function simulateDistribution({ questions, weapons, model, samples, seed 
     const winner = byId.get(ranked[0].weapon.weapon_id);
     winner.first += 1;
     for (const axis of AXIS_IDS) winner.profileSum[axis] += profile[axis] ?? 0;
-    if (ranked.length > 1 && ranked[0].score === ranked[1].score) ties += 1;
+    if (!special && ranked.length > 1 && ranked[0].score === ranked[1].score) ties += 1;
   }
 
   return {
@@ -93,6 +107,8 @@ export function simulateDistribution({ questions, weapons, model, samples, seed 
     seed,
     noise: model === 'persona' ? noise : null,
     ties,
+    central,
+    specials,
     weapons: stats.map(({ weapon, first, top, rankSum, profileSum }) => ({
       weapon_id: weapon.weapon_id,
       weapon_name: weapon.weapon_name,
