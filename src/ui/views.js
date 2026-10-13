@@ -343,6 +343,17 @@ function renderCentralGuide() {
     </section>`;
 }
 
+// 이전 버전 검사에서 달라진 점. 작품 설정의 changes를 대략적인 목록으로 보여 준다.
+function renderChangesGuide({ from, items }) {
+  return `
+    <section aria-labelledby="guide-changes">
+      <h2 id="guide-changes">${escapeHtml(from)} 검사에서 달라진 점</h2>
+      <ul class="guide__list">${items.map((item) => `
+        <li>${escapeHtml(item)}</li>`).join('')}
+      </ul>
+    </section>`;
+}
+
 // 검사 설명. 누구를 위한 검사인지, 어떻게 답하고 어떤 기준으로 무기를 고르는지 게임 지식 없이 읽을 수 있게 쓴다.
 export function renderGuide(game) {
   const axes = axisModelOf(game).axes.map(({ short, name, guide, fit }) => `
@@ -388,7 +399,7 @@ export function renderGuide(game) {
         <li>몬스터의 움직임을 익히는 것처럼 모든 무기에 똑같이 필요한 것</li>
       </ul>
       <p class="guide__note">무기별 값은 테스트하면서 계속 다듬고 있어요. 결과는 첫 무기를 고르는 참고로 삼고, 마음에 드는 무기는 직접 써 보는 것을 추천해요.</p>
-    </section>
+    </section>${game.changes ? renderChangesGuide(game.changes) : ''}
     <div class="result__actions">
       <a class="button" href="#/${game.id}" data-start-quiz="${game.id}">검사 시작하기</a>
       <a class="button button--ghost" href="#/">작품 선택으로</a>

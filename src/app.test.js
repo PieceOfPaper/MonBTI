@@ -164,6 +164,15 @@ describe('화면', () => {
     expect(html).toContain('1순위 무기가 왜 추천됐는지');
   });
 
+  it('검사 설명 화면 맨 아래에 이전 버전에서 달라진 점을 보여 준다', () => {
+    const v2 = supportedGames.find(({ id }) => id === 'wilds_v2');
+    const html = renderGuide(v2);
+    expect(html).toContain('몬스터헌터 와일즈 검사에서 달라진 점');
+    for (const item of v2.changes.items) expect(html).toContain(item);
+    expect(html.indexOf('guide-changes')).toBeGreaterThan(html.indexOf('guide-not'));
+    expect(renderGuide(wilds)).not.toContain('guide-changes');
+  });
+
   it('작품 선택 화면은 작품 이름 대신 로고를 보여 주고 이름은 대체 텍스트로 남긴다', () => {
     const html = renderGameSelection(supportedGames);
     expect(html).toMatch(/<img class="game-card__logo" src="[^"]*logo[^"]*\.webp" alt="몬스터헌터 와일즈"/);
