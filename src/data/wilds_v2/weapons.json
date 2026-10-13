@@ -5,15 +5,15 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_V2_Weapon"
     },
-    "exported_at": "2026-10-13T11:39:13.252Z",
-    "converted_at": "2026-10-13T11:39:13.581Z"
+    "exported_at": "2026-10-13T16:58:58.106Z",
+    "converted_at": "2026-10-13T16:58:58.190Z"
   },
   "weapons": [
     {
       "weapon_id": "great_sword",
       "weapon_name": "대검",
       "attack": 90,
-      "constraint": 70,
+      "constraint": 75,
       "complexity": 30,
       "management": 5,
       "counter": 30
@@ -23,9 +23,9 @@
       "weapon_name": "태도",
       "attack": 50,
       "constraint": 45,
-      "complexity": 70,
+      "complexity": 60,
       "management": 60,
-      "counter": 95
+      "counter": 85
     },
     {
       "weapon_id": "sword_and_shield",
@@ -48,16 +48,16 @@
     {
       "weapon_id": "hammer",
       "weapon_name": "해머",
-      "attack": 90,
+      "attack": 85,
       "constraint": 25,
       "complexity": 30,
       "management": 15,
-      "counter": 35
+      "counter": 25
     },
     {
       "weapon_id": "hunting_horn",
       "weapon_name": "수렵피리",
-      "attack": 60,
+      "attack": 40,
       "constraint": 50,
       "complexity": 70,
       "management": 65,
@@ -79,25 +79,25 @@
       "constraint": 65,
       "complexity": 65,
       "management": 40,
-      "counter": 55
+      "counter": 75
     },
     {
       "weapon_id": "switch_axe",
       "weapon_name": "슬래시액스",
-      "attack": 85,
+      "attack": 80,
       "constraint": 65,
       "complexity": 70,
       "management": 85,
-      "counter": 75
+      "counter": 65
     },
     {
       "weapon_id": "charge_blade",
       "weapon_name": "차지액스",
       "attack": 75,
-      "constraint": 60,
+      "constraint": 85,
       "complexity": 95,
       "management": 100,
-      "counter": 80
+      "counter": 75
     },
     {
       "weapon_id": "insect_glaive",
@@ -106,7 +106,7 @@
       "constraint": 20,
       "complexity": 65,
       "management": 90,
-      "counter": 5
+      "counter": 20
     },
     {
       "weapon_id": "light_bowgun",
@@ -124,7 +124,7 @@
       "constraint": 60,
       "complexity": 15,
       "management": 75,
-      "counter": 45
+      "counter": 30
     },
     {
       "weapon_id": "bow",
@@ -132,8 +132,8 @@
       "attack": 30,
       "constraint": 15,
       "complexity": 40,
-      "management": 70,
-      "counter": 70
+      "management": 55,
+      "counter": 65
     }
   ]
 }

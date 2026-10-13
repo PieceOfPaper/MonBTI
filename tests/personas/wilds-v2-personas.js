@@ -113,12 +113,13 @@ export const wildsV2Personas = [
     description: '약한 성향형보다 조금 더 기울어 일반 결과를 받는다. 중앙형 특별 결과 경계 바깥을 확인하는 기준점이다.',
     // 중앙 이탈도 (15 + 10 + 10 + 10 + 10) / 5 = 11
     targetProfile: { attack: 65, constraint: 40, complexity: 40, management: 40, counter: 60 },
-    // 일반 결과지만 1·2순위 차이가 작아(1.11) 1순위는 고정하지 않고 건랜스·해머의 상위 3위만 확정한다(2026-10-13 사용자 확인).
+    // 일반 결과지만 1·2순위 차이가 작아(1.39) 1순위는 고정하지 않고 활·건랜스의 상위 3위만 확정한다.
+    // 2026-10-14 V2 무기 값 예외 수정(DEC-073)으로 해머가 4순위가 되어 건랜스·해머(2026-10-13 사용자 확인)에서 바꿨다.
     expected: {
       directCentral: false,
       answerCentral: false,
-      directTop3Includes: ['gunlance', 'hammer'],
-      answerTop3Includes: ['gunlance', 'hammer'],
+      directTop3Includes: ['bow', 'gunlance'],
+      answerTop3Includes: ['bow', 'gunlance'],
     },
   },
 ];
