@@ -5,8 +5,8 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_V2_Question"
     },
-    "exported_at": "2026-10-13T11:39:13.252Z",
-    "converted_at": "2026-10-13T11:39:13.581Z"
+    "exported_at": "2026-10-13T12:25:29.668Z",
+    "converted_at": "2026-10-13T12:25:29.765Z"
   },
   "questions": [
     {
@@ -122,10 +122,10 @@
     {
       "question_id": "wilds_q012",
       "question_order": 12,
-      "question_text": "여러 방법을 알고 있어도 실제로는 익숙한 방법부터 쓰는 편이다.",
+      "question_text": "상황에 따라 여러 방법 중 하나를 고르는 일도 할 만하다.",
       "attack": 0,
       "constraint": 0,
-      "complexity": -75,
+      "complexity": 75,
       "management": 0,
       "counter": 0
     },
