@@ -183,7 +183,11 @@ describe('작품별 적용', () => {
     const profile = v2ProfileOf(79, 70, 64, 59, 69);
     expect(centralDeviation(profile, v2.axisModel)).toBeCloseTo(18.2);
     expect(isCentralProfile(profile, v2.axisModel)).toBe(false);
-    expect(recommendWeapons(v2.weapons, profile, v2Options).slice(0, 2).map(({ weapon_id }) => weapon_id)).toEqual(['gunlance', 'switch_axe']);
+    // 무기 순위는 시트 수치에 따라 바뀌므로, 특별 결과 없이 일반 추천 순위를 그대로 쓰는지만 확인한다.
+    const ids = (list) => list.map(({ weapon_id }) => weapon_id);
+    const final = finalRanking(v2.weapons, profile, { centralResult: true, axisModel: v2.axisModel });
+    expect(final.central).toBe(false);
+    expect(final.ranked.slice(0, 3).map(({ weapon }) => weapon.weapon_id)).toEqual(ids(recommendWeapons(v2.weapons, profile, v2Options)));
   });
 
   it('특별 결과가 아닌 V2 결과는 일반 추천과 같다', () => {

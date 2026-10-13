@@ -94,8 +94,8 @@ npm run analyze:personas -- --save base.json
 npm run analyze:personas -- --baseline base.json
 ```
 
-- `test:personas`: 모든 작품의 fixture 형식, 실제 응답 재현 오차, 확정 기대 추천, 결정성, ±5 인접값의 상위 3개 공통 무기, 무기 기준점을 검사합니다. 일반 `npm test`에도 포함됩니다.
-- `analyze:personas`: 페르소나별 목표·응답 프로필과 오차, 자동 생성한 응답, 1~5순위, 인접값 변화, 무기 기준점, 간격 10의 추천 영역 분포와 경고·실패를 출력합니다. 실패가 있으면 종료 코드 1입니다. 간격 10은 약 1초, 간격 5는 약 25초 걸립니다.
+- `test:personas`: 모든 작품의 fixture 형식, 묶음 등록, 결정성처럼 시트 수치와 무관한 조건만 검사합니다. 일반 `npm test`에도 포함됩니다. 실제 응답 재현 오차, 확정 기대 추천, ±5 인접값, 무기 기준점은 수치에 따라 달라지므로 `analyze:personas`에서 보고합니다(DEC-074).
+- `analyze:personas`: 페르소나별 목표·응답 프로필과 오차, 자동 생성한 응답, 1~5순위, 인접값 변화, 무기 기준점, 간격 10의 추천 영역 분포와 경고·기대와 다른 결과·실패를 출력합니다. 종료 코드 1은 fixture 형식 오류(실패)일 때뿐이며, 기대와 다른 결과는 종료 코드를 바꾸지 않습니다. `--github`를 붙이면 기대와 다른 결과를 GitHub Actions 경고 주석으로도 출력합니다. 간격 10은 약 1초, 간격 5는 약 25초 걸립니다.
 - `--game wilds_v2`: 와일즈 V2를 분석합니다. 중앙형 응답 특별 결과를 포함한 최종 순위(`src/core/central.js`의 `finalRanking`)로 판정하고 특별 결과 적용 여부와 비율을 함께 출력합니다.
 - `--save`로 저장한 분포 파일은 비교용 산출물이므로 커밋하지 않습니다.
 - 질문이 여러 축을 측정하도록 바뀌면 응답 자동 탐색이 오류를 냅니다. 그때는 기획에 따라 빔 탐색이나 답변 fixture 방식으로 바꿉니다.
@@ -114,12 +114,13 @@ npm run analyze:personas -- --baseline base.json
 1. 원본 시트의 무기·질문을 편집합니다.
 2. 고친 검사의 워크플로를 엽니다. 와일즈 V2는 [시트 데이터 갱신 — Wilds_V2](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data-wilds-v2.yml), 기존 와일즈는 [시트 데이터 갱신 — Wilds](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data-wilds.yml)입니다. 기존 와일즈·V2 갱신은 질문 문구·오타 수정처럼 수치를 바꾸지 않는 수정에 씁니다.
 3. **Run workflow**에서 브랜치를 **main**으로 선택하고 실행합니다. 별도 입력값은 없습니다. 다른 검사의 탭은 읽지 않으므로 그 탭의 오류나 변경에 영향을 받지 않습니다.
-4. `refresh`가 성공하면 이어서 시작되는 [Deploy GitHub Pages](https://github.com/PieceOfPaper/MonBTI/actions/workflows/deploy-pages.yml) 실행이 성공했는지 확인한 뒤 [사이트](https://pieceofpaper.github.io/MonBTI/)에서 확인합니다. 페이지는 최대 10분 캐시되므로 이전 내용이 보이면 강력 새로고침합니다.
+4. 실행 요약의 **페르소나 보고서**에서 경고와 ‘기대와 다른 결과’를 확인합니다. 수치 변경으로 기대 추천이 달라져도 갱신은 막히지 않으므로, 의도한 변화면 나중에 fixture 기대값을 다시 정합니다.
+5. `refresh`가 성공하면 이어서 시작되는 [Deploy GitHub Pages](https://github.com/PieceOfPaper/MonBTI/actions/workflows/deploy-pages.yml) 실행이 성공했는지 확인한 뒤 [사이트](https://pieceofpaper.github.io/MonBTI/)에서 확인합니다. 페이지는 최대 10분 캐시되므로 이전 내용이 보이면 강력 새로고침합니다.
 
 현재 시트는 로그인 없이 XLSX 다운로드가 가능하므로 별도 인증 Secret을 요구하지 않습니다. 시트 공유 설정은 변경하지 않습니다. 접근이 막히면 해당 단계에서 실패하며, 직접 내보낸 XLSX를 사용하는 로컬 절차로 반영할 수 있습니다.
 `--if-changed`로 변환하기 때문에 실제 데이터·원본·형식 버전이 같으면 파일을 다시 쓰거나 커밋하지 않고 현재 데이터로 다시 배포합니다. 무기 탭의 `reason` 메모는 JSON에 포함하지 않습니다.
 
-커밋에는 워크플로의 `GITHUB_TOKEN`을 사용합니다. 이 토큰으로 만든 푸시는 다른 `push` 워크플로를 실행하지 않으므로, 갱신 워크플로가 테스트·빌드로 검증한 뒤 `workflow_dispatch`로 배포 워크플로를 직접 실행합니다(`actions: write` 권한). 같은 실행에서 바로 배포하면 Pages 배포 버전이 데이터 커밋이 아니라 실행을 시작한 커밋이 되어, 같은 커밋의 푸시 배포와 겹칠 때 새 데이터가 반영되지 않은 채 성공으로 끝날 수 있기 때문입니다. 다운로드·검증·테스트·빌드에 실패하면 커밋과 배포를 진행하지 않습니다. 다른 작업으로 `main`이 먼저 변경되면 강제 푸시하지 않고 중단하므로 최신 상태에서 버튼을 다시 누릅니다. 커밋 후 배포만 실패했다면 **Deploy GitHub Pages**를 `main`으로 다시 실행합니다.
+커밋에는 워크플로의 `GITHUB_TOKEN`을 사용합니다. 이 토큰으로 만든 푸시는 다른 `push` 워크플로를 실행하지 않으므로, 갱신 워크플로가 테스트·빌드로 검증한 뒤 `workflow_dispatch`로 배포 워크플로를 직접 실행합니다(`actions: write` 권한). 같은 실행에서 바로 배포하면 Pages 배포 버전이 데이터 커밋이 아니라 실행을 시작한 커밋이 되어, 같은 커밋의 푸시 배포와 겹칠 때 새 데이터가 반영되지 않은 채 성공으로 끝날 수 있기 때문입니다. 다운로드·검증·테스트·빌드에 실패하거나 페르소나 fixture 형식이 잘못되면 커밋과 배포를 진행하지 않습니다. 페르소나 기대 추천이 달라진 것만으로는 막지 않습니다. 다른 작업으로 `main`이 먼저 변경되면 강제 푸시하지 않고 중단하므로 최신 상태에서 버튼을 다시 누릅니다. 커밋 후 배포만 실패했다면 **Deploy GitHub Pages**를 `main`으로 다시 실행합니다.
 
 ## Codex와 Claude Code 시작 방법
 

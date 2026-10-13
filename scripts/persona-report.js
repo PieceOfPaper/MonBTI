@@ -5,7 +5,9 @@
 //   npm run analyze:personas -- --step 5              상세 간격 5(21⁵ 프로필, 오래 걸림)
 //   npm run analyze:personas -- --save base.json      분포를 기준 결과로 저장
 //   npm run analyze:personas -- --baseline base.json  저장한 기준 결과와 비율 증감 비교
-// 실패 조건(형식·재현 오차·확정 기대·기준점·±5 상위 3개 단절·한 번도 추천되지 않는 무기)이 있으면 종료 코드 1로 끝난다.
+//   npm run analyze:personas -- --github             GitHub Actions 주석(::warning::)도 함께 출력
+// 무기·질문 수치에 따라 달라지는 결과(재현 오차·확정 기대·기준점·±5 상위 3개 단절·한 번도 추천되지 않는 무기)는
+// '기대와 다른 결과'로 보고하고 종료 코드를 바꾸지 않는다. fixture 형식 오류만 실패로 보고 종료 코드 1로 끝난다.
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -96,12 +98,14 @@ async function main() {
       step: { type: 'string', default: '10' },
       save: { type: 'string' },
       baseline: { type: 'string' },
+      github: { type: 'boolean', default: false },
     },
   });
   const data = await loadPersonaSuite(values.game);
   const { personas, rules } = data;
   const step = Number(values.step);
   const failures = [];
+  const mismatches = [];
   const warnings = [];
   const out = [];
 
@@ -118,8 +122,8 @@ async function main() {
       const result = runPersona(persona, data);
       const neighborhood = analyzeNeighborhood(data.weapons, persona.targetProfile, { rules });
       out.push(formatPersona(result, neighborhood, data.questions), '');
-      failures.push(...checkPersona(result).map((f) => `${persona.id}: ${f}`));
-      failures.push(...disjointSmallChanges(neighborhood)
+      mismatches.push(...checkPersona(result).map((f) => `${persona.id}: ${f}`));
+      mismatches.push(...disjointSmallChanges(neighborhood)
         .map(({ axis, delta }) => `${persona.id}: ${shortName[axis]} ${signed(delta)}에서 상위 3개가 하나도 겹치지 않음`));
       warnings.push(...personaWarnings(result).map((w) => `${persona.id}: ${w}`));
       warnings.push(...neighborhood.variations.filter(({ delta, top1Changed }) => Math.abs(delta) === 5 && top1Changed)
@@ -133,8 +137,8 @@ async function main() {
   for (const anchor of checkWeaponAnchors(data.weapons, rules)) {
     out.push(`  ${anchor.ok ? '✓' : '✗'} ${anchor.weapon_name}(${anchor.weapon_id}) → 1순위 ${anchor.top1}${anchor.central ? '(중앙형 특별 결과)' : ''}`
       + ` · 2순위 ${anchor.runnerUp} · 차이 ${fmt(anchor.gap)}${anchor.duplicates.length ? ` · 값이 같은 무기 [${anchor.duplicates.join(', ')}]` : ''}`);
-    if (anchor.duplicates.length) failures.push(`기준점: ${anchor.weapon_id}와 다섯 값이 같은 무기 [${anchor.duplicates.join(', ')}]`);
-    if (!anchor.ok) failures.push(`기준점: ${anchor.weapon_id}가 자신의 기준값에서 1순위가 아님(${anchor.top1})`);
+    if (anchor.duplicates.length) mismatches.push(`기준점: ${anchor.weapon_id}와 다섯 값이 같은 무기 [${anchor.duplicates.join(', ')}]`);
+    if (!anchor.ok) mismatches.push(`기준점: ${anchor.weapon_id}가 자신의 기준값에서 1순위가 아님(${anchor.top1})`);
   }
   out.push('');
 
@@ -143,12 +147,20 @@ async function main() {
   const baseline = values.baseline ? JSON.parse(await readFile(resolve(values.baseline), 'utf8')) : null;
   out.push(formatDistribution(distribution, baseline), `  계산 시간 ${((Date.now() - started) / 1000).toFixed(1)}초`, '');
   const findings = distributionFindings(distribution);
-  failures.push(...findings.failures.map((f) => `추천 영역: ${f}`));
+  mismatches.push(...findings.failures.map((f) => `추천 영역: ${f}`));
   warnings.push(...findings.warnings.map((w) => `추천 영역: ${w}`));
 
   out.push(`■ 경고 ${warnings.length}건 — 테스트와 데이터 갱신을 막지 않습니다`, ...warnings.map((w) => `  ! ${w}`), '');
+  out.push(`■ 기대와 다른 결과 ${mismatches.length}건 — 테스트와 데이터 갱신을 막지 않습니다. 의도한 수치 변경인지 확인하고 fixture 기대값을 다시 정합니다`,
+    ...mismatches.map((m) => `  ✗ ${m}`), '');
   out.push(`■ 실패 ${failures.length}건`, ...failures.map((f) => `  ✗ ${f}`));
   console.log(out.join('\n'));
+  if (values.github) {
+    // 주석 문구의 줄바꿈·% 문자는 GitHub Actions 규칙대로 이스케이프한다.
+    const escape = (text) => text.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+    for (const m of mismatches) console.log(`::warning title=${values.game} 기대와 다른 결과::${escape(m)}`);
+    for (const f of failures) console.log(`::error title=${values.game} 페르소나 실패::${escape(f)}`);
+  }
 
   if (values.save) {
     const saved = { meta: data.meta, ...distribution };

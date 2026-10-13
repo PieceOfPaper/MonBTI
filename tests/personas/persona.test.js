@@ -1,14 +1,13 @@
 // 페르소나 회귀 테스트. 사양은 docs/persona-test-plan.md를 따른다.
-// 추천 영역 전체 순회와 상세 보고서는 npm run analyze:personas에서 실행한다.
+// 여기서는 fixture 형식과 계산의 결정성처럼 시트 수치와 무관한 조건만 검사한다.
+// 기대 추천·재현 오차·±5 인접값·무기 기준점·추천 영역처럼 무기·질문 수치에 따라 달라지는 결과는
+// npm run analyze:personas 보고서에서 '기대와 다른 결과'로 알리며 테스트와 데이터 갱신을 막지 않는다.
 // 작품별 페르소나 묶음(suites.js)을 모두 검사한다. 와일즈 V2는 중앙형 응답 특별 결과를 적용한 최종 순위로 판정한다.
 import { describe, expect, it } from 'vitest';
 import { supportedGames } from '../../src/games/index.js';
 import { AXIS_IDS } from '../../src/core/axes.js';
 import { MultiAxisQuestionError, groupQuestionsByAxis, searchAnswers } from './answer-search.js';
-import {
-  analyzeNeighborhood, checkPersona, checkWeaponAnchors, describePersonaResult, disjointSmallChanges,
-  runPersona, validatePersonas,
-} from './persona-runner.js';
+import { checkWeaponAnchors, runPersona, validatePersonas } from './persona-runner.js';
 import { PERSONA_GAME_IDS, loadPersonaSuite } from './suites.js';
 
 const suites = await Promise.all(PERSONA_GAME_IDS.map(loadPersonaSuite));
@@ -100,31 +99,17 @@ describe('응답 자동 탐색', () => {
 const personaCases = suites.flatMap((suite) => suite.personas.map((persona) => [suite.game, persona.id, persona, suite]));
 
 describe.each(personaCases)('%s 페르소나 %s', (_, __, persona, suite) => {
-  const result = runPersona(persona, suite);
-
-  it('실제 응답으로 목표 프로필을 허용 오차 안에서 재현하고 확정 기대 추천을 만족한다', () => {
-    const failures = checkPersona(result);
-    expect(failures, `${failures.join('\n')}\n${describePersonaResult(result)}`).toEqual([]);
-  });
-
   it('같은 입력에서 결과가 달라지지 않는다', () => {
-    expect(runPersona(persona, suite)).toEqual(result);
-  });
-
-  it('±5 인접값에서 기존 상위 3개와 공통 무기가 남는다', () => {
-    const disjoint = disjointSmallChanges(analyzeNeighborhood(suite.weapons, persona.targetProfile, { rules: suite.rules }));
-    const detail = disjoint.map(({ axis, delta, top3 }) => `${axis} ${delta > 0 ? '+' : ''}${delta}: [${top3.join(', ')}]`);
-    expect(detail, describePersonaResult(result)).toEqual([]);
+    expect(runPersona(persona, suite)).toEqual(runPersona(persona, suite));
   });
 });
 
 describe('무기 기준점', () => {
   it.each(suites.flatMap(({ game, weapons, rules }) => checkWeaponAnchors(weapons, rules).map((anchor) => [game, anchor.weapon_id, anchor])))(
-    '%s %s는 자신의 기준값에서 100점으로 1순위가 된다',
+    '%s %s는 자신의 기준값에서 100점이다',
     (_, __, anchor) => {
-      expect(anchor.duplicates, `다섯 값이 같은 무기: ${anchor.duplicates.join(', ')}`).toEqual([]);
+      // 1순위 여부와 다섯 값이 같은 무기는 수치에 따라 달라지므로 보고서에서 확인한다.
       expect(anchor.score).toBe(100);
-      expect(anchor.top1, `${anchor.weapon_id} 기준점의 1순위가 ${anchor.top1}`).toBe(anchor.weapon_id);
     },
   );
 });

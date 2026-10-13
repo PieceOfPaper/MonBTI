@@ -258,7 +258,8 @@ describe('추천 이유 — 문구와 화면', () => {
 
   it('결과 화면에서 1순위 표시 아래·비교 버튼 위에 두고, 비교 대상과 관계없이 1순위 설명을 유지한다', () => {
     const user = { attack: 73, freedom: 21, complexity: 57, management: 56, counter: 23 };
-    const weapons = rankWeapons(wilds.weapons, user).slice(0, 3).map(({ weapon: w }) => w);
+    // 시트 수치가 바뀌어도 1·2순위 차이가 같도록 고정 예시 무기를 쓴다.
+    const weapons = rankWeapons(EXAMPLE_WEAPONS, user).slice(0, 3).map(({ weapon: w }) => w);
     const result = { weapons, profile: user, nickname: '헌터' };
     const reason = buildRecommendationReason(user, weapons[0], weapons[1]);
     const first = renderResult(wilds, result, { reason });
