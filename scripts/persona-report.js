@@ -9,7 +9,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { AXES } from '../src/core/axes.js';
+import { AXIS_BY_ID } from '../src/core/axes.js';
 import {
   analyzeDistribution, analyzeNeighborhood, checkPersona, checkWeaponAnchors, disjointSmallChanges,
   distributionFindings, fmt, hasExpectations, pct, personaWarnings, runPersona, validatePersonas,
@@ -23,10 +23,10 @@ const displayWidth = (text) => [...text].reduce((sum, ch) => sum + (/[ᄀ-ᇿ㄰
 const padEnd = (text, width) => text + ' '.repeat(Math.max(0, width - displayWidth(text)));
 const padStart = (text, width) => ' '.repeat(Math.max(0, width - displayWidth(text))) + text;
 const signed = (n) => (n > 0 ? `+${n}` : `${n}`);
-const shortName = Object.fromEntries(AXES.map(({ id, short }) => [id, short]));
+const shortName = Object.fromEntries(Object.values(AXIS_BY_ID).map(({ id, short }) => [id, short]));
 
-function axisRow(label, profile) {
-  return `  ${padEnd(label, 12)}${AXES.map(({ id }) => padStart(fmt(profile[id]), 8)).join('')}`;
+function axisRow(axes, label, profile) {
+  return `  ${padEnd(label, 12)}${axes.map(({ id }) => padStart(fmt(profile[id]), 8)).join('')}`;
 }
 
 function rankLines(ranked) {
@@ -38,15 +38,15 @@ function rankLines(ranked) {
 const centralTag = (part) => (part.central ? ` — 중앙형 특별 결과(이탈도 ${fmt(part.deviation)})` : '');
 
 function formatPersona(result, neighborhood, questions) {
-  const { persona, direct, answer } = result;
+  const { persona, direct, answer, axes } = result;
   const answerText = questions.map(({ question_id }) => `${question_id.replace(/^.*_q/, 'q')}=${answer.answers[question_id]}`);
   const lines = [
     `■ ${persona.name} (${persona.id})${hasExpectations(persona) ? '' : ' — 관찰용'}`,
     `  ${persona.description}`,
-    `  ${padEnd('', 12)}${AXES.map(({ short }) => padStart(short, 8)).join('')}`,
-    axisRow('목표', direct.profile),
-    axisRow('응답 결과', answer.profile),
-    axisRow('오차', answer.axisErrors),
+    `  ${padEnd('', 12)}${axes.map(({ short }) => padStart(short, 8)).join('')}`,
+    axisRow(axes, '목표', direct.profile),
+    axisRow(axes, '응답 결과', answer.profile),
+    axisRow(axes, '오차', answer.axisErrors),
     `  최대 축 오차 ${fmt(answer.maxAxisError)} / 허용 ${result.tolerance.maxAxisError}`
       + ` · 평균 절대 오차 ${fmt(answer.meanAbsoluteError)} / 허용 ${result.tolerance.meanAbsoluteError}`,
     `  응답: ${answerText.join(' ')}`,
@@ -59,7 +59,7 @@ function formatPersona(result, neighborhood, questions) {
   lines.push(firstChange
     ? `  인접값: ${shortName[firstChange.axis]} ${signed(firstChange.delta)}에서 1순위가 ${firstChange.top1}(으)로 처음 바뀜`
     : `  인접값: ±${Math.max(...neighborhood.variations.map(({ delta }) => Math.abs(delta)))} 안에서 1순위 유지`);
-  lines.push(`  1순위 유지 범위: ${AXES.map(({ id, short }) => `${short} ${stableRange[id].minus}~${signed(stableRange[id].plus)}`).join(' · ')}`);
+  lines.push(`  1순위 유지 범위: ${axes.map(({ id, short }) => `${short} ${stableRange[id].minus}~${signed(stableRange[id].plus)}`).join(' · ')}`);
   for (const v of neighborhood.variations.filter(({ entered, top1Changed, centralChanged }) => entered.length || top1Changed || centralChanged)) {
     const centralChange = v.centralChanged ? ` · 특별 결과 ${v.central ? '적용' : '해제'}` : '';
     lines.push(`    ${shortName[v.axis]} ${padStart(signed(v.delta), 3)} → 1순위 ${v.top1}${v.top1Changed ? '*' : ''}${centralChange}`

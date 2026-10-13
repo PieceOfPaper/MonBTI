@@ -24,6 +24,7 @@ describe('페르소나 묶음', () => {
       const site = supportedGames.find(({ id }) => id === game);
       expect(site, `${game}이 사이트 작품 설정에 없음`).toBeTruthy();
       expect(rules.centralResult, `${game}의 centralResult`).toBe(Boolean(site.centralResult));
+      expect(rules.axisModel, `${game}의 axisModel`).toBe(site.axisModel);
     }
   });
 
@@ -87,9 +88,10 @@ describe('응답 자동 탐색', () => {
   });
 
   it('현재 질문으로 같은 목표에서 항상 같은 응답을 찾는다', () => {
-    for (const { personas, questions } of suites) {
+    for (const { personas, questions, rules } of suites) {
       for (const persona of personas) {
-        expect(searchAnswers(questions, persona.targetProfile)).toEqual(searchAnswers(questions, persona.targetProfile));
+        const search = () => searchAnswers(questions, persona.targetProfile, rules.axisModel);
+        expect(search()).toEqual(search());
       }
     }
   });

@@ -5,8 +5,8 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_V2_Question"
     },
-    "exported_at": "2026-10-12T11:44:12.485Z",
-    "converted_at": "2026-10-12T11:44:12.567Z"
+    "exported_at": "2026-10-13T11:39:13.252Z",
+    "converted_at": "2026-10-13T11:39:13.581Z"
   },
   "questions": [
     {
@@ -14,7 +14,7 @@
       "question_order": 1,
       "question_text": "조금씩 달라지는 것보다, 한 번에 크게 달라지는 순간이 더 좋다.",
       "attack": 100,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -24,7 +24,7 @@
       "question_order": 2,
       "question_text": "큰 변화 하나보다, 작은 변화가 계속 이어지는 편이 더 만족스럽다.",
       "attack": -100,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -34,7 +34,7 @@
       "question_order": 3,
       "question_text": "조금 오래 기다리더라도, 눈에 띄는 결과를 한 번에 보고 싶다.",
       "attack": 75,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -44,7 +44,7 @@
       "question_order": 4,
       "question_text": "한 번을 오래 준비하기보다, 짧게 여러 번 해보는 편이 즐겁다.",
       "attack": -75,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -54,7 +54,7 @@
       "question_order": 5,
       "question_text": "하던 일을 끝내야 다른 일을 할 수 있으면 답답하다.",
       "attack": 0,
-      "freedom": 100,
+      "constraint": -100,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -64,7 +64,7 @@
       "question_order": 6,
       "question_text": "중간에 바꾸기보다, 시작한 일은 끝까지 이어가는 편이 편하다.",
       "attack": 0,
-      "freedom": -100,
+      "constraint": 100,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -74,7 +74,7 @@
       "question_order": 7,
       "question_text": "짧게 끊어 가며 그때그때 다음 일을 고르는 편이 좋다.",
       "attack": 0,
-      "freedom": 75,
+      "constraint": -75,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -84,7 +84,7 @@
       "question_order": 8,
       "question_text": "한 단계씩 마쳐야 다음으로 넘어가는 방식도 답답하지 않다.",
       "attack": 0,
-      "freedom": -75,
+      "constraint": 75,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -94,7 +94,7 @@
       "question_order": 9,
       "question_text": "방법이 하나로 정해진 일보다, 매번 알맞은 방법을 고르는 일이 더 재미있다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 100,
       "management": 0,
       "counter": 0
@@ -102,9 +102,9 @@
     {
       "question_id": "wilds_q010",
       "question_order": 10,
-      "question_text": "여러 방법을 고르기보다, 익숙한 방법 하나를 잘 쓰는 편이 좋다.",
+      "question_text": "상황이 바뀔 때마다 알맞은 방법을 다시 고르는 일은 부담스럽다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": -100,
       "management": 0,
       "counter": 0
@@ -112,9 +112,9 @@
     {
       "question_id": "wilds_q011",
       "question_order": 11,
-      "question_text": "규칙이 많아도 하나씩 알아가는 과정은 재미있다.",
+      "question_text": "처음에 익혀야 할 규칙이 많아도 하나씩 배우면 할 만하다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 75,
       "management": 0,
       "counter": 0
@@ -122,9 +122,9 @@
     {
       "question_id": "wilds_q012",
       "question_order": 12,
-      "question_text": "필요할 때마다 다른 방법을 떠올려야 하면 금방 피곤해진다.",
+      "question_text": "여러 방법을 알고 있어도 실제로는 익숙한 방법부터 쓰는 편이다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": -75,
       "management": 0,
       "counter": 0
@@ -132,9 +132,9 @@
     {
       "question_id": "wilds_q013",
       "question_order": 13,
-      "question_text": "한 가지를 하는 동안에도, 함께 챙길 것이 몇 개쯤 있는 편이 재미있다.",
+      "question_text": "한 가지 일을 하면서 함께 챙길 것이 몇 개쯤 있는 편이 재미있다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": 100,
       "counter": 0
@@ -142,9 +142,9 @@
     {
       "question_id": "wilds_q014",
       "question_order": 14,
-      "question_text": "여러 가지를 챙기기보다, 한 가지에만 집중할 때 편하다.",
+      "question_text": "한 가지 일을 하면서 여러 상태를 계속 확인하면 금방 지친다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": -100,
       "counter": 0
@@ -152,9 +152,9 @@
     {
       "question_id": "wilds_q015",
       "question_order": 15,
-      "question_text": "잘 돌아가게 하려고 중간중간 손보는 일도 싫지 않다.",
+      "question_text": "중간중간 상태를 확인하고 손보는 일도 할 만하다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": 75,
       "counter": 0
@@ -162,9 +162,9 @@
     {
       "question_id": "wilds_q016",
       "question_order": 16,
-      "question_text": "다시 채워야 하는 물건보다, 언제든 바로 쓸 수 있는 물건이 좋다.",
+      "question_text": "쓰고 있는 물건이 얼마나 남았는지는 다 쓴 뒤에야 알아차리는 편이다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": -75,
       "counter": 0
@@ -172,9 +172,9 @@
     {
       "question_id": "wilds_q017",
       "question_order": 17,
-      "question_text": "답이 정해진 문제를 정확히 푸는 일이 좋다.",
+      "question_text": "나는 답이 정해진 문제를 푸는 것을 좋아한다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": 0,
       "counter": 50
@@ -182,19 +182,19 @@
     {
       "question_id": "wilds_q018",
       "question_order": 18,
-      "question_text": "정해진 답을 찾기보다, 내 방식대로 해보는 일이 좋다.",
+      "question_text": "박자에 맞춰 움직이면 일이 더 잘 풀리는 느낌이 든다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": 0,
-      "counter": -50
+      "counter": 50
     },
     {
       "question_id": "wilds_q019",
       "question_order": 19,
-      "question_text": "먼저 나서기보다, 상대의 움직임을 보고 맞추는 편이 편하다.",
+      "question_text": "신호를 보고 그에 맞춰 움직이는 일이 재미있다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": 0,
       "counter": 100
@@ -202,12 +202,12 @@
     {
       "question_id": "wilds_q020",
       "question_order": 20,
-      "question_text": "상대가 어떻게 나올지 기다리기보다, 내가 먼저 움직이는 편이 좋다.",
+      "question_text": "상대의 행동을 보고 움직이는 방식은 성미에 맞지 않는다.",
       "attack": 0,
-      "freedom": 0,
+      "constraint": 0,
       "complexity": 0,
       "management": 0,
-      "counter": -100
+      "counter": -75
     }
   ]
 }

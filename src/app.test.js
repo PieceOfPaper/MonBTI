@@ -25,11 +25,19 @@ describe('작품 데이터', () => {
     expect(supportedGames.filter(({ development }) => development).map(({ id }) => id)).toEqual(['wilds_v2']);
   });
 
+  it('기존 와일즈는 자유도, 와일즈 V2는 행동 제약 축을 쓴다', () => {
+    const v2 = supportedGames.find(({ id }) => id === 'wilds_v2');
+    expect(wilds.axisModel.axisIds).toEqual(['attack', 'freedom', 'complexity', 'management', 'counter']);
+    expect(v2.axisModel.axisIds).toEqual(['attack', 'constraint', 'complexity', 'management', 'counter']);
+    for (const item of [...v2.weapons, ...v2.questions]) expect(item).not.toHaveProperty('freedom');
+    for (const item of [...wilds.weapons, ...wilds.questions]) expect(item).not.toHaveProperty('constraint');
+  });
+
   it.each(supportedGames.map((game) => [game.id, game]))('%s 질문 JSON은 question_order로 정렬되어 있고 무기 기준값은 0~100이다', (_, game) => {
     const orders = game.questions.map(({ question_order }) => question_order);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
     for (const weapon of game.weapons) {
-      for (const axis of ['attack', 'freedom', 'complexity', 'management', 'counter']) {
+      for (const axis of game.axisModel.axisIds) {
         expect(weapon[axis]).toBeGreaterThanOrEqual(0);
         expect(weapon[axis]).toBeLessThanOrEqual(100);
       }

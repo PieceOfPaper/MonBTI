@@ -5,15 +5,15 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_V2_Weapon"
     },
-    "exported_at": "2026-10-12T11:44:12.485Z",
-    "converted_at": "2026-10-12T11:44:12.567Z"
+    "exported_at": "2026-10-13T11:39:13.252Z",
+    "converted_at": "2026-10-13T11:39:13.581Z"
   },
   "weapons": [
     {
       "weapon_id": "great_sword",
       "weapon_name": "대검",
       "attack": 90,
-      "freedom": 30,
+      "constraint": 70,
       "complexity": 30,
       "management": 5,
       "counter": 30
@@ -22,7 +22,7 @@
       "weapon_id": "long_sword",
       "weapon_name": "태도",
       "attack": 50,
-      "freedom": 55,
+      "constraint": 45,
       "complexity": 70,
       "management": 60,
       "counter": 95
@@ -31,7 +31,7 @@
       "weapon_id": "sword_and_shield",
       "weapon_name": "한손검",
       "attack": 25,
-      "freedom": 95,
+      "constraint": 5,
       "complexity": 40,
       "management": 5,
       "counter": 30
@@ -40,7 +40,7 @@
       "weapon_id": "dual_blades",
       "weapon_name": "쌍검",
       "attack": 10,
-      "freedom": 95,
+      "constraint": 5,
       "complexity": 35,
       "management": 45,
       "counter": 55
@@ -49,7 +49,7 @@
       "weapon_id": "hammer",
       "weapon_name": "해머",
       "attack": 90,
-      "freedom": 75,
+      "constraint": 25,
       "complexity": 30,
       "management": 15,
       "counter": 35
@@ -58,7 +58,7 @@
       "weapon_id": "hunting_horn",
       "weapon_name": "수렵피리",
       "attack": 60,
-      "freedom": 50,
+      "constraint": 50,
       "complexity": 70,
       "management": 65,
       "counter": 30
@@ -67,7 +67,7 @@
       "weapon_id": "lance",
       "weapon_name": "랜스",
       "attack": 20,
-      "freedom": 65,
+      "constraint": 35,
       "complexity": 35,
       "management": 10,
       "counter": 100
@@ -76,7 +76,7 @@
       "weapon_id": "gunlance",
       "weapon_name": "건랜스",
       "attack": 80,
-      "freedom": 35,
+      "constraint": 65,
       "complexity": 65,
       "management": 40,
       "counter": 55
@@ -85,7 +85,7 @@
       "weapon_id": "switch_axe",
       "weapon_name": "슬래시액스",
       "attack": 85,
-      "freedom": 35,
+      "constraint": 65,
       "complexity": 70,
       "management": 85,
       "counter": 75
@@ -94,7 +94,7 @@
       "weapon_id": "charge_blade",
       "weapon_name": "차지액스",
       "attack": 75,
-      "freedom": 40,
+      "constraint": 60,
       "complexity": 95,
       "management": 100,
       "counter": 80
@@ -103,7 +103,7 @@
       "weapon_id": "insect_glaive",
       "weapon_name": "조충곤",
       "attack": 65,
-      "freedom": 80,
+      "constraint": 20,
       "complexity": 65,
       "management": 90,
       "counter": 5
@@ -112,7 +112,7 @@
       "weapon_id": "light_bowgun",
       "weapon_name": "라이트보우건",
       "attack": 20,
-      "freedom": 95,
+      "constraint": 5,
       "complexity": 20,
       "management": 50,
       "counter": 0
@@ -121,7 +121,7 @@
       "weapon_id": "heavy_bowgun",
       "weapon_name": "헤비보우건",
       "attack": 65,
-      "freedom": 40,
+      "constraint": 60,
       "complexity": 15,
       "management": 75,
       "counter": 45
@@ -130,7 +130,7 @@
       "weapon_id": "bow",
       "weapon_name": "활",
       "attack": 30,
-      "freedom": 85,
+      "constraint": 15,
       "complexity": 40,
       "management": 70,
       "counter": 70

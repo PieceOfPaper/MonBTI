@@ -15,6 +15,8 @@
   - 무기 탭: `Wilds_V2_Weapon` — sheetId `1661331336`
   - 질문 탭: `Wilds_V2_Question` — sheetId `1489388738`
   - 2026-10-12에 `Wilds_Weapon`·`Wilds_Question`을 복제해 만들었습니다. 열 구조와 입력 규칙은 아래 와일즈 탭 설명과 같고, 이후 V2 개발에 맞춰 따로 편집합니다. 질문 ID는 작품 안에서만 고유하면 되므로 복제한 `wilds_q…` ID를 그대로 쓸 수 있습니다.
+  - 2026-10-13부터 두 탭은 `freedom` 열 대신 **`constraint`(행동 제약) 열**을 씁니다. 무기 값은 0~100으로 높을수록 시작한 행동을 다른 행동으로 바꾸기 어렵고, 질문 가중치의 양수는 동의할수록 행동 제약을 더 받아들일 수 있다는 뜻입니다. 기존 값에서 옮길 때는 무기 `constraint = 100 - freedom`, 질문 가중치는 부호를 반대로 했습니다. 아래 표의 `freedom` 행은 V2에서 `constraint`로 읽고, 정의와 불일치 공식은 [와일즈 V2 변경 기획](wilds-v2-plan.md)을 따릅니다.
+  - 변환기는 검사마다 축 열을 따로 읽습니다(`scripts/convert-sheet.js`의 `GAMES`·`axisFields`). 그 검사가 쓰지 않는 축 열이 남아 있으면(예: V2 탭의 `freedom`, 와일즈 탭의 `constraint`) 오류로 처리합니다.
 - 기존 `시트1`은 유지하며 와일즈 데이터로 읽지 않습니다.
 - 스프레드시트 파일명이나 탭의 위치 대신 스프레드시트 ID와 정확한 탭 이름으로 대상을 확인합니다.
 
@@ -230,7 +232,7 @@ npm run data:convert -- --sheet Wilds_V2   # 한 검사의 탭만 검증·변환
 
 무기 값은 같은 0~100 척도에서 비교합니다. `attack`·`counter`는 `|user - weapon|`을 불일치로 사용합니다. `freedom`은 `max(0, user - weapon) + 0.5 × max(0, weapon - user)`를 사용해 무기가 더 낮은 차이는 100%, 더 높은 차이는 50% 반영합니다. `complexity`·`management`는 무기가 사용자보다 낮으면 `0.5 × (user - weapon)`을 사용합니다. 무기가 더 높으면 차이 `d = weapon - user`에 `B(d) = 0.5 × min(d, 10) + 0.75 × min(max(d - 10, 0), 10) + max(d - 20, 0)`을 사용해 처음 10점 50%·다음 10점 75%·20점 초과분 100%를 누적 반영합니다. 축 적합도는 `100 - 불일치`입니다. 최종 추천 점수는 측정된 축만 사용해 `attack`·`counter` 적합도에는 0.75, `freedom`·`complexity`·`management` 적합도에는 1.0을 적용한 가중 평균으로 계산합니다. 자유도 부족은 입문자의 직접적인 조작 장벽으로 크게 보고, 필요 이상의 자유도도 선호한 행동 단위·조작 리듬과 다른 정도로 절반만 반영합니다. `complexity`·`management`의 사용자 값은 최대 감당치가 아니라 잘 맞는 선호 수준으로 해석하되, 낮은 요구 수준의 불일치는 초과 부담보다 약하게 봅니다. 3구간은 `weapon > user`인 복잡·관리에만 적용하며 반대 방향과 다른 축에는 적용하지 않습니다.
 
-질문의 영향 가중치와 최종 추천에서 축의 중요도는 별개입니다. 질문 수나 가중치 절댓값 합은 정규화 분모에도 함께 반영되므로 특정 축의 최종 비중을 자동으로 높이지 않습니다. 확정한 추천 축 가중치는 `attack = 0.75`, `counter = 0.75`, `freedom = 1.0`, `complexity = 1.0`, `management = 1.0`입니다. 질문 가중치와 혼동하지 않도록 추천 계산 코드의 별도 상수로 관리합니다. 이 상수는 `src/core/recommend.js`의 `AXIS_WEIGHTS`에 구현되어 있습니다.
+질문의 영향 가중치와 최종 추천에서 축의 중요도는 별개입니다. 질문 수나 가중치 절댓값 합은 정규화 분모에도 함께 반영되므로 특정 축의 최종 비중을 자동으로 높이지 않습니다. 확정한 추천 축 가중치는 `attack = 0.75`, `counter = 0.75`, `freedom = 1.0`, `complexity = 1.0`, `management = 1.0`입니다. 질문 가중치와 혼동하지 않도록 추천 계산 코드의 별도 상수로 관리합니다. 이 상수는 작품별 축 모델(`src/core/axis-models.js`)의 `weights`에 구현되어 있으며, `src/core/recommend.js`의 `AXIS_WEIGHTS`는 기존 와일즈 모델의 값입니다. 와일즈 V2는 `freedom` 자리에 `constraint = 1.0`을 쓰고 `constraint`·`complexity`·`management` 모두 위의 복잡·관리 공식(3구간 완충과 낮은 쪽 50%)을 적용합니다.
 사용자 점수는 `computeAxisProfile`(`src/core/scoring.js`), 무기 적합도와 순위는 `src/core/recommend.js`에서 계산합니다.
 
 ## 사이트 표시 자료

@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { AXES } from '../src/core/axes.js';
+import { GAME_AXIS_MODELS } from '../src/core/axis-models.js';
 import { RECOMMENDATION_COUNT } from '../src/core/recommend.js';
 import { ANSWER_MODELS, simulateDistribution } from './result-distribution.js';
 
@@ -30,11 +30,11 @@ const padStart = (text, width) => ' '.repeat(Math.max(0, width - displayWidth(te
 const percent = (rate) => `${(rate * 100).toFixed(1)}%`;
 const bar = (rate, scale) => '█'.repeat(Math.round(rate * scale));
 
-function formatResult(result) {
+function formatResult(result, axes) {
   const count = result.weapons.length;
   const fair = 1 / count;
   const nameWidth = Math.max(...result.weapons.map(({ weapon_name }) => displayWidth(weapon_name)));
-  const profileHeader = AXES.map(({ short }) => padStart(short, 5)).join('');
+  const profileHeader = axes.map(({ short }) => padStart(short, 5)).join('');
   const lines = [
     `■ ${MODEL_LABELS[result.model]}`,
     `  표본 ${result.samples.toLocaleString()}회 · seed ${result.seed}${result.noise === null ? '' : ` · 흔들림 ${result.noise}`}`
@@ -47,7 +47,7 @@ function formatResult(result) {
   const sorted = [...result.weapons].sort((a, b) => b.firstRate - a.firstRate);
   for (const weapon of sorted) {
     const profile = weapon.firstProfile
-      ? AXES.map(({ id }) => padStart(weapon.firstProfile[id].toFixed(0), 5)).join('')
+      ? axes.map(({ id }) => padStart(weapon.firstProfile[id].toFixed(0), 5)).join('')
       : '   (1순위 없음)';
     const flag = weapon.firstRate < fair / 2 ? ' ▼' : weapon.firstRate > fair * 2 ? ' ▲' : '  ';
     lines.push(
@@ -78,14 +78,18 @@ async function main() {
   if (!Number.isInteger(samples) || samples <= 0) throw new Error('--samples는 양의 정수여야 합니다.');
   if (!Number.isFinite(noise) || noise < 0) throw new Error('--noise는 0 이상이어야 합니다.');
 
+  const axisModel = GAME_AXIS_MODELS[values.game];
+  if (!axisModel) throw new Error(`알 수 없는 작품입니다: ${values.game} (가능: ${Object.keys(GAME_AXIS_MODELS).join(', ')})`);
   const data = await loadData(values.game);
-  const results = models.map((model) => simulateDistribution({ ...data, model, samples, seed, noise, central: values.central }));
+  const results = models.map((model) => simulateDistribution({
+    ...data, model, samples, seed, noise, central: values.central, axisModel,
+  }));
   if (values.json) {
     console.log(JSON.stringify(results, null, 2));
     return;
   }
   console.log(`${values.game}: 질문 ${data.questions.length}개 · 무기 ${data.weapons.length}개\n`);
-  console.log(results.map(formatResult).join('\n\n'));
+  console.log(results.map((result) => formatResult(result, axisModel.axes)).join('\n\n'));
 }
 
 main().catch((error) => {

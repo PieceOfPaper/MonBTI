@@ -11,6 +11,9 @@ import { decodeShareCode, encodeShareCode } from './share.js';
 const wilds = supportedGames.find(({ id }) => id === 'wilds');
 const v2 = supportedGames.find(({ id }) => id === 'wilds_v2');
 const profileOf = (attack, freedom, complexity, management, counter) => ({ attack, freedom, complexity, management, counter });
+// 와일즈 V2 축(constraint) 프로필.
+const v2ProfileOf = (attack, constraint, complexity, management, counter) => ({ attack, constraint, complexity, management, counter });
+const v2Options = { axisModel: v2.axisModel };
 const weapon = (weapon_id, values) => ({ weapon_id, weapon_name: weapon_id, ...values });
 
 describe('중앙 이탈도', () => {
@@ -149,7 +152,7 @@ describe('작품별 적용', () => {
     expect(before.weapons).toEqual(recommendWeapons(wilds.weapons, before.profile));
     const after = buildResult(v2, flat(v2));
     expect(after.central).toBeTruthy();
-    expect(after.weapons).toEqual(centralRecommendation(v2.weapons, after.profile));
+    expect(after.weapons).toEqual(centralRecommendation(v2.weapons, after.profile, v2Options));
   });
 
   it('finalRanking의 앞 세 무기는 사이트 결과(buildResult)의 1~3순위와 같다', () => {
@@ -163,27 +166,32 @@ describe('작품별 적용', () => {
 
   it('특별 결과의 profile과 그래프는 원래 점수를 쓴다', () => {
     const result = buildResult(v2, flat(v2), '종잇장');
-    expect(Object.values(result.profile).every((value) => value === 50)).toBe(true);
+    const { axisIds } = v2.axisModel;
+    const original = axisIds.map((axis) => String(Math.round(result.profile[axis])));
+    const amplified = amplifyProfile(result.profile, v2.axisModel);
+    expect(axisIds.map((axis) => String(Math.round(amplified[axis])))).not.toEqual(original);
     const html = renderResult(v2, result);
     expect(html).toContain('혹시 이미 몬스터헌터 숙련자이거나 취향을 잘 안 타는 사람인가요?');
     expect(html).not.toContain('왜 이 무기인가요?');
-    // 표의 내 점수 칸은 확대 점수(51·49→54·46)가 아니라 원래 점수 50이다.
-    expect(html.match(/<tr><th scope="row">[^<]+<\/th><td>(\d+)<\/td>/g).map((row) => row.match(/<td>(\d+)/)[1])).toEqual(['50', '50', '50', '50', '50']);
+    // 표의 내 점수 칸은 확대 점수가 아니라 원래 점수이며 V2 축 순서(한방·제약·복잡·관리·반격)를 따른다.
+    expect(html.match(/<tr><th scope="row">[^<]+<\/th>/g).map((row) => row.match(/row">([^<]+)/)[1])).toEqual(['한방', '제약', '복잡', '관리', '반격']);
+    expect(html.match(/<tr><th scope="row">[^<]+<\/th><td>(\d+)<\/td>/g).map((row) => row.match(/<td>(\d+)/)[1])).toEqual(original);
   });
 
   it('중앙 이탈도 10 초과인 건랜스·슬래시액스 회귀 사례는 V2에서도 일반 결과다', () => {
-    const profile = profileOf(79, 30, 64, 59, 69);
-    expect(centralDeviation(profile)).toBeCloseTo(18.2);
-    expect(isCentralProfile(profile)).toBe(false);
-    expect(recommendWeapons(v2.weapons, profile).slice(0, 2).map(({ weapon_id }) => weapon_id)).toEqual(['gunlance', 'switch_axe']);
+    // 기존 자유도 30을 행동 제약 70으로 옮긴 같은 응답이다.
+    const profile = v2ProfileOf(79, 70, 64, 59, 69);
+    expect(centralDeviation(profile, v2.axisModel)).toBeCloseTo(18.2);
+    expect(isCentralProfile(profile, v2.axisModel)).toBe(false);
+    expect(recommendWeapons(v2.weapons, profile, v2Options).slice(0, 2).map(({ weapon_id }) => weapon_id)).toEqual(['gunlance', 'switch_axe']);
   });
 
   it('특별 결과가 아닌 V2 결과는 일반 추천과 같다', () => {
     const answers = Object.fromEntries(v2.questions.map(({ question_id }, i) => [question_id, i % 2 ? 1 : 6]));
     const result = buildResult(v2, answers);
-    expect(isCentralProfile(result.profile)).toBe(false);
+    expect(isCentralProfile(result.profile, v2.axisModel)).toBe(false);
     expect(result.central).toBeUndefined();
-    expect(result.weapons).toEqual(recommendWeapons(v2.weapons, result.profile));
+    expect(result.weapons).toEqual(recommendWeapons(v2.weapons, result.profile, v2Options));
   });
 
   it('검사 설명은 특별 결과를 쓰는 검사에만 안내한다', () => {
@@ -200,9 +208,12 @@ describe('공유 링크', () => {
     const url = shareUrl(v2, own, 'https://example.com/MonBTI/');
     const code = new URL(url).searchParams.get('r').replace(/^wilds_v2\./, '');
     expect(code.endsWith('.c')).toBe(true);
-    const shared = sharedResult(v2, decodeShareCode(code, v2.weapons));
+    const shared = sharedResult(v2, decodeShareCode(code, v2.weapons, v2.axisModel));
     expect(shared.weapons).toEqual(own.weapons);
-    expect(shared.central).toEqual(own.central);
+    // 공유 결과의 설명 모델은 반올림한 점수로 다시 만든다.
+    const rounded = Object.fromEntries(v2.axisModel.axisIds.map((axis) => [axis, Math.round(own.profile[axis])]));
+    expect(shared.central).toEqual(buildCentralModel(v2.weapons, rounded, own.weapons[0], v2Options));
+    expect(shared.central.winnerId).toBe(own.central.winnerId);
     expect(renderResult(v2, shared, { shared: true })).toContain('혹시 이미 몬스터헌터 숙련자이거나 취향을 잘 안 타는 사람인가요?');
   });
 
@@ -211,7 +222,7 @@ describe('공유 링크', () => {
     const own = buildResult(v2, answers, '종잇장');
     const code = new URL(shareUrl(v2, own, 'https://example.com/')).searchParams.get('r');
     expect(code.endsWith('.c')).toBe(false);
-    const shared = sharedResult(v2, decodeShareCode(code.replace(/^wilds_v2\./, ''), v2.weapons));
+    const shared = sharedResult(v2, decodeShareCode(code.replace(/^wilds_v2\./, ''), v2.weapons, v2.axisModel));
     expect(shared.central).toBeUndefined();
     expect(shared.weapons).toEqual(own.weapons);
   });

@@ -1,11 +1,13 @@
 // 결과 공유 링크. 답변 대신 결과 자체(추천 무기 ID와 축별 0~100 값)를 담아
 // 질문 데이터가 바뀌어도 공유받은 사람이 같은 결과를 볼 수 있게 한다.
 // 공유 창·메신저·복사 과정에서 인코딩되지 않도록 영문·숫자·'.'·'_'·'-'만 사용한다.
-// 코드: <1순위>.<2순위>.<3순위 weapon_id>.<attack>.<freedom>.<complexity>.<management>.<counter>.<이름>[.c]
+// 코드: <1순위>.<2순위>.<3순위 weapon_id>.<축 값 다섯 개>.<이름>[.c]
+// 축 값의 순서는 작품의 축 모델 순서다. 기존 와일즈는 attack.freedom.complexity.management.counter,
+// 와일즈 V2는 attack.constraint.complexity.management.counter다.
 // 축 값은 0~100 정수이며 미측정 축은 '-'로 적는다. 이름은 UTF-8 base64url이며,
 // 이름이 없는 예전 링크는 대체 이름으로 연다. 끝의 'c'는 중앙형 응답 특별 결과(core/central.js)라는 표시다.
 // 외부 링크: <사이트 주소>?r=<작품 ID>.<코드>, 앱 내부 주소: #/<작품 ID>/share/<코드>
-import { AXIS_IDS } from './axes.js';
+import { DEFAULT_AXIS_MODEL } from './axis-models.js';
 import { FALLBACK_NICKNAME, decodeNickname, encodeNickname } from './nickname.js';
 import { RECOMMENDATION_COUNT } from './recommend.js';
 
@@ -13,8 +15,8 @@ export const SHARE_PARAM = 'r';
 
 export const CENTRAL_SHARE_FLAG = 'c';
 
-export function encodeShareCode({ weaponIds, profile, nickname, central = false }) {
-  const values = AXIS_IDS.map((axis) => (profile[axis] === null ? '-' : String(Math.round(profile[axis]))));
+export function encodeShareCode({ weaponIds, profile, nickname, central = false }, model = DEFAULT_AXIS_MODEL) {
+  const values = model.axisIds.map((axis) => (profile[axis] === null ? '-' : String(Math.round(profile[axis]))));
   return [...weaponIds, ...values, encodeNickname(nickname), ...(central ? [CENTRAL_SHARE_FLAG] : [])].join('.');
 }
 
@@ -29,9 +31,9 @@ export function parseShareParam(value) {
 }
 
 // 알 수 없는 무기, 중복, 범위 밖 값, 잘못된 이름이 있으면 null을 돌려준다.
-export function decodeShareCode(code, weapons) {
+export function decodeShareCode(code, weapons, model = DEFAULT_AXIS_MODEL) {
   const parts = (code ?? '').split('.');
-  const base = RECOMMENDATION_COUNT + AXIS_IDS.length;
+  const base = RECOMMENDATION_COUNT + model.axisIds.length;
   if (parts.length < base || parts.length > base + 2) return null;
   if (parts.length === base + 2 && parts[base + 1] !== CENTRAL_SHARE_FLAG) return null;
   const central = parts.length === base + 2;
@@ -45,7 +47,7 @@ export function decodeShareCode(code, weapons) {
   if (!ids.every((id) => byId.has(id))) return null;
 
   const profile = {};
-  for (const [i, axis] of AXIS_IDS.entries()) {
+  for (const [i, axis] of model.axisIds.entries()) {
     if (values[i] === '-') {
       profile[axis] = null;
       continue;

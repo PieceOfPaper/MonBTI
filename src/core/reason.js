@@ -2,7 +2,7 @@
 // 추천 순위와 같은 축별 계산(scoreWeapon)을 쓰고, 문장 대신 축 ID와 수치만 돌려준다.
 // 잘 맞는 점·낯설 수 있는 점·2순위가 더 가까운 점은 원래 불일치(mismatch)로,
 // 1순위가 된 이유(화면 소제목 ‘결정적인 차이’)는 축 가중치를 곱한 상대 우위(weightedAmount)로 고른다.
-import { AXIS_IDS } from './axes.js';
+import { DEFAULT_AXIS_MODEL } from './axis-models.js';
 import { scoreWeapon } from './recommend.js';
 
 // 문구 임계값. 계산 중에는 반올림하지 않고 원본 실수 값으로 비교한다.
@@ -38,9 +38,9 @@ export function advantageStrength(weightedAmount) {
   return 'slight';
 }
 
-// 값 내림차순(또는 오름차순), 같으면 AXIS_IDS 순서.
-const byValue = (key, descending) => (a, b) =>
-  (descending ? b[key] - a[key] : a[key] - b[key]) || (AXIS_IDS.indexOf(a.axis) - AXIS_IDS.indexOf(b.axis));
+// 값 내림차순(또는 오름차순), 같으면 축 모델의 축 순서.
+const byValue = (axisIds, key, descending) => (a, b) =>
+  (descending ? b[key] - a[key] : a[key] - b[key]) || (axisIds.indexOf(a.axis) - axisIds.indexOf(b.axis));
 
 function comparisonStatus(winner, runner) {
   if (!runner) return 'missing-runner-up';
@@ -52,19 +52,19 @@ function comparisonStatus(winner, runner) {
 }
 
 // profile: 사용자 축 점수, winner·runnerUp: 결과의 1·2순위 무기(runnerUp은 없을 수 있음).
-// 측정된 축이 없으면 null을 돌려준다.
-export function buildRecommendationReason(profile, winner, runnerUp) {
-  const winnerScore = scoreWeapon(profile, winner);
+// model은 작품의 축 모델(core/axis-models.js)이며 추천 순위와 같은 모델을 넘긴다. 측정된 축이 없으면 null을 돌려준다.
+export function buildRecommendationReason(profile, winner, runnerUp, model = DEFAULT_AXIS_MODEL) {
+  const winnerScore = scoreWeapon(profile, winner, model);
   if (winnerScore.score === null) return null;
-  const runnerScore = runnerUp ? scoreWeapon(profile, runnerUp) : null;
+  const runnerScore = runnerUp ? scoreWeapon(profile, runnerUp, model) : null;
   const status = comparisonStatus(winnerScore, runnerScore);
-  const measured = AXIS_IDS.filter((axis) => winnerScore.axes[axis]);
+  const measured = model.axisIds.filter((axis) => winnerScore.axes[axis]);
   const winnerAxes = measured.map((axis) => ({ axis, ...winnerScore.axes[axis] }));
 
-  const closest = [...winnerAxes].sort(byValue('mismatch', false)).slice(0, CLOSEST_COUNT)
+  const closest = [...winnerAxes].sort(byValue(model.axisIds, 'mismatch', false)).slice(0, CLOSEST_COUNT)
     .map(({ axis, mismatch, direction }) => ({ axis, mismatch, band: mismatchBand(mismatch), direction }));
 
-  const top = [...winnerAxes].sort(byValue('mismatch', true))[0];
+  const top = [...winnerAxes].sort(byValue(model.axisIds, 'mismatch', true))[0];
   const caution = top.mismatch > CAUTION_MIN
     ? { axis: top.axis, mismatch: top.mismatch, band: mismatchBand(top.mismatch), direction: top.direction }
     : null;
@@ -104,12 +104,12 @@ export function buildRecommendationReason(profile, winner, runnerUp) {
   });
 
   const advantages = status === 'normal'
-    ? pairs.filter(({ weightedAmount }) => weightedAmount > 0).sort(byValue('weightedAmount', true)).slice(0, ADVANTAGE_COUNT)
+    ? pairs.filter(({ weightedAmount }) => weightedAmount > 0).sort(byValue(model.axisIds, 'weightedAmount', true)).slice(0, ADVANTAGE_COUNT)
     : [];
 
   const tradeoffs = pairs.map(({ axis, winnerMismatch, runnerMismatch }) => ({
     axis, amount: winnerMismatch - runnerMismatch, winnerMismatch, runnerMismatch,
-  })).filter(({ amount }) => amount >= COMPARISON_MIN).sort(byValue('amount', true));
+  })).filter(({ amount }) => amount >= COMPARISON_MIN).sort(byValue(model.axisIds, 'amount', true));
 
   const scoreGap = winnerScore.score - runnerScore.score;
   return {

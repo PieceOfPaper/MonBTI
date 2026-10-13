@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { SheetConversionError, convertQuestions, convertWeapons } from './sheet-converter.js';
+import {
+  SheetConversionError, V2_AXIS_FIELDS, convertQuestions, convertWeapons,
+} from './sheet-converter.js';
 
 const WEAPON_HEADER = ['weapon_id', 'weapon_name', 'attack', 'freedom', 'complexity', 'management', 'counter'];
 const QUESTION_HEADER = ['question_id', 'question_order', 'question_text', 'attack', 'freedom', 'complexity', 'management', 'counter'];
@@ -106,5 +108,27 @@ describe('질문 탭 변환', () => {
     expect(message).toContain("'axis'");
     expect(message).toContain("'reverse'");
     expect(message).toContain("'attack'");
+  });
+});
+
+describe('검사별 축 열', () => {
+  const V2_WEAPON_HEADER = ['weapon_id', 'weapon_name', 'attack', 'constraint', 'complexity', 'management', 'counter'];
+  const V2_QUESTION_HEADER = ['question_id', 'question_order', 'question_text', 'attack', 'constraint', 'complexity', 'management', 'counter'];
+
+  it('와일즈 V2는 constraint 열을 읽고 freedom 필드를 만들지 않는다', () => {
+    expect(convertWeapons([V2_WEAPON_HEADER, ['bow', '활', 30, 15, 40, 70, 70]], 'Wilds_V2_Weapon', V2_AXIS_FIELDS)).toEqual([
+      { weapon_id: 'bow', weapon_name: '활', attack: 30, constraint: 15, complexity: 40, management: 70, counter: 70 },
+    ]);
+    expect(convertQuestions([V2_QUESTION_HEADER, ['q5', 5, '가', 0, -100, 0, 0, 0]], 'Wilds_V2_Question', V2_AXIS_FIELDS)).toEqual([
+      { question_id: 'q5', question_order: 5, question_text: '가', attack: 0, constraint: -100, complexity: 0, management: 0, counter: 0 },
+    ]);
+  });
+
+  it('검사가 쓰지 않는 축 열이 남아 있으면 오류로 처리한다', () => {
+    const leftover = [...V2_WEAPON_HEADER, 'freedom'];
+    expect(errorsOf(() => convertWeapons([leftover], 'Wilds_V2_Weapon', V2_AXIS_FIELDS))).toContain("쓰지 않는 축 열 'freedom'");
+    expect(errorsOf(() => convertQuestions([V2_QUESTION_HEADER.map((n) => (n === 'constraint' ? 'freedom' : n))], 'Wilds_V2_Question', V2_AXIS_FIELDS)))
+      .toContain("필수 열 'constraint'");
+    expect(errorsOf(() => convertWeapons([[...WEAPON_HEADER, 'constraint']]))).toContain("쓰지 않는 축 열 'constraint'");
   });
 });

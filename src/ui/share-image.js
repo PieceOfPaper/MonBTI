@@ -3,7 +3,6 @@
 // 1순위 무기(배경 캐릭터·아이콘·이름·입문 난이도·소개 문구) → 왜 이 무기인가요? → 무기별 기준 비교(1~3순위·차트·표).
 // 영상·버튼처럼 눌러서 쓰는 요소만 뺀다. 내용 길이에 따라 세로 길이가 달라진다.
 // 아이콘·캐릭터 이미지는 사이트와 같은 출처의 파일이라 캔버스를 내보낼 때 막히지 않는다.
-import { AXES } from '../core/axes.js';
 import { RADAR_RINGS, radarPoint, radarPolygon } from './radar.js';
 import { shareContent } from './result-content.js';
 
@@ -276,25 +275,27 @@ function drawReason(ctx, reason, top) {
   return y + 56;
 }
 
-function drawRadar(ctx, profile, weapon, cx, cy, radius) {
+// axes는 결과 화면 차트와 같은 축 목록(shareContent의 comparison.axes)이다.
+function drawRadar(ctx, axes, profile, weapon, cx, cy, radius) {
+  const point = (i, value) => radarPoint(i, value, cx, cy, radius, axes.length);
   ctx.lineWidth = 2;
   ctx.strokeStyle = COLORS.grid;
   for (const ring of RADAR_RINGS) {
     ctx.beginPath();
-    AXES.forEach((_, i) => ctx.lineTo(...radarPoint(i, ring, cx, cy, radius)));
+    axes.forEach((_, i) => ctx.lineTo(...point(i, ring)));
     ctx.closePath();
     ctx.stroke();
   }
-  AXES.forEach((_, i) => {
+  axes.forEach((_, i) => {
     ctx.beginPath();
     ctx.moveTo(cx, cy);
-    ctx.lineTo(...radarPoint(i, 100, cx, cy, radius));
+    ctx.lineTo(...point(i, 100));
     ctx.stroke();
   });
 
   // 화면과 같이 무기를 먼저, 사용자를 위에 그린다.
   for (const [values, color] of [[weapon, COLORS.accent], [profile, COLORS.me]]) {
-    const points = radarPolygon(values, cx, cy, radius);
+    const points = radarPolygon(values, cx, cy, radius, axes);
     if (points.length === 0) continue;
     ctx.beginPath();
     points.forEach((point) => ctx.lineTo(...point));
@@ -308,8 +309,8 @@ function drawRadar(ctx, profile, weapon, cx, cy, radius) {
     ctx.stroke();
   }
 
-  AXES.forEach(({ short }, i) => {
-    const [x, y] = radarPoint(i, 128, cx, cy, radius);
+  axes.forEach(({ short }, i) => {
+    const [x, y] = point(i, 128);
     text(ctx, short, x, y, { size: 32, weight: 700, align: 'center' });
   });
 }
@@ -345,7 +346,7 @@ function drawComparison(ctx, comparison, assets, top) {
   const chartWidth = Math.round(INNER * 0.55);
   const radius = 170;
   const cy = y + 40 + radius * 1.28;
-  drawRadar(ctx, comparison.profile, comparison.weapon, PAD + chartWidth / 2, cy, radius);
+  drawRadar(ctx, comparison.axes, comparison.profile, comparison.weapon, PAD + chartWidth / 2, cy, radius);
   const legendY = cy + radius * 1.28 + 64;
   setFont(ctx, 28, 700);
   const legend = [[COLORS.me, comparison.legend[0]], [COLORS.accent, comparison.legend[1]]]
@@ -385,9 +386,10 @@ function drawComparison(ctx, comparison, assets, top) {
   return Math.max(legendY + 40, tableTop + rowHeight * (comparison.rows.length + 1)) + 56;
 }
 
-// gameName·result·reason은 결과 화면과 같은 값을 받는다. weapons는 입문 난이도 계산에 쓰는 작품 전체 무기다.
-export async function drawShareImage({ gameName, result, reason, weapons, siteUrl }) {
-  const content = shareContent({ gameName, result, reason, weapons });
+// gameName·result·reason은 결과 화면과 같은 값을 받는다. weapons는 입문 난이도 계산에 쓰는 작품 전체 무기,
+// axisModel은 작품의 축 모델이다.
+export async function drawShareImage({ gameName, result, reason, weapons, axisModel, siteUrl }) {
+  const content = shareContent({ gameName, result, reason, weapons, axisModel });
   const characters = content.winner.weapon.characters ?? [];
   const [icons, characterImages] = await Promise.all([
     Promise.all(result.weapons.map((weapon) => loadImage(weapon.icon))),

@@ -1,7 +1,7 @@
 // 결과 화면(views.js)과 공유 이미지(share-image.js)가 함께 쓰는 결과 표시 내용.
 // 두 출력이 같은 항목·문구·값을 보여 주도록 표시 내용은 여기서만 만든다(docs/test-design.md '결과 화면과 공유 이미지').
 // 문자열은 이스케이프하지 않은 원문이다. HTML로 낼 때는 views.js가 이스케이프한다.
-import { AXES } from '../core/axes.js';
+import { DEFAULT_AXIS_MODEL } from '../core/axis-models.js';
 import { DIFFICULTY_LEVELS, difficultyLabel, difficultyStars } from '../core/difficulty.js';
 import { FALLBACK_NICKNAME } from '../core/nickname.js';
 import {
@@ -19,9 +19,9 @@ export const displayName = (nickname) => nickname || FALLBACK_NICKNAME;
 export const resultTitle = (who) => `${who}에게 어울리는 무기`;
 export const compareTitle = (who, weapon) => `${who} vs ${weapon.weapon_name}`;
 
-// 입문 난이도: 같은 작품 무기 사이의 상대평가 별표.
-export function difficultyContent(weapon, weapons) {
-  const stars = difficultyStars(weapon, weapons);
+// 입문 난이도: 같은 작품 무기 사이의 상대평가 별표. axisModel은 작품의 축 모델이다.
+export function difficultyContent(weapon, weapons, axisModel = DEFAULT_AXIS_MODEL) {
+  const stars = difficultyStars(weapon, weapons, axisModel);
   return {
     title: DIFFICULTY_TITLE,
     stars,
@@ -94,14 +94,15 @@ export function resultReasonContent(result, reason) {
 
 const formatValue = (value) => (value === null || value === undefined ? '측정 안 됨' : String(Math.round(value)));
 
-// 기준 비교 표의 행. 차트도 같은 profile·weapon 값을 그린다.
-export function comparisonRows(profile, weapon) {
-  return AXES.map(({ id, short }) => ({ id, short, me: formatValue(profile[id]), weapon: formatValue(weapon[id]) }));
+// 기준 비교 표의 행. 차트도 같은 profile·weapon 값과 축 순서를 그린다.
+export function comparisonRows(profile, weapon, axisModel = DEFAULT_AXIS_MODEL) {
+  return axisModel.axes.map(({ id, short }) => ({ id, short, me: formatValue(profile[id]), weapon: formatValue(weapon[id]) }));
 }
 
 // 공유 이미지에 담는 결과 전체. 결과 화면의 첫 상태(1순위와 비교)와 같다.
 // 영상·버튼·나머지 무기 목록처럼 눌러서 쓰는 요소는 이미지에서 쓸 수 없으므로 담지 않는다.
-export function shareContent({ gameName, result, reason, weapons }) {
+// axisModel은 작품의 축 모델이며 입문 난이도와 기준 비교의 축을 정한다.
+export function shareContent({ gameName, result, reason, weapons, axisModel = DEFAULT_AXIS_MODEL }) {
   const who = displayName(result.nickname);
   const winner = result.weapons[0];
   return {
@@ -112,7 +113,7 @@ export function shareContent({ gameName, result, reason, weapons }) {
       weapon: winner,
       name: winnerName(result),
       badge: winnerBadge(result),
-      difficulty: difficultyContent(winner, weapons),
+      difficulty: difficultyContent(winner, weapons, axisModel),
       quote: quoteContent(winner),
     },
     reason: resultReasonContent(result, reason),
@@ -123,7 +124,8 @@ export function shareContent({ gameName, result, reason, weapons }) {
       legend: [who, winner.weapon_name],
       profile: result.profile,
       weapon: winner,
-      rows: comparisonRows(result.profile, winner),
+      axes: axisModel.axes,
+      rows: comparisonRows(result.profile, winner, axisModel),
     },
   };
 }

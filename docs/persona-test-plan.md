@@ -149,7 +149,7 @@
 | `wilds` | `tests/personas/wilds-personas.js` | 원래 점수 순위 |
 | `wilds_v2` | `tests/personas/wilds-v2-personas.js` | 중앙형 응답 특별 결과를 포함한 최종 순위 |
 
-- 작품별 묶음은 `tests/personas/suites.js`에 두고 판정 규칙 `centralResult`가 사이트 작품 설정(`src/games/index.js`)과 같은지 자동 테스트로 확인합니다. 사이트에 등록된 작품에 묶음이 없어도 실패합니다.
+- 작품별 묶음은 `tests/personas/suites.js`에 두고 판정 규칙 `centralResult`·`axisModel`이 사이트 작품 설정(`src/games/index.js`)과 같은지 자동 테스트로 확인합니다. `axisModel`은 작품의 축 목록과 추천 공식이며, 와일즈 V2 fixture의 목표 프로필은 `freedom` 대신 `constraint`를 씁니다. 사이트에 등록된 작품에 묶음이 없어도 실패합니다.
 - 기존 와일즈 fixture는 V2 개발이 끝날 때까지 기존 와일즈 데이터의 회귀 기준으로 그대로 둡니다. V2의 질문·무기 값·규칙을 바꿔 결과가 달라지면 V2 fixture만 갱신합니다.
 
 ### 새 검사를 추가할 때
@@ -158,7 +158,7 @@
 
 1. `scripts/convert-sheet.js`의 `GAMES`에 검사 내부 이름(원본 탭 접두사)과 작품 ID를 추가하고 검사별 데이터 갱신 워크플로(`.github/workflows/refresh-data-<작품 ID의 _를 -로>.yml`)를 만든 뒤, `npm run data:convert -- --sheet <이름>`으로 새 검사의 `src/data/<작품 ID>/*.json`을 만듭니다.
 2. `tests/personas/<작품>-personas.js` fixture를 만듭니다. 기존 검사의 fixture를 복사해 시작할 수 있지만 서로 참조하지 않는 독립 파일로 두고, 다섯 축을 모두 지정합니다.
-3. `tests/personas/suites.js`에 fixture와 판정 규칙을 등록합니다. 판정 규칙은 사이트 작품 설정과 같아야 합니다(예: `centralResult`).
+3. `tests/personas/suites.js`에 fixture와 판정 규칙을 등록합니다. 판정 규칙은 사이트 작품 설정과 같아야 합니다(예: `centralResult`, `axisModel`).
 4. 새 검사에만 있는 규칙이 있으면 그 규칙의 경계를 확인하는 페르소나와 기대값 항목을 추가하고, 테스트가 결과 화면과 같은 최종 결과로 판정하는지 확인합니다.
 5. 현재 데이터로 순위를 계산·검토해 기대값을 정합니다. 재미 결과나 경계에 가까운 결과처럼 사용자 확인이 필요한 무기는 확정하기 전까지 관찰용으로 둡니다.
 6. `npm test`와 `npm run analyze:personas -- --game <작품 ID>`를 실행해 실패가 없는지 확인하고, 기존 검사의 보고서가 바뀌지 않았는지 비교합니다.
@@ -280,7 +280,7 @@ tests/
   personas/
     wilds-personas.js       # 와일즈 대표 페르소나 fixture
     wilds-v2-personas.js    # 와일즈 V2 페르소나 fixture
-    suites.js               # 작품별 fixture와 판정 규칙(centralResult)
+    suites.js               # 작품별 fixture와 판정 규칙(centralResult·axisModel)
     answer-search.js        # 목표 프로필에 가까운 응답 탐색
     persona-runner.js       # 직접 점수·응답 점수·추천·오차 계산
     persona.test.js         # CI에서 실패시킬 계약과 기대 결과

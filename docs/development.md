@@ -24,7 +24,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `src/assets/games/<작품 ID>/` | 작품 로고 파일 |
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
 | `src/assets/characters/<작품 ID>/` | 무기별 캐릭터 이미지 파일(`<weapon_id>_a·_b.webp`) |
-| `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 와일즈 V2의 중앙형 응답 특별 결과(`central.js`·`central-copy.js`), 입문 난이도 별표(`difficulty.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
+| `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함, `axes.js`), 작품별 축 모델(`axis-models.js`: 축 목록·불일치 공식·합산 가중치·입문 난이도 원점수, 기존 와일즈 `freedom`·V2 `constraint`), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 와일즈 V2의 중앙형 응답 특별 결과(`central.js`·`central-copy.js`), 입문 난이도 별표(`difficulty.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
 | `src/ui/views.js` | 화면 마크업(작품 선택과 개발 중인 검사 목록·검사 설명·이름 입력·질문·결과) |
 | `src/ui/radar.js` | 오각형 방사형 차트 위치 계산과 SVG |
 | `src/ui/result-content.js` | 결과 화면과 공유 이미지가 함께 쓰는 표시 내용(제목·입문 난이도·소개 문구·추천 이유·기준 비교) |
@@ -162,7 +162,7 @@ GitHub 이슈 #번호를 AGENTS.md의 ‘GitHub 이슈 기반 작업’ 규칙�
 
 ‘왜 이 무기인가요?’는 [결과 추천 이유 설계](result-reason.md)에 따라 구현되어 있습니다.
 
-- `src/core/recommend.js`: 축별 불일치(`AXIS_MISMATCH`)와 최종 축 가중치(`AXIS_WEIGHTS`)로 점수를 계산하고, `scoreWeapon`이 축별 상세값을 함께 돌려줌
+- `src/core/recommend.js`: 작품의 축 모델(`src/core/axis-models.js`)의 축별 불일치와 최종 축 가중치로 점수를 계산하고, `scoreWeapon`이 축별 상세값을 함께 돌려줌
 - `src/core/reason.js`: 1·2순위 비교와 표시 항목 선택을 담당하는 순수 함수(`buildRecommendationReason`)와 임계값 상수
 - `src/core/reason-copy.js`: 축·방향별 한국어 문장 틀과 조사 선택
 - `src/app.js`: 정상 결과와 공유 결과의 1·2순위로 이유 모델 생성

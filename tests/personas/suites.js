@@ -1,13 +1,14 @@
 // 작품별 페르소나 묶음. 작품 ID는 src/data/<작품 ID>/와 사이트 작품 설정(src/games/index.js)의 ID와 같다.
-// rules.centralResult는 사이트의 작품 설정 centralResult와 같아야 하며 persona.test.js에서 일치를 확인한다.
+// rules.centralResult·axisModel은 사이트의 작품 설정 centralResult·axisModel과 같아야 하며 persona.test.js에서 일치를 확인한다.
 // (사이트 작품 설정은 이미지 자산을 불러오므로 Node로 실행하는 보고서 스크립트에서 직접 읽지 않는다.)
+import { GAME_AXIS_MODELS } from '../../src/core/axis-models.js';
 import { loadGameData } from './persona-runner.js';
 import { wildsPersonas } from './wilds-personas.js';
 import { wildsV2Personas } from './wilds-v2-personas.js';
 
 export const personaSuites = {
-  wilds: { personas: wildsPersonas, rules: { centralResult: false } },
-  wilds_v2: { personas: wildsV2Personas, rules: { centralResult: true } },
+  wilds: { personas: wildsPersonas, rules: { centralResult: false, axisModel: GAME_AXIS_MODELS.wilds } },
+  wilds_v2: { personas: wildsV2Personas, rules: { centralResult: true, axisModel: GAME_AXIS_MODELS.wilds_v2 } },
 };
 
 export const PERSONA_GAME_IDS = Object.keys(personaSuites);

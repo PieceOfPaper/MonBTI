@@ -7,7 +7,9 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import readExcelFile from 'read-excel-file/node';
-import { SheetConversionError, buildMeta, convertQuestions, convertWeapons } from './sheet-converter.js';
+import {
+  AXIS_FIELDS, SheetConversionError, V2_AXIS_FIELDS, buildMeta, convertQuestions, convertWeapons,
+} from './sheet-converter.js';
 import { sameSheetData } from './json-output.js';
 
 const SPREADSHEET_ID = '124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras';
@@ -16,9 +18,10 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 // sheet는 데이터 갱신에서 검사를 가리키는 내부 이름이자 원본 탭 접두사(<sheet>_Weapon·<sheet>_Question)다.
 // id는 사이트 작품 ID이자 src/data/<id>/ 경로이며 공유 링크·저장소 키에 쓰이므로 바꾸지 않는다.
+// axisFields는 그 검사의 축 열이며 사이트 작품 설정의 축 모델(axisModel)과 같아야 한다.
 export const GAMES = [
-  { sheet: 'Wilds', id: 'wilds' },
-  { sheet: 'Wilds_V2', id: 'wilds_v2' },
+  { sheet: 'Wilds', id: 'wilds', axisFields: AXIS_FIELDS },
+  { sheet: 'Wilds_V2', id: 'wilds_v2', axisFields: V2_AXIS_FIELDS },
 ].map((game) => ({ ...game, weaponSheet: `${game.sheet}_Weapon`, questionSheet: `${game.sheet}_Question` }));
 
 // --sheet가 없으면 모든 검사, 있으면 그 검사 하나. 알 수 없는 이름은 가능한 이름과 함께 오류를 낸다.
@@ -86,8 +89,8 @@ async function main() {
 
   // 선택한 작품을 모두 먼저 검증한 뒤 기록해 일부만 갱신되는 상황을 막는다.
   const outputs = games.map((game) => {
-    const weapons = convertWeapons(sheetRows(sheets, game.weaponSheet), game.weaponSheet);
-    const questions = convertQuestions(sheetRows(sheets, game.questionSheet), game.questionSheet);
+    const weapons = convertWeapons(sheetRows(sheets, game.weaponSheet), game.weaponSheet, game.axisFields);
+    const questions = convertQuestions(sheetRows(sheets, game.questionSheet), game.questionSheet, game.axisFields);
     const meta = (sheet) => buildMeta({ spreadsheetId: SPREADSHEET_ID, sheet, exportedAt, convertedAt });
     return { game, weapons, questions, meta };
   });

@@ -5,7 +5,7 @@ MonBTI의 기획서는 이 폴더 하위에 Markdown으로 관리합니다.
 | 문서 | 역할 |
 | --- | --- |
 | [project-plan.md](project-plan.md) | 최신 제품 기획과 사용자 흐름 |
-| [wilds-v2-plan.md](wilds-v2-plan.md) | 기존 와일즈 대비 와일즈 V2 변경 사항과 구현 예정 규칙 |
+| [wilds-v2-plan.md](wilds-v2-plan.md) | 기존 와일즈 대비 와일즈 V2 변경 사항과 적용 규칙 |
 | [test-design.md](test-design.md) | 검사·분류·추천 설계 |
 | [persona-test-plan.md](persona-test-plan.md) | 페르소나 기반 추천·문항 회귀 테스트 구현 사양 |
 | [result-reason.md](result-reason.md) | 결과의 ‘왜 이 무기인가요?’ 계산·문장·화면·테스트 명세 |

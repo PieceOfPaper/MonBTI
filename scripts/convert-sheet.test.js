@@ -12,6 +12,12 @@ describe('검사별 데이터 변환 대상', () => {
     expect(GAMES.map(({ id }) => id).sort()).toEqual(supportedGames.map(({ id }) => id).sort());
   });
 
+  it('검사별 축 열은 사이트 작품 설정의 축 모델과 같다', () => {
+    for (const game of GAMES) {
+      expect(game.axisFields).toEqual(supportedGames.find(({ id }) => id === game.id).axisModel.axisIds);
+    }
+  });
+
   it('--sheet가 없으면 모든 검사, 있으면 그 검사만 고르고 모르는 이름은 거부한다', () => {
     expect(selectGames(undefined)).toEqual(GAMES);
     expect(selectGames('Wilds_V2').map(({ id }) => id)).toEqual(['wilds_v2']);

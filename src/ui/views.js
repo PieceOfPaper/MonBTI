@@ -1,5 +1,5 @@
 // 화면 마크업. 상태를 받아 문자열을 돌려주며 이벤트 연결은 app.js가 맡는다.
-import { AXES } from '../core/axes.js';
+import { DEFAULT_AXIS_MODEL, axisModelOf } from '../core/axis-models.js';
 import { AMPLIFY_FACTOR } from '../core/central.js';
 import { NICKNAME_MAX_LENGTH } from '../core/nickname.js';
 import { RESPONSES } from '../core/responses.js';
@@ -137,8 +137,8 @@ function renderWinnerArt(weapon) {
 }
 
 // 입문 난이도: 같은 작품 무기 사이의 상대평가 별표. 별 글자 대신 단계를 읽어 주도록 화면 낭독기용 이름을 붙인다.
-function renderDifficulty(weapon, weapons) {
-  const { title, label, spoken } = difficultyContent(weapon, weapons);
+function renderDifficulty(weapon, weapons, axisModel) {
+  const { title, label, spoken } = difficultyContent(weapon, weapons, axisModel);
   return `<p class="difficulty">
           <span class="difficulty__label">${title}</span>
           <span class="difficulty__stars" role="img" aria-label="${spoken}">${label}</span>
@@ -147,7 +147,7 @@ function renderDifficulty(weapon, weapons) {
 
 // badge는 중앙형 특별 결과의 물음표 표시(result-content.js의 winnerBadge)이며 없으면 아이콘만 둔다.
 // name은 크게 보여 주는 이름(result-content.js의 winnerName)이며 특별 결과면 끝에 물음표가 붙는다.
-function renderWinner(weapon, weapons, badge = null, name = weapon.weapon_name) {
+function renderWinner(weapon, weapons, axisModel, badge = null, name = weapon.weapon_name) {
   const icon = badge
     ? `<span class="winner__icon-wrap">${weaponIcon(weapon, 'winner__icon')}<span class="winner__badge" role="img" aria-label="${escapeHtml(badge.label)}" title="${escapeHtml(badge.label)}">${escapeHtml(badge.mark)}</span></span>`
     : weaponIcon(weapon, 'winner__icon');
@@ -156,7 +156,7 @@ function renderWinner(weapon, weapons, badge = null, name = weapon.weapon_name) 
       <div class="winner__main">
         ${icon}
         <strong class="winner__name">${escapeHtml(name)}</strong>
-        ${renderDifficulty(weapon, weapons)}
+        ${renderDifficulty(weapon, weapons, axisModel)}
       </div>
       ${renderQuote(weapon)}
     </div>`;
@@ -214,12 +214,13 @@ function renderReasonContent(content) {
 }
 
 // 선택한 무기와 나의 기준 비교(차트·표). 비교 대상 버튼을 누르면 이 부분만 다시 그린다.
-export function renderComparisonView(profile, weapon, who) {
+// axisModel은 작품의 축 모델이며 차트 꼭짓점과 표의 행 순서를 정한다.
+export function renderComparisonView(profile, weapon, who, axisModel = DEFAULT_AXIS_MODEL) {
   const chart = renderRadarSvg(
     [{ values: weapon, className: 'radar__series--weapon' }, { values: profile, className: 'radar__series--me' }],
-    { label: `${who} 점수와 ${escapeHtml(weapon.weapon_name)} 기준 비교` },
+    { label: `${who} 점수와 ${escapeHtml(weapon.weapon_name)} 기준 비교`, axes: axisModel.axes },
   );
-  const rows = comparisonRows(profile, weapon).map(({ short, me, weapon: value }) => `
+  const rows = comparisonRows(profile, weapon, axisModel).map(({ short, me, weapon: value }) => `
           <tr><th scope="row">${short}</th><td>${me}</td><td>${value}</td></tr>`).join('');
   return `<h3 id="compare-title" class="compare__title">${who} vs ${escapeHtml(weapon.weapon_name)}</h3>
       <div class="compare">
@@ -238,14 +239,14 @@ export function renderComparisonView(profile, weapon, who) {
 }
 
 // 비교 대상 버튼(1~3순위와 나머지 무기)과 기준 비교.
-function renderComparison(result, others, selected, selectedIndex, othersOpen, who) {
+function renderComparison(result, others, selected, selectedIndex, othersOpen, who, axisModel) {
   return `<section class="result__section" aria-labelledby="compare-section-title">
       <h2 id="compare-section-title">${COMPARE_SECTION_TITLE}</h2>
       <ol class="ranking" aria-label="추천 무기 순위">${renderRanking(result.weapons, selectedIndex)}
       </ol>
       ${renderOthers(others, selectedIndex, othersOpen)}
       <div class="compare-view" id="compare-view" aria-live="polite">
-      ${renderComparisonView(result.profile, selected, who)}
+      ${renderComparisonView(result.profile, selected, who, axisModel)}
       </div>
     </section>`;
 }
@@ -298,6 +299,7 @@ export function renderResult(game, result, {
   selectedIndex = 0, shared = false, others = [], othersOpen = false, reason = null,
 } = {}) {
   const winner = result.weapons[0];
+  const axisModel = axisModelOf(game);
   const selected = [...result.weapons, ...others][selectedIndex] ?? winner;
   const name = displayName(result.nickname);
   const who = escapeHtml(name);
@@ -308,9 +310,9 @@ export function renderResult(game, result, {
   return `<section class="result" aria-labelledby="result-title">
     <p class="eyebrow">${escapeHtml(game.name)}</p>
     <h1 id="result-title" tabindex="-1">${escapeHtml(resultTitle(name))}</h1>
-    ${renderWinner(winner, game.weapons, winnerBadge(result), winnerName(result))}
+    ${renderWinner(winner, game.weapons, axisModel, winnerBadge(result), winnerName(result))}
     ${renderReasonContent(resultReasonContent(result, reason))}
-    ${renderComparison(result, others, selected, selectedIndex, othersOpen, who)}
+    ${renderComparison(result, others, selected, selectedIndex, othersOpen, who, axisModel)}
     ${renderIntro(winner)}
     <section class="result__section share-section" aria-labelledby="share-title">
       <h2 id="share-title">결과 공유하기</h2>
@@ -343,7 +345,7 @@ function renderCentralGuide() {
 
 // 검사 설명. 누구를 위한 검사인지, 어떻게 답하고 어떤 기준으로 무기를 고르는지 게임 지식 없이 읽을 수 있게 쓴다.
 export function renderGuide(game) {
-  const axes = AXES.map(({ short, name, guide, fit }) => `
+  const axes = axisModelOf(game).axes.map(({ short, name, guide, fit }) => `
       <li class="guide__axis">
         <h3><span class="guide__short">${short}</span> ${name}</h3>
         <p>${guide}</p>

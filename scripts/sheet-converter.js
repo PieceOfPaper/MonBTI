@@ -1,10 +1,15 @@
 // 원본 시트의 행 배열을 사이트용 JSON 구조로 검증·변환한다.
 // 규칙은 docs/data-schema.md의 '변환 규칙'을 따른다.
 
+// 검사마다 축 열이 다르다. 기존 와일즈는 freedom, 와일즈 V2는 constraint를 쓴다(작품 축 모델, src/core/axis-models.js).
+// axisFields를 주지 않으면 기존 와일즈의 축 열이다.
 export const AXIS_FIELDS = ['attack', 'freedom', 'complexity', 'management', 'counter'];
-export const WEAPON_COLUMNS = ['weapon_id', 'weapon_name', ...AXIS_FIELDS];
-export const QUESTION_COLUMNS = ['question_id', 'question_order', 'question_text', ...AXIS_FIELDS];
-export const LEGACY_QUESTION_COLUMNS = ['axis', 'reverse'];
+export const V2_AXIS_FIELDS = ['attack', 'constraint', 'complexity', 'management', 'counter'];
+// 어느 검사에서든 축으로 쓰는 열. 그 검사가 쓰지 않는 축 열이 남아 있으면 옮기다 만 데이터로 보고 오류를 낸다.
+const KNOWN_AXIS_FIELDS = [...new Set([...AXIS_FIELDS, ...V2_AXIS_FIELDS])];
+const weaponColumns = (axisFields) => ['weapon_id', 'weapon_name', ...axisFields];
+const questionColumns = (axisFields) => ['question_id', 'question_order', 'question_text', ...axisFields];
+export const LEGACY_columns = ['axis', 'reverse'];
 
 // 다축 가중치 구조(complexity 필드). 선택지 행(1)·단일 축(2)·resource(3)·combo(4) 구조와 구분한다.
 export const DATA_FORMAT_VERSION = 5;
@@ -20,7 +25,7 @@ export class SheetConversionError extends Error {
 
 const isBlank = (value) => value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
 
-function readHeader(sheet, rows, expected, errors) {
+function readHeader(sheet, rows, expected, errors, axisFields) {
   const header = (rows[0] ?? []).map((cell) => (typeof cell === 'string' ? cell.trim() : cell));
   const index = {};
   header.forEach((name, column) => {
@@ -30,6 +35,9 @@ function readHeader(sheet, rows, expected, errors) {
   });
   for (const name of expected) {
     if (!(name in index)) errors.push(`필수 열 '${name}'이 없습니다.`);
+  }
+  for (const name of KNOWN_AXIS_FIELDS) {
+    if (name in index && !axisFields.includes(name)) errors.push(`이 검사에서 쓰지 않는 축 열 '${name}'이 있습니다. 제거해야 합니다.`);
   }
   if (errors.length) throw new SheetConversionError(sheet, errors);
   return index;
@@ -51,15 +59,16 @@ function readNumber(value, min, max) {
   return value;
 }
 
-export function convertWeapons(rows, sheet = 'Wilds_Weapon') {
+export function convertWeapons(rows, sheet = 'Wilds_Weapon', axisFields = AXIS_FIELDS) {
   const errors = [];
-  const index = readHeader(sheet, rows, WEAPON_COLUMNS, errors);
+  const columns = weaponColumns(axisFields);
+  const index = readHeader(sheet, rows, columns, errors, axisFields);
   const weapons = [];
   const seen = new Set();
 
   rows.slice(1).forEach((row, offset) => {
     const line = `${offset + 2}행`;
-    const cells = cellsOf(row ?? [], index, WEAPON_COLUMNS);
+    const cells = cellsOf(row ?? [], index, columns);
     if (Object.values(cells).every(isBlank)) return;
 
     const weapon_id = readText(cells.weapon_id);
@@ -70,7 +79,7 @@ export function convertWeapons(rows, sheet = 'Wilds_Weapon') {
     if (!weapon_name) errors.push(`${line}: weapon_name이 비어 있습니다.`);
 
     const weapon = { weapon_id, weapon_name };
-    for (const axis of AXIS_FIELDS) {
+    for (const axis of axisFields) {
       if (isBlank(cells[axis])) {
         errors.push(`${line}: ${axis} 값이 비어 있습니다.`);
         continue;
@@ -86,22 +95,23 @@ export function convertWeapons(rows, sheet = 'Wilds_Weapon') {
   return weapons;
 }
 
-export function convertQuestions(rows, sheet = 'Wilds_Question') {
+export function convertQuestions(rows, sheet = 'Wilds_Question', axisFields = AXIS_FIELDS) {
   const errors = [];
+  const columns = questionColumns(axisFields);
   const header = (rows[0] ?? []).map((cell) => (typeof cell === 'string' ? cell.trim() : cell));
-  for (const legacy of LEGACY_QUESTION_COLUMNS) {
+  for (const legacy of LEGACY_columns) {
     if (header.includes(legacy)) errors.push(`이전 구조의 '${legacy}' 열이 있습니다. 다축 가중치 구조로 바꿔야 합니다.`);
   }
-  const index = readHeader(sheet, rows, QUESTION_COLUMNS, errors);
+  const index = readHeader(sheet, rows, columns, errors, axisFields);
   const questions = [];
   const seenIds = new Set();
   const seenOrders = new Set();
 
   rows.slice(1).forEach((row, offset) => {
     const line = `${offset + 2}행`;
-    const cells = cellsOf(row ?? [], index, QUESTION_COLUMNS);
+    const cells = cellsOf(row ?? [], index, columns);
     const baseBlank = ['question_id', 'question_order', 'question_text'].every((name) => isBlank(cells[name]));
-    const weightsEmpty = AXIS_FIELDS.every((axis) => isBlank(cells[axis]) || cells[axis] === 0);
+    const weightsEmpty = axisFields.every((axis) => isBlank(cells[axis]) || cells[axis] === 0);
     if (baseBlank && weightsEmpty) return;
     if (baseBlank) {
       errors.push(`${line}: question_id·question_order·question_text 없이 가중치만 있습니다.`);
@@ -127,7 +137,7 @@ export function convertQuestions(rows, sheet = 'Wilds_Question') {
     if (!question_text) errors.push(`${line}: question_text가 비어 있습니다.`);
 
     const question = { question_id, question_order, question_text };
-    for (const axis of AXIS_FIELDS) {
+    for (const axis of axisFields) {
       if (isBlank(cells[axis])) {
         question[axis] = 0;
         continue;
@@ -137,7 +147,7 @@ export function convertQuestions(rows, sheet = 'Wilds_Question') {
       // -0은 JSON에서 0이 되므로 미리 정리한다.
       question[axis] = value === 0 ? 0 : value;
     }
-    if (AXIS_FIELDS.every((axis) => question[axis] === 0)) {
+    if (axisFields.every((axis) => question[axis] === 0)) {
       errors.push(`${line}: 0이 아닌 가중치가 하나 이상 필요합니다.`);
     }
     questions.push(question);

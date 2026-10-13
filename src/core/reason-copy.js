@@ -1,8 +1,8 @@
 // 추천 이유 문장 틀. 기준은 docs/result-reason.md의 '축별 문장 기준'을 따른다.
 // 게임 용어와 내부 변수명 없이 쓰고, 이름은 escape 전 원문을 받아 조사만 붙인다(HTML 이스케이프는 views.js가 맡는다).
-import { AXES } from './axes.js';
+import { AXIS_BY_ID } from './axes.js';
 
-const SHORT = Object.fromEntries(AXES.map(({ id, short }) => [id, short]));
+const SHORT = Object.fromEntries(Object.values(AXIS_BY_ID).map(({ id, short }) => [id, short]));
 
 // 축별 문구. noun은 잘 맞는 점에서 두 기준을 이어 말할 때 쓰는 짧은 명사구이고,
 // higher·lower는 무기 값이 사용자보다 높거나 낮아 멀 때 '처음에는 낯설 수 있어요' 앞에 붙는 연결형 구절이다.
@@ -16,6 +16,12 @@ export const AXIS_COPY = {
     noun: '행동을 바꾸는 속도',
     higher: '원하는 것보다 행동을 더 빠르고 자유롭게 바꿀 수 있어',
     lower: '공격 중 다음 행동으로 넘어가는 속도가 원하는 것보다 느려',
+  },
+  // 와일즈 V2. 값이 높을수록 시작한 동작에 오래 묶이므로 자유도와 방향이 반대다.
+  constraint: {
+    noun: '시작한 동작에 묶이는 정도',
+    higher: '원하는 것보다 한 번 시작한 동작에 오래 묶이는 편이라',
+    lower: '원하는 것보다 행동을 더 빠르고 자유롭게 바꿀 수 있어',
   },
   complexity: {
     noun: '상황에 맞는 행동을 고르는 정도',

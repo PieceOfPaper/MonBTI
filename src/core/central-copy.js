@@ -17,6 +17,7 @@ export const CENTRAL_SECTION_TITLES = {
 export const CENTRAL_AXIS_COPY = {
   attack: { higher: '큰 한 방을 모아 넣는 쪽', lower: '대미지를 꾸준히 쌓는 쪽' },
   freedom: { higher: '행동을 빨리 바꾸는 쪽', lower: '한 행동을 끝까지 이어 가는 쪽' },
+  constraint: { higher: '한 행동을 끝까지 이어 가는 쪽', lower: '행동을 빨리 바꾸는 쪽' },
   complexity: { higher: '상황에 맞게 골라 쓰는 쪽', lower: '단순하게 밀고 가는 쪽' },
   management: { higher: '상태를 챙기며 싸우는 쪽', lower: '신경 쓸 것이 적은 쪽' },
   counter: { higher: '받아치는 플레이 쪽', lower: '먼저 흐름을 만드는 쪽' },

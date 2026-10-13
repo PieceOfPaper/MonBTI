@@ -1,6 +1,6 @@
 // 현재 질문·무기 데이터로 어떤 무기가 몇 % 비율로 추천되는지 모의 응답으로 추정한다. 밸런싱 전용이며 사이트에서 쓰지 않는다.
 // 점수 계산은 사이트와 같은 src/core 함수를 그대로 사용한다.
-import { AXIS_IDS } from '../src/core/axes.js';
+import { DEFAULT_AXIS_MODEL } from '../src/core/axis-models.js';
 import { RESPONSES, responseCoefficient } from '../src/core/responses.js';
 import { computeAxisProfile, computeAxisTotals } from '../src/core/scoring.js';
 import { finalRanking } from '../src/core/central.js';
@@ -43,12 +43,12 @@ export const ANSWER_MODELS = {
   uniform: (questions, random) => Object.fromEntries(questions.map(({ question_id }) => (
     [question_id, RESPONSE_VALUES[Math.floor(random() * RESPONSE_VALUES.length)]]
   ))),
-  persona: (questions, random, { noise }) => {
-    const trait = Object.fromEntries(AXIS_IDS.map((axis) => [axis, random() * 100]));
+  persona: (questions, random, { noise, axisModel }) => {
+    const trait = Object.fromEntries(axisModel.axisIds.map((axis) => [axis, random() * 100]));
     return Object.fromEntries(questions.map((question) => {
       let signed = 0;
       let maxAbs = 0;
-      for (const axis of AXIS_IDS) {
+      for (const axis of axisModel.axisIds) {
         const weight = question[axis] ?? 0;
         signed += weight * ((trait[axis] - 50) / 50);
         maxAbs += Math.abs(weight);
@@ -60,7 +60,11 @@ export const ANSWER_MODELS = {
 };
 
 // samples번 모의 응답을 만들어 무기별 1순위·3순위 이내 횟수, 순위 합, 1순위가 된 사용자의 축 점수 합을 센다.
-export function simulateDistribution({ questions, weapons, model, samples, seed = 1, noise = 0.3, central = false }) {
+// model은 응답 모형, axisModel은 작품의 축 모델(core/axis-models.js)이다.
+export function simulateDistribution({
+  questions, weapons, model, samples, seed = 1, noise = 0.3, central = false, axisModel = DEFAULT_AXIS_MODEL,
+}) {
+  const axisIds = axisModel.axisIds;
   const answer = ANSWER_MODELS[model];
   if (!answer) throw new Error(`알 수 없는 응답 모형입니다: ${model}`);
   const random = createRandom(seed);
@@ -69,16 +73,17 @@ export function simulateDistribution({ questions, weapons, model, samples, seed 
     first: 0,
     top: 0,
     rankSum: 0,
-    profileSum: Object.fromEntries(AXIS_IDS.map((axis) => [axis, 0])),
+    profileSum: Object.fromEntries(axisIds.map((axis) => [axis, 0])),
   }));
   const byId = new Map(stats.map((entry) => [entry.weapon.weapon_id, entry]));
   let ties = 0;
   let specials = 0;
 
   for (let i = 0; i < samples; i += 1) {
-    const profile = computeAxisProfile(computeAxisTotals(questions, answer(questions, random, { noise })));
+    const answers = answer(questions, random, { noise, axisModel });
+    const profile = computeAxisProfile(computeAxisTotals(questions, answers, axisModel));
     // central이 참이면 사이트의 작품 설정 centralResult처럼 중앙형 응답에 특별 결과를 적용한다.
-    const { ranked, central: special } = finalRanking(weapons, profile, { centralResult: central });
+    const { ranked, central: special } = finalRanking(weapons, profile, { centralResult: central, axisModel });
     if (special) specials += 1;
     ranked.forEach(({ weapon }, rank) => {
       const entry = byId.get(weapon.weapon_id);
@@ -87,7 +92,7 @@ export function simulateDistribution({ questions, weapons, model, samples, seed 
     });
     const winner = byId.get(ranked[0].weapon.weapon_id);
     winner.first += 1;
-    for (const axis of AXIS_IDS) winner.profileSum[axis] += profile[axis] ?? 0;
+    for (const axis of axisIds) winner.profileSum[axis] += profile[axis] ?? 0;
     if (!special && ranked.length > 1 && ranked[0].score === ranked[1].score) ties += 1;
   }
 
@@ -106,7 +111,7 @@ export function simulateDistribution({ questions, weapons, model, samples, seed 
       topRate: top / samples,
       averageRank: rankSum / samples,
       firstProfile: first
-        ? Object.fromEntries(AXIS_IDS.map((axis) => [axis, profileSum[axis] / first]))
+        ? Object.fromEntries(axisIds.map((axis) => [axis, profileSum[axis] / first]))
         : null,
     })),
   };

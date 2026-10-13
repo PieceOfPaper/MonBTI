@@ -2,10 +2,11 @@
 // 사양은 docs/persona-test-plan.md를 따른다. 추천 점수는 src/core/recommend.js를 그대로 사용한다.
 // rules.centralResult는 사이트의 작품 설정 centralResult와 같다. 켜져 있으면 결과 화면과 같은 최종 순위
 // (중앙형 응답 특별 결과, src/core/central.js)로 기대값·인접값·기준점·추천 영역을 판정한다.
+// rules.axisModel은 사이트의 작품 설정 axisModel(core/axis-models.js)이며 축 목록과 추천 공식을 정한다.
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { AXES, AXIS_IDS } from '../../src/core/axes.js';
+import { DEFAULT_AXIS_MODEL } from '../../src/core/axis-models.js';
 import { centralDeviation, finalRanking } from '../../src/core/central.js';
 import { RECOMMENDATION_COUNT } from '../../src/core/recommend.js';
 import { searchAnswers } from './answer-search.js';
@@ -40,9 +41,12 @@ const RANK_EXPECTATION_KEYS = ['directTop1', 'directTop3Includes', 'answerTop1',
 const CENTRAL_EXPECTATION_KEYS = ['directCentral', 'answerCentral'];
 const EXPECTATION_KEYS = [...RANK_EXPECTATION_KEYS, ...CENTRAL_EXPECTATION_KEYS];
 
+export const axisModelOfRules = (rules = {}) => rules.axisModel ?? DEFAULT_AXIS_MODEL;
+
 // fixture 형식 오류 목록. 비어 있으면 통과다.
 export function validatePersonas(personas, weapons, rules = {}) {
   const errors = [];
+  const { axisIds } = axisModelOfRules(rules);
   const weaponIds = new Set(weapons.map(({ weapon_id }) => weapon_id));
   const seen = new Set();
   for (const [index, persona] of personas.entries()) {
@@ -55,14 +59,14 @@ export function validatePersonas(personas, weapons, rules = {}) {
     seen.add(persona?.id);
     if (typeof persona?.name !== 'string' || !persona.name) errors.push(`${label}: name이 필요합니다.`);
     const target = persona?.targetProfile ?? {};
-    for (const axis of AXIS_IDS) {
+    for (const axis of axisIds) {
       const value = target[axis];
       if (!Number.isFinite(value) || value < 0 || value > 100) {
         errors.push(`${label}: targetProfile.${axis}는 0~100의 숫자여야 합니다(현재 ${value}).`);
       }
     }
     for (const key of Object.keys(target)) {
-      if (!AXIS_IDS.includes(key)) errors.push(`${label}: targetProfile에 알 수 없는 축 '${key}'가 있습니다.`);
+      if (!axisIds.includes(key)) errors.push(`${label}: targetProfile에 알 수 없는 축 '${key}'가 있습니다.`);
     }
     for (const key of ['maxAxisError', 'meanAbsoluteError']) {
       const value = persona?.tolerance?.[key];
@@ -110,20 +114,25 @@ const topIds = (ranked, count = RECOMMENDATION_COUNT) => ranked.slice(0, count).
 // 1·2순위 점수 차이. 특별 결과는 점수 순서가 아니므로 차이를 매기지 않는다.
 const gapOf = (ranked) => (!ranked.central && ranked.length > 1 ? ranked[0].score - ranked[1].score : null);
 
-const summarize = (ranked, profile) => ({
+const summarize = (ranked, profile, axisModel) => ({
   ranking: ranked,
   gap: gapOf(ranked),
   central: ranked.central,
-  deviation: centralDeviation(profile),
+  deviation: centralDeviation(profile, axisModel),
 });
 
 export function runPersona(persona, { questions, weapons, rules = {} }) {
-  const search = searchAnswers(questions, persona.targetProfile);
+  const axisModel = axisModelOfRules(rules);
+  const search = searchAnswers(questions, persona.targetProfile, axisModel);
   return {
     persona,
+    axes: axisModel.axes,
     tolerance: { ...DEFAULT_TOLERANCE, ...persona.tolerance },
-    direct: { profile: persona.targetProfile, ...summarize(ranking(weapons, persona.targetProfile, rules), persona.targetProfile) },
-    answer: { ...search, ...summarize(ranking(weapons, search.profile, rules), search.profile) },
+    direct: {
+      profile: persona.targetProfile,
+      ...summarize(ranking(weapons, persona.targetProfile, rules), persona.targetProfile, axisModel),
+    },
+    answer: { ...search, ...summarize(ranking(weapons, search.profile, rules), search.profile, axisModel) },
   };
 }
 
@@ -164,7 +173,7 @@ const centralNote = (part) => (part.central ? ` [중앙형 특별 결과, 이탈
 // 실패를 고칠 때 바로 판단할 수 있도록 목표·실제 프로필, 축별 오차, 순위를 함께 보여 준다.
 export function describePersonaResult(result, count = 5) {
   const { persona, answer, direct } = result;
-  const axes = (profile) => AXES.map(({ id, short }) => `${short} ${fmt(profile[id])}`).join(' · ');
+  const axes = (profile) => result.axes.map(({ id, short }) => `${short} ${fmt(profile[id])}`).join(' · ');
   const ranks = (ranked) => ranked.slice(0, count).map((r, i) => `${i + 1}.${r.weapon_id}(${fmt(r.score)})`).join(' ');
   return [
     `[${persona.id}] ${persona.name}`,
@@ -196,7 +205,8 @@ export function personaWarnings(result) {
 // 각 무기의 기준값을 그대로 프로필로 쓸 때의 1순위. 다섯 값이 같은 무기는 중복으로 따로 보고한다.
 // 특별 결과가 적용되는 기준점은 결과 화면과 같은 최종 1순위로 판정한다.
 export function checkWeaponAnchors(weapons, rules = {}) {
-  const key = (w) => AXIS_IDS.map((axis) => w[axis]).join(',');
+  const { axisIds } = axisModelOfRules(rules);
+  const key = (w) => axisIds.map((axis) => w[axis]).join(',');
   return weapons.map((weapon) => {
     const ranked = ranking(weapons, weapon, rules);
     const duplicates = weapons
@@ -220,10 +230,11 @@ const clamp = (value) => Math.min(100, Math.max(0, value));
 
 // 한 번에 한 축만 바꿔 1순위·상위 3개 변화를 본다.
 export function analyzeNeighborhood(weapons, profile, { rules = {}, deltas = NEIGHBOR_DELTAS } = {}) {
+  const { axisIds } = axisModelOfRules(rules);
   const base = ranking(weapons, profile, rules);
   const baseTop = topIds(base);
   const variations = [];
-  for (const axis of AXIS_IDS) {
+  for (const axis of axisIds) {
     for (const delta of deltas) {
       const value = clamp(profile[axis] + delta);
       const ranked = ranking(weapons, { ...profile, [axis]: value }, rules);
@@ -247,9 +258,9 @@ export function analyzeNeighborhood(weapons, profile, { rules = {}, deltas = NEI
   // 1순위가 처음 바뀌는 변화: 변화 크기가 작은 순, 같은 크기면 축 표시 순서와 감소 방향 우선.
   const changed = variations.filter(({ top1Changed }) => top1Changed);
   const firstChange = changed.sort((a, b) => (Math.abs(a.delta) - Math.abs(b.delta))
-    || (AXIS_IDS.indexOf(a.axis) - AXIS_IDS.indexOf(b.axis)) || (a.delta - b.delta))[0] ?? null;
+    || (axisIds.indexOf(a.axis) - axisIds.indexOf(b.axis)) || (a.delta - b.delta))[0] ?? null;
   // 축·방향별로 1순위가 유지되는 가장 큰 변화량.
-  const stableRange = Object.fromEntries(AXIS_IDS.map((axis) => {
+  const stableRange = Object.fromEntries(axisIds.map((axis) => {
     const along = (sign) => {
       let kept = 0;
       for (const v of variations.filter((x) => x.axis === axis && Math.sign(x.delta) === sign)
@@ -277,13 +288,14 @@ export const disjointSmallChanges = (neighborhood) => neighborhood.variations
 // 중앙형 특별 결과를 쓰는 작품은 결과 화면과 같은 최종 순위로 세고, 특별 결과가 적용된 프로필 수를 함께 센다.
 export function analyzeDistribution(weapons, step = 10, rules = {}) {
   if (!Number.isInteger(step) || step <= 0 || 100 % step !== 0) throw new Error('간격은 100의 약수인 양의 정수여야 합니다.');
+  const { axisIds } = axisModelOfRules(rules);
   const values = Array.from({ length: 100 / step + 1 }, (_, i) => i * step);
   const counts = Object.fromEntries(weapons.map(({ weapon_id }) => [weapon_id, { first: 0, top: 0 }]));
   const profile = {};
   let total = 0;
   let centrals = 0;
   const visit = (depth) => {
-    if (depth === AXIS_IDS.length) {
+    if (depth === axisIds.length) {
       const { ranked, central } = finalRanking(weapons, profile, rules);
       if (central) centrals += 1;
       counts[ranked[0].weapon.weapon_id].first += 1;
@@ -292,7 +304,7 @@ export function analyzeDistribution(weapons, step = 10, rules = {}) {
       return;
     }
     for (const value of values) {
-      profile[AXIS_IDS[depth]] = value;
+      profile[axisIds[depth]] = value;
       visit(depth + 1);
     }
   };

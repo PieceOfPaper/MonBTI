@@ -1,7 +1,7 @@
 // 해시 라우팅과 화면 상태. GitHub Pages 하위 경로(/MonBTI/)에서도 새로고침이 동작하도록
 // 경로 대신 #/<작품 ID>, #/<작품 ID>/guide, #/<작품 ID>/result, #/<작품 ID>/share/<코드> 형식을 사용한다.
 // 외부로 공유하는 링크만 ?r=<작품 ID>.<코드> 형식이며, 열면 내부 해시 주소로 바꾼다(core/share.js).
-import { AXIS_IDS } from './core/axes.js';
+import { axisModelOf } from './core/axis-models.js';
 import { buildCentralModel, centralRecommendation, isCentralProfile } from './core/central.js';
 import { buildRecommendationReason } from './core/reason.js';
 import { recommendWeapons, remainingWeapons } from './core/recommend.js';
@@ -48,14 +48,15 @@ export function shareParamToHash(search) {
 // 완료한 답변으로 결과를 만든다. 무기 순위는 사용자 점수와 무기 기준값의 적합도로 정한다(core/recommend.js).
 // nickname은 검사 시작 때 입력한 표시 이름이며 계산에는 쓰지 않는다.
 // 작품 설정 centralResult가 켜져 있고 응답이 중앙형이면 특별 결과(core/central.js)로 1~3순위를 정하고 central에 설명 모델을 담는다.
-// profile은 어느 경우든 원래 점수이며 그래프도 원래 점수를 그린다.
+// profile은 어느 경우든 원래 점수이며 그래프도 원래 점수를 그린다. 축과 계산식은 작품의 축 모델(core/axis-models.js)을 따른다.
 export function buildResult(game, answers, nickname) {
-  const profile = computeAxisProfile(computeAxisTotals(game.questions, answers));
-  if (game.centralResult && isCentralProfile(profile)) {
-    const weapons = centralRecommendation(game.weapons, profile);
-    return { weapons, profile, nickname, central: buildCentralModel(game.weapons, profile, weapons[0]) };
+  const axisModel = axisModelOf(game);
+  const profile = computeAxisProfile(computeAxisTotals(game.questions, answers, axisModel));
+  if (game.centralResult && isCentralProfile(profile, axisModel)) {
+    const weapons = centralRecommendation(game.weapons, profile, { axisModel });
+    return { weapons, profile, nickname, central: buildCentralModel(game.weapons, profile, weapons[0], { axisModel }) };
   }
-  return { weapons: recommendWeapons(game.weapons, profile), profile, nickname };
+  return { weapons: recommendWeapons(game.weapons, profile, { axisModel }), profile, nickname };
 }
 
 // 공유 링크로 받은 결과. 특별 결과 표시가 있고 작품이 그 규칙을 쓰면 반올림한 점수로 설명 모델을 다시 만든다.
@@ -63,17 +64,18 @@ export function buildResult(game, answers, nickname) {
 export function sharedResult(game, shared) {
   const { central, ...result } = shared;
   if (!central || !game.centralResult) return result;
-  return { ...result, central: buildCentralModel(game.weapons, result.profile, result.weapons[0]) };
+  return { ...result, central: buildCentralModel(game.weapons, result.profile, result.weapons[0], { axisModel: axisModelOf(game) }) };
 }
 
 // 공유 링크. 축 값은 0~100 정수로 반올림하고 표시 이름과 함께 담는다. # 없이 쿼리 하나만 써서 공유 과정의 변형을 피한다.
 export function shareUrl(game, result, base = `${location.origin}${location.pathname}`) {
+  const axisModel = axisModelOf(game);
   const code = encodeShareCode({
     weaponIds: result.weapons.map(({ weapon_id }) => weapon_id),
-    profile: Object.fromEntries(AXIS_IDS.map((axis) => [axis, result.profile[axis]])),
+    profile: Object.fromEntries(axisModel.axisIds.map((axis) => [axis, result.profile[axis]])),
     nickname: result.nickname,
     central: Boolean(result.central),
-  });
+  }, axisModel);
   return `${base}?${SHARE_PARAM}=${game.id}.${code}`;
 }
 
@@ -234,13 +236,14 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
   }
 
   function showResult(game, result, { shared = false } = {}) {
-    const others = remainingWeapons(game.weapons, result.profile, result.weapons);
+    const axisModel = axisModelOf(game);
+    const others = remainingWeapons(game.weapons, result.profile, result.weapons, axisModel);
     const ranked = [...result.weapons, ...others];
     const winner = result.weapons[0];
     const who = escapeHtml(result.nickname || FALLBACK_NICKNAME);
     // 추천 이유는 정상·공유 결과 모두 결과에 담긴 1·2순위로 만든다. 순위를 다시 정하지 않는다.
     // 중앙형 특별 결과는 1순위가 원래 적합도 순위가 아니므로 추천 이유 대신 result.central 안내를 쓴다.
-    const reason = result.central ? null : buildRecommendationReason(result.profile, winner, result.weapons[1]);
+    const reason = result.central ? null : buildRecommendationReason(result.profile, winner, result.weapons[1], axisModel);
     root.innerHTML = renderResult(game, result, { shared, others, reason });
     const status = root.querySelector('.share__status');
     const say = (message) => { status.textContent = message; };
@@ -252,7 +255,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
         if (button.getAttribute('aria-pressed') === 'true') return;
         buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
         root.querySelector('#compare-view').innerHTML = renderComparisonView(
-          result.profile, ranked[Number(button.dataset.select)], who,
+          result.profile, ranked[Number(button.dataset.select)], who, axisModel,
         );
       });
     });
@@ -292,7 +295,9 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
         // 캔버스 코드는 공유할 때만 불러온다.
         const { drawShareImage } = await import('./ui/share-image.js');
         const siteUrl = `${location.host}${location.pathname}`;
-        const blob = await drawShareImage({ gameName: game.name, result, reason, weapons: game.weapons, siteUrl });
+        const blob = await drawShareImage({
+          gameName: game.name, result, reason, weapons: game.weapons, axisModel, siteUrl,
+        });
         const file = new File([blob], 'monbti-result.png', { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {
           say('');
@@ -330,7 +335,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
     } else if (route.name === 'guide') {
       root.innerHTML = renderGuide(game);
     } else if (route.name === 'share') {
-      const shared = decodeShareCode(route.code, game.weapons);
+      const shared = decodeShareCode(route.code, game.weapons, axisModelOf(game));
       if (shared) {
         showResult(game, sharedResult(game, shared), { shared: true });
       } else {
