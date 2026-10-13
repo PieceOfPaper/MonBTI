@@ -128,7 +128,7 @@ describe('화면', () => {
     expect(dev).toContain('<summary>개발 중인 검사');
     expect(dev).toContain('href="#/wilds_v2" data-game-id="wilds_v2" data-start-quiz="wilds_v2"');
     expect(dev).toContain('href="#/wilds_v2/guide"');
-    expect(dev).toContain('<span class="game-card__tag">V2</span>');
+    expect(dev).toContain('몬스터헌터 와일즈 무기 추천 검사 <span class="game-card__version">V2</span>');
     expect(html).not.toMatch(/<details class="game-dev" open/);
   });
 
@@ -173,11 +173,19 @@ describe('화면', () => {
     expect(renderGuide(wilds)).not.toContain('guide-changes');
   });
 
-  it('작품 선택 화면은 작품 이름 대신 로고를 보여 주고 이름은 대체 텍스트로 남긴다', () => {
+  it('작품 카드는 개발 중 여부와 관계없이 왼쪽 로고, 검사 이름과 소개를 같은 모양으로 보여 준다', () => {
     const html = renderGameSelection(supportedGames);
-    expect(html).toMatch(/<img class="game-card__logo" src="[^"]*logo[^"]*\.webp" alt="몬스터헌터 와일즈"/);
-    expect(html).not.toContain('<strong>몬스터헌터 와일즈</strong>');
-    expect(renderGameSelection([{ id: 'x', name: '이름', description: '설명' }])).toContain('<strong>이름</strong>');
+    expect(html.match(/<img class="game-card__logo" src="[^"]*logo[^"]*\.webp" alt="" \/>/g)).toHaveLength(2);
+    expect(html).toContain('<strong class="game-card__title">몬스터헌터 와일즈 무기 추천 검사</strong>');
+    expect(html).not.toContain('game-card__label');
+    // 첫 화면 제목은 사이트 이름이고, 검사 이름과 겹치는 질문형 제목이나 작은 MONBTI 표시는 두지 않는다.
+    expect(html).toContain('<h1 id="page-title" tabindex="-1">MonBTI</h1>');
+    expect(html).not.toContain('MONBTI');
+    for (const { description } of supportedGames) expect(html).toContain(description);
+    expect(html).toContain('aria-label="몬스터헌터 와일즈 무기 추천 검사 V2 검사 설명"');
+    const plain = renderGameSelection([{ id: 'x', title: '이름', description: '설명' }]);
+    expect(plain).toContain('<strong class="game-card__title">이름</strong>');
+    expect(plain).not.toContain('<img');
   });
 
   it('이름 입력 화면은 기본값을 채우고 HTML을 이스케이프한다', () => {

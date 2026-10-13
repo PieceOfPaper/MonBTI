@@ -10,7 +10,8 @@ import { wildsLogo, wildsMedia } from './wilds/media.js';
 const withMedia = (weapons, media) => weapons.map((weapon) => ({ ...weapon, ...media(weapon.weapon_id) }));
 
 // 등록 순서가 작품 선택 화면의 표시 순서다. development가 true인 검사는 ‘개발 중인 검사’ 접이식 목록에 따로 보여 준다.
-// tag는 같은 로고를 쓰는 검사를 구분하는 짧은 표시다.
+// title은 작품 선택 카드에 보여 줄 검사 이름이고, version은 같은 이름의 검사를 구분하는 버전 표시로 이름 뒤에 작게 붙는다.
+// name은 작품 이름으로 검사 화면 상단 등에 쓴다.
 // 와일즈 V2는 개발 중인 다음 버전 검사로, 무기·질문 원본을 Wilds_V2_* 탭으로 분리하고 표시 자료는 와일즈 것을 함께 쓴다.
 // 개발이 끝나면 development를 지우고 기존 와일즈보다 위에 등록한다.
 // axisModel은 축 목록·불일치 공식·입문 난이도 원점수를 정하는 축 모델(core/axis-models.js)이다.
@@ -21,8 +22,9 @@ export const supportedGames = [
   {
     id: 'wilds',
     name: '몬스터헌터 와일즈',
+    title: '몬스터헌터 와일즈 무기 추천 검사',
     logo: wildsLogo,
-    description: '나의 플레이 취향에 어울리는 무기를 찾아보세요.',
+    description: '질문에 답하면 나의 플레이 취향에 맞는 와일즈 무기를 추천해 드려요.',
     axisModel: GAME_AXIS_MODELS.wilds,
     questions: wildsQuestions.questions,
     weapons: withMedia(wildsWeapons.weapons, wildsMedia),
@@ -30,7 +32,8 @@ export const supportedGames = [
   {
     id: 'wilds_v2',
     name: '몬스터헌터 와일즈 V2',
-    tag: 'V2',
+    title: '몬스터헌터 와일즈 무기 추천 검사',
+    version: 'V2',
     development: true,
     centralResult: true,
     axisModel: GAME_AXIS_MODELS.wilds_v2,
@@ -44,7 +47,7 @@ export const supportedGames = [
       ],
     },
     logo: wildsLogo,
-    description: '다음 버전으로 준비 중인 와일즈 검사예요.',
+    description: '기준과 질문을 새로 다듬은 다음 버전의 와일즈 무기 추천 검사예요.',
     questions: wildsV2Questions.questions,
     weapons: withMedia(wildsV2Weapons.weapons, wildsMedia),
   },

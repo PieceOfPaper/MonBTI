@@ -7,21 +7,20 @@ h1:focus { outline: none; }
 .hero { display: grid; align-content: center; min-height: 100dvh; }
 .eyebrow { margin: 0 0 .75rem; color: #c8da81; font-weight: 700; letter-spacing: .12em; }
 h1 { margin: 0; font-size: clamp(2rem, 8vw, 4.5rem); line-height: 1.15; word-break: keep-all; overflow-wrap: anywhere; }
-.hero > p:not(.eyebrow), .result__lead { max-width: 40rem; color: #d5ddd7; font-size: 1.125rem; line-height: 1.7; }
+.hero > p:not(.eyebrow), .result__lead { max-width: 40rem; color: #d5ddd7; font-size: 1.125rem; line-height: 1.7; word-break: keep-all; }
 .game-list { display: grid; gap: .75rem; margin: 2rem 0 0; padding: 0; list-style: none; }
 .game-list > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; }
 .button.game-guide { display: flex; align-items: center; width: auto; padding: .6rem .85rem; font-size: .9375rem; }
 .game-card, .button { display: block; border: 1px solid #789151; border-radius: 1rem; padding: 1.5rem; color: inherit; background: #243529; text-align: left; text-decoration: none; cursor: pointer; }
 .game-card { display: grid; gap: .3rem; width: 100%; padding: .75rem 1rem; border-radius: .75rem; }
 .game-card:hover, .game-card:focus-visible, .button:hover:not(:disabled), .button:focus-visible { outline: 3px solid #d8ef86; outline-offset: 3px; background: #304535; }
-.game-card strong { margin: .1rem 0; font-size: 1.125rem; }
-.game-card__label { color: #c8da81; font-size: .8125rem; font-weight: 700; }
-.game-card__tag { display: inline-block; margin-left: .25rem; padding: 0 .4rem; border-radius: .35rem; color: #18231e; background: #c8da81; font-size: .75rem; }
+.game-card__title { font-size: 1.0625rem; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
+.game-card__version { margin-left: .1rem; color: #c8da81; font-size: .75em; font-weight: 700; white-space: nowrap; }
 .game-card__logo { display: block; width: 100%; height: auto; }
-/* 로고가 있으면 왼쪽에 로고, 오른쪽에 상태·설명을 두어 카드 높이를 줄인다. */
+/* 로고가 있으면 왼쪽에 로고, 오른쪽에 검사 이름·소개를 두어 카드 높이를 줄인다. */
 .game-card:has(.game-card__logo) { grid-template-columns: clamp(5.5rem, 28%, 8.5rem) minmax(0, 1fr); align-items: center; column-gap: .85rem; }
 .game-card:has(.game-card__logo) .game-card__logo { grid-column: 1; grid-row: 1 / span 2; }
-.game-card:has(.game-card__logo) .game-card__label { grid-column: 2; align-self: end; }
+.game-card:has(.game-card__logo) .game-card__title { grid-column: 2; align-self: end; }
 .game-card:has(.game-card__logo) .game-card__description { grid-column: 2; align-self: start; }
 .game-card__description { color: #d5ddd7; font-size: .875rem; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }
 @media (max-width: 360px) {
