@@ -5,7 +5,7 @@ import { gameLabel, supportedGames } from '../games/index.js';
 import { shareContent } from './result-content.js';
 import { renderResult } from './views.js';
 
-const wilds = supportedGames[0];
+const wilds = supportedGames.find(({ id }) => id === 'wilds');
 // 결과 화면 HTML을 글자만 남긴 문장으로 바꾼다. 공유 이미지 원문과 비교하기 위해 엔티티를 되돌린다.
 const plain = (html) => html.replace(/<br \/>/g, '\n').replace(/<[^>]+>/g, ' ')
   .replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&amp;', '&')

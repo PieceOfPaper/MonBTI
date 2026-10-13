@@ -11,7 +11,7 @@
 - 작품 키: `wilds`
 - 무기 탭: `Wilds_Weapon` — sheetId `1001`
 - 질문 탭: `Wilds_Question` — sheetId `1002`
-- 개발 중인 와일즈 V2 작품 키: `wilds_v2`
+- 와일즈 V2 작품 키: `wilds_v2`
   - 무기 탭: `Wilds_V2_Weapon` — sheetId `1661331336`
   - 질문 탭: `Wilds_V2_Question` — sheetId `1489388738`
   - 2026-10-12에 `Wilds_Weapon`·`Wilds_Question`을 복제해 만들었습니다. 열 구조와 입력 규칙은 아래 와일즈 탭 설명과 같고, 이후 V2 개발에 맞춰 따로 편집합니다. 질문 ID는 작품 안에서만 고유하면 되므로 복제한 `wilds_q…` ID를 그대로 쓸 수 있습니다.

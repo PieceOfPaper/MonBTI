@@ -150,7 +150,7 @@
 | `wilds_v2` | `tests/personas/wilds-v2-personas.js` | 중앙형 응답 특별 결과를 포함한 최종 순위 |
 
 - 작품별 묶음은 `tests/personas/suites.js`에 두고 판정 규칙 `centralResult`·`axisModel`이 사이트 작품 설정(`src/games/index.js`)과 같은지 자동 테스트로 확인합니다. `axisModel`은 작품의 축 목록과 추천 공식이며, 와일즈 V2 fixture의 목표 프로필은 `freedom` 대신 `constraint`를 씁니다. 사이트에 등록된 작품에 묶음이 없어도 실패합니다.
-- 기존 와일즈 fixture는 V2 개발이 끝날 때까지 기존 와일즈 데이터의 회귀 기준으로 그대로 둡니다. V2의 질문·무기 값·규칙을 바꿔 결과가 달라지면 V2 fixture만 갱신합니다.
+- 기존 와일즈와 V2 fixture는 공개한 각 검사 데이터의 회귀 기준으로 그대로 둡니다. 이후 개선은 다음 버전 검사(V3)의 독립 fixture에서 기대값을 정합니다.
 
 ### 새 검사를 추가할 때
 

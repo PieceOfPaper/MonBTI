@@ -10,7 +10,7 @@ import {
 import { AXIS_MISMATCH, AXIS_WEIGHTS, rankWeapons, scoreWeapon } from './recommend.js';
 import { decodeShareCode, encodeShareCode } from './share.js';
 
-const wilds = supportedGames[0];
+const wilds = supportedGames.find(({ id }) => id === 'wilds');
 const weapon = (weapon_id, values) => ({
   weapon_id, weapon_name: weapon_id, attack: 50, freedom: 50, complexity: 50, management: 50, counter: 50, ...values,
 });

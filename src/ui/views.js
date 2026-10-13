@@ -25,7 +25,7 @@ const IMAGE_ICON = `<svg class="share__icon" viewBox="0 0 24 24" aria-hidden="tr
 const LINK_ICON = `<svg class="share__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
 const YOUTUBE_ICON = `<svg class="credit__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#ff0033" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#fff" d="M9.545 15.568V8.432L15.818 12z"/></svg>`;
 
-// 검사 카드: 왼쪽에 기반 작품 로고, 오른쪽에 검사 이름(버전은 작게)과 짧은 소개. 개발 중 여부와 관계없이 같은 모양이다.
+// 검사 카드: 왼쪽에 기반 작품 로고, 오른쪽에 검사 이름(버전은 작게)과 짧은 소개. 개발 중·오래된 검사 여부와 관계없이 같은 모양이다.
 function renderGameChoice(game) {
   const { id, title, version, logo, description } = game;
   const label = gameLabel(game);
@@ -37,23 +37,36 @@ function renderGameChoice(game) {
       </a><a class="button button--ghost game-guide" href="#/${id}/guide" aria-label="${escapeHtml(label)} 검사 설명">검사 설명</a></li>`;
 }
 
-// 개발 중인 검사는 기본으로 접어 둔 목록에 따로 보여 주고, 없으면 목록 자체를 만들지 않는다.
+// 접어 둔 검사 목록(개발 중인 검사·오래된 검사). 해당하는 검사가 없으면 목록 자체를 만들지 않는다.
+function renderGameGroup(games, { kind, summary, note }) {
+  if (!games.length) return '';
+  return `<details class="game-group game-group--${kind}">
+      <summary>${summary} <span class="game-group__count">${games.length}</span></summary>
+      <p class="game-group__note">${note}</p>
+      <ul class="game-list game-list--${kind}" aria-label="${summary} 선택">${games.map(renderGameChoice).join('')}</ul>
+    </details>`;
+}
+
+// 현재 검사는 위에 바로 보여 주고, 개발 중인 검사와 오래된 검사는 기본으로 접어 둔 목록에 따로 보여 준다.
 export function renderGameSelection(games) {
-  const choices = games.filter(({ development }) => !development).map(renderGameChoice).join('');
-  const developing = games.filter(({ development }) => development);
-  const developingList = developing.length
-    ? `<details class="game-dev">
-      <summary>개발 중인 검사 <span class="game-dev__count">${developing.length}</span></summary>
-      <p class="game-dev__note">아직 만들고 있는 검사예요. 질문·무기 수치와 결과가 예고 없이 바뀔 수 있어요.</p>
-      <ul class="game-list game-list--dev" aria-label="개발 중인 검사 선택">${developing.map(renderGameChoice).join('')}</ul>
-    </details>`
-    : '';
+  const choices = games.filter(({ development, legacy }) => !development && !legacy).map(renderGameChoice).join('');
+  const developingList = renderGameGroup(games.filter(({ development }) => development), {
+    kind: 'dev',
+    summary: '개발 중인 검사',
+    note: '아직 만들고 있는 검사예요. 질문·무기 수치와 결과가 예고 없이 바뀔 수 있어요.',
+  });
+  const legacyList = renderGameGroup(games.filter(({ legacy }) => legacy), {
+    kind: 'legacy',
+    summary: '오래된 검사',
+    note: '이전 버전의 검사예요. 더 이상 고치지 않고 공개했던 그대로 남겨 두었어요.',
+  });
 
   return `<section class="hero" aria-labelledby="page-title">
     <h1 id="page-title" class="hero__title" tabindex="-1"><img class="hero__logo" src="${monbtiLogo}" alt="MonBTI" width="1200" height="535" /></h1>
     <p>몬스터헌터와 관련된 여러 검사를 제공해요.</p>
     ${choices ? `<ul class="game-list" aria-label="검사 선택">${choices}</ul>` : ''}
     ${developingList}
+    ${legacyList}
     <footer class="credit">
       <p class="credit__by">
         <span>Made by <strong>종잇장</strong></span>

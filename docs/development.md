@@ -17,7 +17,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `tests/personas/` | 작품별 페르소나 fixture(`wilds-personas.js`·`wilds-v2-personas.js`)와 묶음·판정 규칙(`suites.js`), 응답 자동 탐색(`answer-search.js`), 실행기(`persona-runner.js`), 회귀 테스트(`persona.test.js`) |
 | `scripts/persona-report.js` | 페르소나별 순위·인접값·무기 기준점·추천 영역 분포 보고서 |
 | `src/data/<작품 ID>/` | 생성된 무기·질문 JSON. 직접 편집하지 않음 |
-| `src/games/index.js` | 작품 등록과 작품별 데이터·표시 자료 연결. 등록 순서가 검사 선택 화면 순서이며, `development: true`인 검사는 ‘개발 중인 검사’ 접이식 목록에 표시. `title`은 검사 이름, `version`은 같은 이름의 검사를 구분하는 버전 표시(예: `V2`)이며 `gameLabel`이 둘을 합친 검사 이름을 만듦 |
+| `src/games/index.js` | 작품 등록과 작품별 데이터·표시 자료 연결. 등록 순서가 검사 선택 화면 순서이며, `development: true`인 검사는 ‘개발 중인 검사’, `legacy: true`인 검사는 ‘오래된 검사’ 접이식 목록에 표시(해당 검사가 없으면 목록을 만들지 않음). `title`은 검사 이름, `version`은 같은 이름의 검사를 구분하는 버전 표시(예: `V2`)이며 `gameLabel`이 둘을 합친 검사 이름을 만듦 |
 | `src/games/<작품 ID>/media.js` | 작품 로고, 무기별 아이콘·캐릭터 이미지·소개 영상 ID |
 | `src/games/<작품 ID>/characters.js` | 결과 상단 배경 캐릭터 이미지의 무기별 배치와 출처 |
 | `src/games/<작품 ID>/descriptions.js` | 무기별 공식 소개 문구와 출처 |
@@ -27,7 +27,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
 | `src/assets/characters/<작품 ID>/` | 무기별 캐릭터 이미지 파일(`<weapon_id>_a·_b.webp`) |
 | `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함, `axes.js`), 작품별 축 모델(`axis-models.js`: 축 목록·불일치 공식·합산 가중치·입문 난이도 원점수, 기존 와일즈 `freedom`·V2 `constraint`), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 와일즈 V2의 중앙형 응답 특별 결과(`central.js`·`central-copy.js`), 입문 난이도 별표(`difficulty.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
-| `src/ui/views.js` | 화면 마크업(검사 선택과 개발 중인 검사 목록·검사 설명·이름 입력·질문·결과) |
+| `src/ui/views.js` | 화면 마크업(검사 선택과 개발 중인·오래된 검사 목록·검사 설명·이름 입력·질문·결과) |
 | `src/ui/radar.js` | 오각형 방사형 차트 위치 계산과 SVG |
 | `src/ui/result-content.js` | 결과 화면과 공유 이미지가 함께 쓰는 표시 내용(제목·입문 난이도·소개 문구·추천 이유·기준 비교) |
 | `src/ui/share-image.js` | 공유 이미지(캔버스). `result-content.js`의 내용을 결과 화면과 같은 순서로 그림. 공유할 때만 불러옴. 상단 ‘MONBTI · 몬BTI’ 표시 앞에 `public/icon-192x192.png`를 그리고, 불러오지 못하면 글자만 그림 |
@@ -112,7 +112,7 @@ npm run analyze:personas -- --baseline base.json
 ## 버튼으로 시트 데이터 반영
 
 1. 원본 시트의 무기·질문을 편집합니다.
-2. 고친 검사의 워크플로를 엽니다. 와일즈 V2는 [시트 데이터 갱신 — Wilds_V2](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data-wilds-v2.yml), 기존 와일즈는 [시트 데이터 갱신 — Wilds](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data-wilds.yml)입니다. 기존 와일즈 갱신은 V2 완성 전까지 질문 문구·오타 수정처럼 수치를 바꾸지 않는 수정에 씁니다.
+2. 고친 검사의 워크플로를 엽니다. 와일즈 V2는 [시트 데이터 갱신 — Wilds_V2](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data-wilds-v2.yml), 기존 와일즈는 [시트 데이터 갱신 — Wilds](https://github.com/PieceOfPaper/MonBTI/actions/workflows/refresh-data-wilds.yml)입니다. 기존 와일즈·V2 갱신은 질문 문구·오타 수정처럼 수치를 바꾸지 않는 수정에 씁니다.
 3. **Run workflow**에서 브랜치를 **main**으로 선택하고 실행합니다. 별도 입력값은 없습니다. 다른 검사의 탭은 읽지 않으므로 그 탭의 오류나 변경에 영향을 받지 않습니다.
 4. `refresh`가 성공하면 이어서 시작되는 [Deploy GitHub Pages](https://github.com/PieceOfPaper/MonBTI/actions/workflows/deploy-pages.yml) 실행이 성공했는지 확인한 뒤 [사이트](https://pieceofpaper.github.io/MonBTI/)에서 확인합니다. 페이지는 최대 10분 캐시되므로 이전 내용이 보이면 강력 새로고침합니다.
 

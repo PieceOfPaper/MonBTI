@@ -9,7 +9,7 @@ import { decodeNickname, encodeNickname, normalizeNickname } from './core/nickna
 import { remainingWeapons } from './core/recommend.js';
 import { difficultyLabel, difficultyStars } from './core/difficulty.js';
 
-const wilds = supportedGames[0];
+const wilds = supportedGames.find(({ id }) => id === 'wilds');
 // 화면·저장 테스트는 편집 가능한 원본 시트의 문항 ID·가중치와 분리한다.
 const testGame = {
   ...wilds,
@@ -20,9 +20,10 @@ const testGame = {
 };
 
 describe('작품 데이터', () => {
-  it('현재 검사는 와일즈이고, 와일즈 V2는 개발 중인 검사로 등록한다', () => {
-    expect(supportedGames.map(({ id }) => id)).toEqual(['wilds', 'wilds_v2']);
-    expect(supportedGames.filter(({ development }) => development).map(({ id }) => id)).toEqual(['wilds_v2']);
+  it('현재 검사는 와일즈 V2이고, 기존 와일즈는 오래된 검사로 등록한다', () => {
+    expect(supportedGames.map(({ id }) => id)).toEqual(['wilds_v2', 'wilds']);
+    expect(supportedGames.filter(({ development }) => development)).toEqual([]);
+    expect(supportedGames.filter(({ legacy }) => legacy).map(({ id }) => id)).toEqual(['wilds']);
   });
 
   it('기존 와일즈는 자유도, 와일즈 V2는 행동 제약 축을 쓴다', () => {
@@ -120,22 +121,34 @@ describe('화면', () => {
     expect(own).not.toContain('data-start-quiz');
   });
 
-  it('개발 중인 검사는 접힌 ‘개발 중인 검사’ 목록 안에 따로 보여 준다', () => {
+  it('오래된 검사는 접힌 ‘오래된 검사’ 목록 안에 따로 보여 준다', () => {
     const html = renderGameSelection(supportedGames);
-    const [main, dev] = html.split('<details class="game-dev">');
-    expect(main).toContain('href="#/wilds"');
-    expect(main).not.toContain('href="#/wilds_v2"');
-    expect(dev).toContain('<summary>개발 중인 검사');
-    expect(dev).toContain('href="#/wilds_v2" data-game-id="wilds_v2" data-start-quiz="wilds_v2"');
-    expect(dev).toContain('href="#/wilds_v2/guide"');
-    expect(dev).toContain('몬스터헌터 와일즈 무기 추천 검사 <span class="game-card__version">V2</span>');
-    expect(html).not.toMatch(/<details class="game-dev" open/);
+    const [main, legacy] = html.split('<details class="game-group game-group--legacy">');
+    expect(main).toContain('href="#/wilds_v2" data-game-id="wilds_v2" data-start-quiz="wilds_v2"');
+    expect(main).toContain('몬스터헌터 와일즈 무기 추천 검사 <span class="game-card__version">V2</span>');
+    expect(main).not.toContain('href="#/wilds"');
+    expect(legacy).toContain('<summary>오래된 검사');
+    expect(legacy).toContain('href="#/wilds" data-game-id="wilds" data-start-quiz="wilds"');
+    expect(legacy).toContain('href="#/wilds/guide"');
+    expect(html).not.toMatch(/<details[^>]* open/);
   });
 
-  it('개발 중인 검사가 없으면 접이식 목록을 만들지 않는다', () => {
-    const html = renderGameSelection(supportedGames.filter(({ development }) => !development));
-    expect(html).not.toContain('game-dev');
+  it('개발 중인 검사는 접힌 ‘개발 중인 검사’ 목록 안에 따로 보여 준다', () => {
+    const html = renderGameSelection([...supportedGames, { id: 'next', title: '다음 검사', description: '설명', development: true }]);
+    const [main, dev] = html.split('<details class="game-group game-group--dev">');
+    expect(main).not.toContain('href="#/next"');
+    expect(dev).toContain('<summary>개발 중인 검사');
+    expect(dev).toContain('href="#/next" data-game-id="next" data-start-quiz="next"');
+    expect(dev.indexOf('game-group--dev')).toBeLessThan(dev.indexOf('game-group--legacy'));
+  });
+
+  it('개발 중인 검사나 오래된 검사가 없으면 해당 접이식 목록을 만들지 않는다', () => {
+    const html = renderGameSelection(supportedGames);
+    expect(html).not.toContain('game-group--dev');
     expect(html).not.toContain('개발 중인 검사');
+    const current = renderGameSelection(supportedGames.filter(({ legacy }) => !legacy));
+    expect(current).not.toContain('game-group');
+    expect(current).not.toContain('오래된 검사');
   });
 
   it('검사 선택 화면은 검사 옆에 검사 설명 링크를 제공한다', () => {
@@ -173,7 +186,7 @@ describe('화면', () => {
     expect(renderGuide(wilds)).not.toContain('guide-changes');
   });
 
-  it('검사 카드는 개발 중 여부와 관계없이 왼쪽 로고, 검사 이름과 소개를 같은 모양으로 보여 준다', () => {
+  it('검사 카드는 개발 중·오래된 검사 여부와 관계없이 왼쪽 로고, 검사 이름과 소개를 같은 모양으로 보여 준다', () => {
     const html = renderGameSelection(supportedGames);
     expect(html.match(/<img class="game-card__logo" src="[^"]*logo[^"]*\.webp" alt="" \/>/g)).toHaveLength(2);
     expect(html).toContain('<strong class="game-card__title">몬스터헌터 와일즈 무기 추천 검사</strong>');

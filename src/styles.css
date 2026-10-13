@@ -29,12 +29,12 @@ h1 { margin: 0; font-size: clamp(2rem, 8vw, 4.5rem); line-height: 1.15; word-bre
   .game-list > li { grid-template-columns: minmax(0, 1fr); }
   .button.game-guide { justify-content: center; padding: .45rem .85rem; }
 }
-.game-dev { margin-top: 1.25rem; border-top: 1px solid #3a4d3c; padding-top: .75rem; }
-.game-dev summary { width: fit-content; padding: .35rem .25rem; color: #d5ddd7; font-weight: 700; cursor: pointer; }
-.game-dev summary:focus-visible { outline: 3px solid #d8ef86; outline-offset: 3px; border-radius: .35rem; }
-.game-dev__count { display: inline-block; min-width: 1.4em; margin-left: .25rem; padding: 0 .35rem; border-radius: 1rem; color: #18231e; background: #9fab9f; font-size: .8125rem; text-align: center; }
-.game-dev__note { margin: .5rem 0 0; color: #9fab9f; font-size: .875rem; line-height: 1.6; }
-.game-list--dev { margin-top: .75rem; }
+.game-group { margin-top: 1.25rem; border-top: 1px solid #3a4d3c; padding-top: .75rem; }
+.game-group summary { width: fit-content; padding: .35rem .25rem; color: #d5ddd7; font-weight: 700; cursor: pointer; }
+.game-group summary:focus-visible { outline: 3px solid #d8ef86; outline-offset: 3px; border-radius: .35rem; }
+.game-group__count { display: inline-block; min-width: 1.4em; margin-left: .25rem; padding: 0 .35rem; border-radius: 1rem; color: #18231e; background: #9fab9f; font-size: .8125rem; text-align: center; }
+.game-group__note { margin: .5rem 0 0; color: #9fab9f; font-size: .875rem; line-height: 1.6; }
+.game-group .game-list { margin-top: .75rem; }
 .game-list--dev .game-card { border-style: dashed; }
 .credit { margin-top: 3rem; color: #9fab9f; font-size: .9375rem; }
 .credit__by { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25rem .75rem; margin: 0; }

@@ -9,30 +9,20 @@ import { wildsLogo, wildsMedia } from './wilds/media.js';
 // 시트에서 온 무기 데이터에 사이트 표시 자료(아이콘·영상·소개 문구)를 붙인다. 기반 작품 로고는 검사 선택 화면의 검사 카드 왼쪽에 보여 준다.
 const withMedia = (weapons, media) => weapons.map((weapon) => ({ ...weapon, ...media(weapon.weapon_id) }));
 
-// 등록 순서가 검사 선택 화면의 표시 순서다. development가 true인 검사는 ‘개발 중인 검사’ 접이식 목록에 따로 보여 준다.
+// 등록 순서가 검사 선택 화면의 표시 순서다. development가 true인 검사는 ‘개발 중인 검사’, legacy가 true인 검사는 ‘오래된 검사’ 접이식 목록에 따로 보여 준다.
 // title은 검사 카드에 보여 줄 검사 이름이고, version은 같은 이름의 검사를 구분하는 버전 표시로 이름 뒤에 작게 붙는다.
 // 검사 화면 상단·결과·공유 이미지에도 같은 검사 이름(gameLabel: title과 version)을 쓴다.
-// 와일즈 V2는 개발 중인 다음 버전 검사로, 무기·질문 원본을 Wilds_V2_* 탭으로 분리하고 표시 자료는 와일즈 것을 함께 쓴다.
-// 개발이 끝나면 development를 지우고 기존 와일즈보다 위에 등록한다.
+// 와일즈 V2는 개발을 마친 현재 검사로, 무기·질문 원본을 Wilds_V2_* 탭으로 분리하고 표시 자료는 와일즈 것을 함께 쓴다.
+// 기존 와일즈는 V2 공개 후 ‘오래된 검사’로 옮겨 처음 공개한 상태 그대로 둔다. 이후 개선은 새 버전(V3)을 개발 중인 검사로 등록해 진행한다.
 // axisModel은 축 목록·불일치 공식·입문 난이도 원점수를 정하는 축 모델(core/axis-models.js)이다.
 // 기존 와일즈는 자유도(freedom), 와일즈 V2는 행동 제약(constraint)과 부담 허용형 공식을 쓴다(docs/wilds-v2-plan.md).
 // centralResult가 true인 검사는 중앙형 응답에 특별 결과를 보여 준다(core/central.js, GitHub 이슈 #1). 현재 와일즈 V2에만 적용한다.
 // changes는 이전 버전 검사에서 달라진 점으로, 검사 설명 화면 맨 아래에 대략적으로 보여 준다. 새 변경은 목록 끝에 추가한다.
 export const supportedGames = [
   {
-    id: 'wilds',
-    title: '몬스터헌터 와일즈 무기 추천 검사',
-    logo: wildsLogo,
-    description: '질문에 답하면 나의 플레이 취향에 맞는 와일즈 무기를 추천해 드려요.',
-    axisModel: GAME_AXIS_MODELS.wilds,
-    questions: wildsQuestions.questions,
-    weapons: withMedia(wildsWeapons.weapons, wildsMedia),
-  },
-  {
     id: 'wilds_v2',
     title: '몬스터헌터 와일즈 무기 추천 검사',
     version: 'V2',
-    development: true,
     centralResult: true,
     axisModel: GAME_AXIS_MODELS.wilds_v2,
     changes: {
@@ -45,9 +35,19 @@ export const supportedGames = [
       ],
     },
     logo: wildsLogo,
-    description: '기준과 질문을 새로 다듬은 다음 버전의 와일즈 무기 추천 검사예요.',
+    description: '질문에 답하면 나의 플레이 취향에 맞는 와일즈 무기를 추천해 드려요.',
     questions: wildsV2Questions.questions,
     weapons: withMedia(wildsV2Weapons.weapons, wildsMedia),
+  },
+  {
+    id: 'wilds',
+    title: '몬스터헌터 와일즈 무기 추천 검사',
+    legacy: true,
+    logo: wildsLogo,
+    description: '질문에 답하면 나의 플레이 취향에 맞는 와일즈 무기를 추천해 드려요.',
+    axisModel: GAME_AXIS_MODELS.wilds,
+    questions: wildsQuestions.questions,
+    weapons: withMedia(wildsWeapons.weapons, wildsMedia),
   },
 ];
 
