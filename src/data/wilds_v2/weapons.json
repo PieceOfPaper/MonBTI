@@ -5,8 +5,8 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_V2_Weapon"
     },
-    "exported_at": "2026-10-13T17:21:34.552Z",
-    "converted_at": "2026-10-13T17:21:34.689Z"
+    "exported_at": "2026-10-13T17:25:06.636Z",
+    "converted_at": "2026-10-13T17:25:06.768Z"
   },
   "weapons": [
     {
@@ -50,7 +50,7 @@
       "weapon_name": "해머",
       "attack": 85,
       "constraint": 25,
-      "complexity": 30,
+      "complexity": 55,
       "management": 15,
       "counter": 25
     },
