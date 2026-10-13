@@ -412,7 +412,8 @@ export async function drawShareImage({ gameName, result, reason, weapons, axisMo
   // 아이콘을 불러오지 못하면 글자만 원래 자리에 둔다.
   if (siteIcon) ctx.drawImage(siteIcon, PAD, 74 - SITE_ICON_SIZE / 2, SITE_ICON_SIZE, SITE_ICON_SIZE);
   text(ctx, 'MONBTI · 몬BTI', siteIcon ? PAD + SITE_ICON_SIZE + 14 : PAD, 84, { size: 30, weight: 700, color: COLORS.accent });
-  text(ctx, content.gameName, WIDTH - PAD, 84, { size: 28, color: COLORS.muted, align: 'right' });
+  // 검사 이름이 길어도 왼쪽 사이트 이름과 겹치지 않게 줄인다.
+  fitText(ctx, content.gameName, WIDTH - PAD, 84, 560, { size: 28, color: COLORS.muted, align: 'right' });
   fitText(ctx, content.title, PAD, 160, INNER, { size: 60, weight: 800 });
 
   let y = drawWinner(ctx, content.winner, assets, 220);

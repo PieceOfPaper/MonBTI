@@ -3,6 +3,7 @@ import { DEFAULT_AXIS_MODEL, axisModelOf } from '../core/axis-models.js';
 import { AMPLIFY_FACTOR } from '../core/central.js';
 import { NICKNAME_MAX_LENGTH } from '../core/nickname.js';
 import { RESPONSES } from '../core/responses.js';
+import { gameLabel } from '../games/index.js';
 import monbtiLogo from '../assets/brand/monbti-logo.webp';
 import { renderRadarSvg } from './radar.js';
 import {
@@ -24,9 +25,10 @@ const IMAGE_ICON = `<svg class="share__icon" viewBox="0 0 24 24" aria-hidden="tr
 const LINK_ICON = `<svg class="share__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
 const YOUTUBE_ICON = `<svg class="credit__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#ff0033" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#fff" d="M9.545 15.568V8.432L15.818 12z"/></svg>`;
 
-// 작품 카드: 왼쪽에 기반 작품 로고, 오른쪽에 검사 이름(버전은 작게)과 짧은 소개. 개발 중 여부와 관계없이 같은 모양이다.
-function renderGameChoice({ id, title, version, logo, description }) {
-  const label = version ? `${title} ${version}` : title;
+// 검사 카드: 왼쪽에 기반 작품 로고, 오른쪽에 검사 이름(버전은 작게)과 짧은 소개. 개발 중 여부와 관계없이 같은 모양이다.
+function renderGameChoice(game) {
+  const { id, title, version, logo, description } = game;
+  const label = gameLabel(game);
   return `
       <li><a class="game-card" href="#/${id}" data-game-id="${id}" data-start-quiz="${id}">
         ${logo ? `<img class="game-card__logo" src="${escapeHtml(logo)}" alt="" />` : ''}
@@ -50,7 +52,7 @@ export function renderGameSelection(games) {
   return `<section class="hero" aria-labelledby="page-title">
     <h1 id="page-title" class="hero__title" tabindex="-1"><img class="hero__logo" src="${monbtiLogo}" alt="MonBTI" width="1200" height="535" /></h1>
     <p>몬스터헌터와 관련된 여러 검사를 제공해요.</p>
-    ${choices ? `<ul class="game-list" aria-label="검사할 작품 선택">${choices}</ul>` : ''}
+    ${choices ? `<ul class="game-list" aria-label="검사 선택">${choices}</ul>` : ''}
     ${developingList}
     <footer class="credit">
       <p class="credit__by">
@@ -66,7 +68,7 @@ export function renderGameSelection(games) {
 export function renderNameForm(game, value = '') {
   return `<section class="quiz" aria-labelledby="name-title">
     <header class="quiz__header">
-      <p class="eyebrow">${escapeHtml(game.name)}</p>
+      <p class="eyebrow">${escapeHtml(gameLabel(game))}</p>
     </header>
     <form class="quiz__form name-form" novalidate>
       <h1 id="name-title" class="quiz__question" tabindex="-1">결과에 표시할 이름을 알려 주세요</h1>
@@ -77,7 +79,7 @@ export function renderNameForm(game, value = '') {
         aria-describedby="nickname-help nickname-error" required />
       <p class="name-form__error" id="nickname-error" role="alert"></p>
       <div class="quiz__nav">
-        <a class="button button--ghost" href="#/">작품 선택으로</a>
+        <a class="button button--ghost" href="#/">메인 화면으로</a>
         <button class="button" type="submit">검사 시작</button>
       </div>
     </form>
@@ -99,7 +101,7 @@ export function renderQuestion(game, index, answers) {
 
   return `<section class="quiz" aria-labelledby="question-title">
     <header class="quiz__header">
-      <p class="eyebrow">${escapeHtml(game.name)}</p>
+      <p class="eyebrow">${escapeHtml(gameLabel(game))}</p>
       <p class="quiz__progress">질문 ${index + 1} / ${questions.length}</p>
       <progress max="${questions.length}" value="${index + 1}" aria-hidden="true"></progress>
     </header>
@@ -310,7 +312,7 @@ export function renderResult(game, result, {
     : `<button class="button button--ghost" type="button" data-action="restart">처음부터 다시 하기</button>`;
 
   return `<section class="result" aria-labelledby="result-title">
-    <p class="eyebrow">${escapeHtml(game.name)}</p>
+    <p class="eyebrow">${escapeHtml(gameLabel(game))}</p>
     <h1 id="result-title" tabindex="-1">${escapeHtml(resultTitle(name))}</h1>
     ${renderWinner(winner, game.weapons, axisModel, winnerBadge(result), winnerName(result))}
     ${renderReasonContent(resultReasonContent(result, reason))}
@@ -326,7 +328,7 @@ export function renderResult(game, result, {
     </section>
     <div class="result__actions">
       ${actions}
-      <a class="button button--ghost" href="#/">작품 선택으로</a>
+      <a class="button button--ghost" href="#/">메인 화면으로</a>
     </div>
   </section>`;
 }
@@ -368,7 +370,7 @@ export function renderGuide(game) {
   const weaponCount = game.weapons.length;
 
   return `<section class="guide" aria-labelledby="guide-title">
-    <p class="eyebrow">${escapeHtml(game.name)}</p>
+    <p class="eyebrow">${escapeHtml(gameLabel(game))}</p>
     <h1 id="guide-title" tabindex="-1">몬BTI는 어떤 검사인가요?</h1>
     <section aria-labelledby="guide-who">
       <h2 id="guide-who">누구를 위한 검사인가요?</h2>
@@ -404,16 +406,16 @@ export function renderGuide(game) {
     </section>${game.changes ? renderChangesGuide(game.changes) : ''}
     <div class="result__actions">
       <a class="button" href="#/${game.id}" data-start-quiz="${game.id}">검사 시작하기</a>
-      <a class="button button--ghost" href="#/">작품 선택으로</a>
+      <a class="button button--ghost" href="#/">메인 화면으로</a>
     </div>
   </section>`;
 }
 
 export function renderEmpty(game) {
   return `<section class="hero" aria-labelledby="empty-title">
-    <p class="eyebrow">${escapeHtml(game.name)}</p>
+    <p class="eyebrow">${escapeHtml(gameLabel(game))}</p>
     <h1 id="empty-title" tabindex="-1">검사를 준비하고 있어요.</h1>
     <p>질문이 등록되면 이곳에서 시작할 수 있습니다.</p>
-    <a class="button button--ghost" href="#/">작품 선택으로 돌아가기</a>
+    <a class="button button--ghost" href="#/">메인 화면으로 돌아가기</a>
   </section>`;
 }

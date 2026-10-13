@@ -13,7 +13,7 @@ import { orderQuestions, resolveQuestionOrder } from './core/order.js';
 import {
   SHARE_PARAM, decodeShareCode, encodeShareCode, parseShareParam, shareHash,
 } from './core/share.js';
-import { findGame, supportedGames } from './games/index.js';
+import { findGame, gameLabel, supportedGames } from './games/index.js';
 import {
   escapeHtml, renderComparisonView, renderEmpty, renderGameSelection, renderGuide, renderNameForm, renderQuestion, renderResult,
   renderVideoPlayer,
@@ -296,7 +296,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
         const { drawShareImage } = await import('./ui/share-image.js');
         const siteUrl = `${location.host}${location.pathname}`;
         const blob = await drawShareImage({
-          gameName: game.name, result, reason, weapons: game.weapons, axisModel, siteUrl,
+          gameName: gameLabel(game), result, reason, weapons: game.weapons, axisModel, siteUrl,
         });
         const file = new File([blob], 'monbti-result.png', { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {
@@ -373,7 +373,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
   const sharedHash = shareParamToHash(location.search);
   if (sharedHash) history.replaceState(null, '', `${location.pathname}${sharedHash}`);
 
-  // 작품 카드·검사 설명·공유 결과의 검사 시작 링크는 이전 진행을 이어 가지 않고 새 검사를 연다.
+  // 검사 카드·검사 설명·공유 결과의 검사 시작 링크는 이전 진행을 이어 가지 않고 새 검사를 연다.
   // 이어 하기는 새로고침, 이전 질문 이동, 브라우저 뒤로·앞으로 이동에서만 유지한다.
   // 클릭 처리가 링크 이동(hashchange)보다 먼저 실행되므로 render는 비운 저장소를 읽는다.
   root.addEventListener('click', (event) => {

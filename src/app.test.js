@@ -105,7 +105,7 @@ describe('답변 저장', () => {
 });
 
 describe('화면', () => {
-  it('작품 선택 화면은 와일즈 검사 링크를 제공한다', () => {
+  it('검사 선택 화면은 와일즈 검사 링크를 제공한다', () => {
     expect(renderGameSelection(supportedGames)).toContain('href="#/wilds"');
   });
 
@@ -138,11 +138,11 @@ describe('화면', () => {
     expect(html).not.toContain('개발 중인 검사');
   });
 
-  it('작품 선택 화면은 검사 옆에 검사 설명 링크를 제공한다', () => {
+  it('검사 선택 화면은 검사 옆에 검사 설명 링크를 제공한다', () => {
     expect(renderGameSelection(supportedGames)).toContain('href="#/wilds/guide"');
   });
 
-  it('작품 선택 화면 하단에 개발자와 채널 링크를 보여 준다', () => {
+  it('검사 선택 화면 하단에 개발자와 채널 링크를 보여 준다', () => {
     const html = renderGameSelection(supportedGames);
     expect(html).toContain('종잇장');
     expect(html).toContain('href="https://github.com/PieceOfPaper"');
@@ -173,7 +173,7 @@ describe('화면', () => {
     expect(renderGuide(wilds)).not.toContain('guide-changes');
   });
 
-  it('작품 카드는 개발 중 여부와 관계없이 왼쪽 로고, 검사 이름과 소개를 같은 모양으로 보여 준다', () => {
+  it('검사 카드는 개발 중 여부와 관계없이 왼쪽 로고, 검사 이름과 소개를 같은 모양으로 보여 준다', () => {
     const html = renderGameSelection(supportedGames);
     expect(html.match(/<img class="game-card__logo" src="[^"]*logo[^"]*\.webp" alt="" \/>/g)).toHaveLength(2);
     expect(html).toContain('<strong class="game-card__title">몬스터헌터 와일즈 무기 추천 검사</strong>');

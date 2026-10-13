@@ -6,12 +6,12 @@ import wildsV2Weapons from '../data/wilds_v2/weapons.json';
 import { GAME_AXIS_MODELS } from '../core/axis-models.js';
 import { wildsLogo, wildsMedia } from './wilds/media.js';
 
-// 시트에서 온 무기 데이터에 사이트 표시 자료(아이콘·영상·소개 문구)를 붙인다. 작품 로고는 작품 선택 화면에서 이름 대신 보여 준다.
+// 시트에서 온 무기 데이터에 사이트 표시 자료(아이콘·영상·소개 문구)를 붙인다. 기반 작품 로고는 검사 선택 화면의 검사 카드 왼쪽에 보여 준다.
 const withMedia = (weapons, media) => weapons.map((weapon) => ({ ...weapon, ...media(weapon.weapon_id) }));
 
-// 등록 순서가 작품 선택 화면의 표시 순서다. development가 true인 검사는 ‘개발 중인 검사’ 접이식 목록에 따로 보여 준다.
-// title은 작품 선택 카드에 보여 줄 검사 이름이고, version은 같은 이름의 검사를 구분하는 버전 표시로 이름 뒤에 작게 붙는다.
-// name은 작품 이름으로 검사 화면 상단 등에 쓴다.
+// 등록 순서가 검사 선택 화면의 표시 순서다. development가 true인 검사는 ‘개발 중인 검사’ 접이식 목록에 따로 보여 준다.
+// title은 검사 카드에 보여 줄 검사 이름이고, version은 같은 이름의 검사를 구분하는 버전 표시로 이름 뒤에 작게 붙는다.
+// 검사 화면 상단·결과·공유 이미지에도 같은 검사 이름(gameLabel: title과 version)을 쓴다.
 // 와일즈 V2는 개발 중인 다음 버전 검사로, 무기·질문 원본을 Wilds_V2_* 탭으로 분리하고 표시 자료는 와일즈 것을 함께 쓴다.
 // 개발이 끝나면 development를 지우고 기존 와일즈보다 위에 등록한다.
 // axisModel은 축 목록·불일치 공식·입문 난이도 원점수를 정하는 축 모델(core/axis-models.js)이다.
@@ -21,7 +21,6 @@ const withMedia = (weapons, media) => weapons.map((weapon) => ({ ...weapon, ...m
 export const supportedGames = [
   {
     id: 'wilds',
-    name: '몬스터헌터 와일즈',
     title: '몬스터헌터 와일즈 무기 추천 검사',
     logo: wildsLogo,
     description: '질문에 답하면 나의 플레이 취향에 맞는 와일즈 무기를 추천해 드려요.',
@@ -31,7 +30,6 @@ export const supportedGames = [
   },
   {
     id: 'wilds_v2',
-    name: '몬스터헌터 와일즈 V2',
     title: '몬스터헌터 와일즈 무기 추천 검사',
     version: 'V2',
     development: true,
@@ -52,6 +50,11 @@ export const supportedGames = [
     weapons: withMedia(wildsV2Weapons.weapons, wildsMedia),
   },
 ];
+
+// 검사 이름. 버전이 있으면 이름 뒤에 붙인다(예: ‘몬스터헌터 와일즈 무기 추천 검사 V2’).
+export function gameLabel({ title, version }) {
+  return version ? `${title} ${version}` : title;
+}
 
 export function findGame(id, games = supportedGames) {
   return games.find((game) => game.id === id) ?? null;

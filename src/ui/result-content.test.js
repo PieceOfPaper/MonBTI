@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildResult } from '../app.js';
 import { buildRecommendationReason } from '../core/reason.js';
-import { supportedGames } from '../games/index.js';
+import { gameLabel, supportedGames } from '../games/index.js';
 import { shareContent } from './result-content.js';
 import { renderResult } from './views.js';
 
@@ -34,7 +34,7 @@ describe('결과 화면과 공유 이미지', () => {
   it.each(cases)('%s: 공유 이미지에 담는 모든 글자와 값이 결과 화면 첫 상태에 있다', (_, result) => {
     const reason = buildRecommendationReason(result.profile, result.weapons[0], result.weapons[1]);
     const html = plain(renderResult(wilds, result, { reason }));
-    const content = shareContent({ gameName: wilds.name, result, reason, weapons: wilds.weapons });
+    const content = shareContent({ gameName: gameLabel(wilds), result, reason, weapons: wilds.weapons });
     const missing = shareTexts(content).filter((value) => !html.includes(value));
     expect(missing).toEqual([]);
   });
@@ -44,7 +44,7 @@ describe('결과 화면과 공유 이미지', () => {
     const result = buildResult(v2, Object.fromEntries(v2.questions.map(({ question_id }) => [question_id, 4])), '종잇장');
     expect(result.central).toBeTruthy();
     const html = plain(renderResult(v2, result));
-    const content = shareContent({ gameName: v2.name, result, reason: null, weapons: v2.weapons, axisModel: v2.axisModel });
+    const content = shareContent({ gameName: gameLabel(v2), result, reason: null, weapons: v2.weapons, axisModel: v2.axisModel });
     expect(content.comparison.rows.map(({ short }) => short)).toEqual(['한방', '제약', '복잡', '관리', '반격']);
     expect(content.reason.title).toBe('혹시 이미 몬스터헌터 숙련자이거나 취향을 잘 안 타는 사람인가요?');
     // 1순위 아이콘의 물음표 표시도 두 출력에 같이 있다.
@@ -58,7 +58,7 @@ describe('결과 화면과 공유 이미지', () => {
   it('결과 화면과 같은 순서(1순위 → 추천 이유 → 1~3순위 기준 비교)와 1순위 비교 대상으로 구성한다', () => {
     const [, result] = cases[0];
     const reason = buildRecommendationReason(result.profile, result.weapons[0], result.weapons[1]);
-    const content = shareContent({ gameName: wilds.name, result, reason, weapons: wilds.weapons });
+    const content = shareContent({ gameName: gameLabel(wilds), result, reason, weapons: wilds.weapons });
     expect(Object.keys(content)).toEqual(['gameName', 'who', 'title', 'winner', 'reason', 'comparison']);
     expect(content.winner.badge).toBeNull();
     expect(content.winner.name).toBe(result.weapons[0].weapon_name);
