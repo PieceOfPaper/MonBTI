@@ -21,6 +21,8 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `src/games/<작품 ID>/media.js` | 작품 로고, 무기별 아이콘·캐릭터 이미지·소개 영상 ID |
 | `src/games/<작품 ID>/characters.js` | 결과 상단 배경 캐릭터 이미지의 무기별 배치와 출처 |
 | `src/games/<작품 ID>/descriptions.js` | 무기별 공식 소개 문구와 출처 |
+| `public/` | 사이트 아이콘(`favicon.ico`·`favicon-32x32.png`·`apple-touch-icon.png`·`icon-192x192.png`·`icon-512x512.png`)과 홈 화면 추가용 `site.webmanifest`. 빌드 시 그대로 배포 루트(`/MonBTI/`)에 복사되며, `index.html`의 파비콘·링크 미리보기(OG) 태그와 공유 이미지 상단 표시가 사용 |
+| `src/assets/brand/` | 사이트 로고. `monbti-logo.png`는 받은 원본(2129×739, 투명 배경), `monbti-logo.webp`는 투명 여백을 잘라 가로 1200px로 줄인 웹용 파일로 첫 화면 제목에 사용 |
 | `src/assets/games/<작품 ID>/` | 작품 로고 파일 |
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
 | `src/assets/characters/<작품 ID>/` | 무기별 캐릭터 이미지 파일(`<weapon_id>_a·_b.webp`) |
@@ -28,7 +30,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `src/ui/views.js` | 화면 마크업(작품 선택과 개발 중인 검사 목록·검사 설명·이름 입력·질문·결과) |
 | `src/ui/radar.js` | 오각형 방사형 차트 위치 계산과 SVG |
 | `src/ui/result-content.js` | 결과 화면과 공유 이미지가 함께 쓰는 표시 내용(제목·입문 난이도·소개 문구·추천 이유·기준 비교) |
-| `src/ui/share-image.js` | 공유 이미지(캔버스). `result-content.js`의 내용을 결과 화면과 같은 순서로 그림. 공유할 때만 불러옴 |
+| `src/ui/share-image.js` | 공유 이미지(캔버스). `result-content.js`의 내용을 결과 화면과 같은 순서로 그림. 공유할 때만 불러옴. 상단 ‘MONBTI · 몬BTI’ 표시 앞에 `public/icon-192x192.png`를 그리고, 불러오지 못하면 글자만 그림 |
 | `src/app.js` | 해시 라우팅, 표시 이름·답변·질문 순서 상태와 세션 저장, 결과·공유 동작 |
 
 ## 로컬 개발 및 검증

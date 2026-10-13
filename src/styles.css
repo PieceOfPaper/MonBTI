@@ -7,6 +7,8 @@ h1:focus { outline: none; }
 .hero { display: grid; align-content: center; min-height: 100dvh; }
 .eyebrow { margin: 0 0 .75rem; color: #c8da81; font-weight: 700; letter-spacing: .12em; }
 h1 { margin: 0; font-size: clamp(2rem, 8vw, 4.5rem); line-height: 1.15; word-break: keep-all; overflow-wrap: anywhere; }
+.hero__title { line-height: 0; }
+.hero__logo { display: block; width: min(100%, 30rem); height: auto; }
 .hero > p:not(.eyebrow), .result__lead { max-width: 40rem; color: #d5ddd7; font-size: 1.125rem; line-height: 1.7; word-break: keep-all; }
 .game-list { display: grid; gap: .75rem; margin: 2rem 0 0; padding: 0; list-style: none; }
 .game-list > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; }

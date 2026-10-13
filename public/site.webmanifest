@@ -1,0 +1,14 @@
+{
+  "name": "몬BTI",
+  "short_name": "몬BTI",
+  "description": "플레이 취향을 바탕으로 몬스터헌터 와일즈의 무기를 찾아 보는 몬BTI입니다.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#18231e",
+  "theme_color": "#18231e",
+  "icons": [
+    { "src": "icon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

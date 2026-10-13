@@ -45,6 +45,10 @@ function loadImage(src) {
   });
 }
 
+// 상단 사이트 표시 앞의 MonBTI 아이콘. public/에 있는 파비콘용 아이콘을 배포 경로 기준으로 불러온다.
+const SITE_ICON = `${import.meta.env.BASE_URL}icon-192x192.png`;
+const SITE_ICON_SIZE = 56;
+
 const setFont = (ctx, size, weight = 400) => { ctx.font = `${weight} ${size}px ${FONT}`; };
 
 function text(ctx, value, x, y, { size, weight = 400, color = COLORS.text, align = 'left', shadow = false }) {
@@ -391,9 +395,10 @@ function drawComparison(ctx, comparison, assets, top) {
 export async function drawShareImage({ gameName, result, reason, weapons, axisModel, siteUrl }) {
   const content = shareContent({ gameName, result, reason, weapons, axisModel });
   const characters = content.winner.weapon.characters ?? [];
-  const [icons, characterImages] = await Promise.all([
+  const [icons, characterImages, siteIcon] = await Promise.all([
     Promise.all(result.weapons.map((weapon) => loadImage(weapon.icon))),
     Promise.all(characters.map(({ src }) => loadImage(src))),
+    loadImage(SITE_ICON),
   ]);
   const assets = { icons, characters: characterImages };
 
@@ -404,7 +409,9 @@ export async function drawShareImage({ gameName, result, reason, weapons, axisMo
   ctx.fillStyle = COLORS.background;
   ctx.fillRect(0, 0, WIDTH, MAX_HEIGHT);
 
-  text(ctx, 'MONBTI · 몬BTI', PAD, 84, { size: 30, weight: 700, color: COLORS.accent });
+  // 아이콘을 불러오지 못하면 글자만 원래 자리에 둔다.
+  if (siteIcon) ctx.drawImage(siteIcon, PAD, 74 - SITE_ICON_SIZE / 2, SITE_ICON_SIZE, SITE_ICON_SIZE);
+  text(ctx, 'MONBTI · 몬BTI', siteIcon ? PAD + SITE_ICON_SIZE + 14 : PAD, 84, { size: 30, weight: 700, color: COLORS.accent });
   text(ctx, content.gameName, WIDTH - PAD, 84, { size: 28, color: COLORS.muted, align: 'right' });
   fitText(ctx, content.title, PAD, 160, INNER, { size: 60, weight: 800 });
 

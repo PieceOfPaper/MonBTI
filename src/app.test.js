@@ -179,13 +179,13 @@ describe('화면', () => {
     expect(html).toContain('<strong class="game-card__title">몬스터헌터 와일즈 무기 추천 검사</strong>');
     expect(html).not.toContain('game-card__label');
     // 첫 화면 제목은 사이트 이름이고, 검사 이름과 겹치는 질문형 제목이나 작은 MONBTI 표시는 두지 않는다.
-    expect(html).toContain('<h1 id="page-title" tabindex="-1">MonBTI</h1>');
+    expect(html).toMatch(/<h1 id="page-title" class="hero__title" tabindex="-1"><img class="hero__logo" src="[^"]+" alt="MonBTI"/);
     expect(html).not.toContain('MONBTI');
     for (const { description } of supportedGames) expect(html).toContain(description);
     expect(html).toContain('aria-label="몬스터헌터 와일즈 무기 추천 검사 V2 검사 설명"');
     const plain = renderGameSelection([{ id: 'x', title: '이름', description: '설명' }]);
     expect(plain).toContain('<strong class="game-card__title">이름</strong>');
-    expect(plain).not.toContain('<img');
+    expect(plain).not.toContain('game-card__logo');
   });
 
   it('이름 입력 화면은 기본값을 채우고 HTML을 이스케이프한다', () => {

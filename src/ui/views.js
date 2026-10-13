@@ -3,6 +3,7 @@ import { DEFAULT_AXIS_MODEL, axisModelOf } from '../core/axis-models.js';
 import { AMPLIFY_FACTOR } from '../core/central.js';
 import { NICKNAME_MAX_LENGTH } from '../core/nickname.js';
 import { RESPONSES } from '../core/responses.js';
+import monbtiLogo from '../assets/brand/monbti-logo.webp';
 import { renderRadarSvg } from './radar.js';
 import {
   COMPARE_SECTION_TITLE, RANK_LABELS, comparisonRows, difficultyContent, displayName, winnerBadge, winnerName, quoteContent, reasonContent, resultReasonContent, resultTitle,
@@ -47,7 +48,7 @@ export function renderGameSelection(games) {
     : '';
 
   return `<section class="hero" aria-labelledby="page-title">
-    <h1 id="page-title" tabindex="-1">MonBTI</h1>
+    <h1 id="page-title" class="hero__title" tabindex="-1"><img class="hero__logo" src="${monbtiLogo}" alt="MonBTI" width="1200" height="535" /></h1>
     <p>몬스터헌터와 관련된 여러 검사를 제공해요.</p>
     ${choices ? `<ul class="game-list" aria-label="검사할 작품 선택">${choices}</ul>` : ''}
     ${developingList}
