@@ -5,8 +5,8 @@
       "spreadsheet_id": "124oQusXZQ6_F9-UYUVAzG3TD7u50oBjKdBIEbrT7Ras",
       "sheet": "Wilds_V2_Question"
     },
-    "exported_at": "2026-10-13T12:25:29.668Z",
-    "converted_at": "2026-10-13T12:25:29.765Z"
+    "exported_at": "2026-10-13T16:07:53.122Z",
+    "converted_at": "2026-10-13T16:07:53.238Z"
   },
   "questions": [
     {
@@ -43,7 +43,7 @@
       "question_id": "wilds_q004",
       "question_order": 4,
       "question_text": "한 번을 오래 준비하기보다, 짧게 여러 번 해보는 편이 즐겁다.",
-      "attack": -75,
+      "attack": -100,
       "constraint": 0,
       "complexity": 0,
       "management": 0,
@@ -64,7 +64,7 @@
       "question_order": 6,
       "question_text": "중간에 바꾸기보다, 시작한 일은 끝까지 이어가는 편이 편하다.",
       "attack": 0,
-      "constraint": 100,
+      "constraint": 75,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -74,7 +74,7 @@
       "question_order": 7,
       "question_text": "짧게 끊어 가며 그때그때 다음 일을 고르는 편이 좋다.",
       "attack": 0,
-      "constraint": -75,
+      "constraint": -100,
       "complexity": 0,
       "management": 0,
       "counter": 0
@@ -177,7 +177,7 @@
       "constraint": 0,
       "complexity": 0,
       "management": 0,
-      "counter": 50
+      "counter": 100
     },
     {
       "question_id": "wilds_q018",
@@ -187,7 +187,7 @@
       "constraint": 0,
       "complexity": 0,
       "management": 0,
-      "counter": 50
+      "counter": 75
     },
     {
       "question_id": "wilds_q019",
@@ -207,7 +207,7 @@
       "constraint": 0,
       "complexity": 0,
       "management": 0,
-      "counter": -75
+      "counter": -100
     }
   ]
 }
