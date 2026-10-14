@@ -356,6 +356,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
         const siteUrl = `${location.host}${location.pathname}`;
         const blob = await drawShareImage({
           gameName: gameLabel(game), result, reason, weapons: game.weapons, others, axisModel, siteUrl,
+          weaponIcons: Boolean(game.inlineWeaponIcons),
         });
         const file = new File([blob], 'monbti-result.png', { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {

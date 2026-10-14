@@ -4,12 +4,16 @@ import { findLighterAlternative } from '../core/alternative.js';
 import { remainingWeapons } from '../core/recommend.js';
 import { buildRecommendationReason } from '../core/reason.js';
 import { gameLabel, supportedGames } from '../games/index.js';
-import { alternativeTip, comparisonSlots, shareContent } from './result-content.js';
+import {
+  alternativeTip, comparisonSlots, reasonContent, segmentsText, shareContent,
+} from './result-content.js';
 import { renderResult } from './views.js';
 
 const wilds = supportedGames.find(({ id }) => id === 'wilds');
 // 결과 화면 HTML을 글자만 남긴 문장으로 바꾼다. 공유 이미지 원문과 비교하기 위해 엔티티를 되돌린다.
-const plain = (html) => html.replace(/<br \/>/g, '\n').replace(/<[^>]+>/g, ' ')
+// 문장 속 무기 아이콘(와일즈 V2)은 이름과 붙어 있으므로 공백 없이 지운다.
+const plain = (html) => html.replace(/<span class="inline-weapon">|<img class="inline-weapon__icon"[^>]*>|<\/span>/g, '')
+  .replace(/<br \/>/g, '\n').replace(/<[^>]+>/g, ' ')
   .replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&amp;', '&')
   .replace(/[ \t]+/g, ' ');
 
@@ -20,7 +24,7 @@ function shareTexts(content) {
     content.gameName, content.title,
     winner.weapon.weapon_name, winner.name, winner.difficulty.title, winner.difficulty.label,
     ...(winner.quote?.lines ?? []), winner.quote?.credit,
-    reason?.title, reason?.lead, ...(reason?.parts ?? []).flatMap(({ title, lines }) => [title, ...lines]),
+    reason?.title, reason && segmentsText(reason.lead), ...(reason?.parts ?? []).flatMap(({ title, lines }) => [title, ...lines.map(segmentsText)]),
     comparison.title, comparison.subtitle, ...comparison.legend,
     ...comparison.ranking.flatMap(({ label, weapon, badge }) => [label, weapon.weapon_name, badge?.text]),
     ...comparison.rows.flatMap(({ short, me, weapon }) => [short, me, weapon]),
@@ -134,6 +138,53 @@ describe('결과 화면과 공유 이미지', () => {
       const shared = sharedResult(v2, { weapons: base.weapons, profile: rounded, nickname: '종잇장', central: false });
       expect(shared.weapons).toBe(base.weapons);
       expect(shared.alternative).toEqual(findLighterAlternative(v2.weapons, rounded, base.weapons, v2.axisModel));
+    });
+  });
+
+  describe('설명 문장 속 무기 아이콘', () => {
+    const v2 = supportedGames.find(({ id }) => id === 'wilds_v2');
+    const byId = (id) => v2.weapons.find(({ weapon_id }) => weapon_id === id);
+    // ‘랜스’와 ‘건랜스’처럼 한 이름이 다른 이름에 들어 있어도 정확히 나눈다.
+    const lance = byId('lance');
+    const gunlance = byId('gunlance');
+    const reason = buildRecommendationReason({ attack: 50, constraint: 50, complexity: 50, management: 50, counter: 90 }, gunlance, lance, v2.axisModel);
+
+    it('켜면 무기 이름을 아이콘 조각으로 나누고, 끄면 같은 문장을 글자 조각 하나로 둔다', () => {
+      const on = reasonContent(reason, [gunlance, lance], { weaponIcons: true });
+      const off = reasonContent(reason, [gunlance, lance]);
+      expect(segmentsText(on.lead)).toBe(segmentsText(off.lead));
+      expect(on.parts.map(({ lines }) => lines.map(segmentsText))).toEqual(off.parts.map(({ lines }) => lines.map(segmentsText)));
+      expect(off.lead).toEqual([{ text: segmentsText(off.lead) }]);
+      const weapons = [on.lead, ...on.parts.flatMap(({ lines }) => lines)].flat().filter(({ weapon }) => weapon).map(({ weapon }) => weapon.weapon_id);
+      expect(weapons).toContain('gunlance');
+      expect(weapons.every((id) => id === 'gunlance' || id === 'lance')).toBe(true);
+      // 아이콘 뒤의 조사는 이름과 따로 글자 조각으로 남는다(예: 건랜스 + ‘는’).
+      expect(on.parts[0].lines[0][0]).toEqual({ weapon: gunlance });
+      expect(on.parts[0].lines[0][1].text.startsWith('는 ')).toBe(true);
+    });
+
+    it('와일즈 V2 결과 화면과 공유 이미지에만 아이콘을 넣고 글자는 그대로 같다', () => {
+      const answers = Object.fromEntries(v2.questions.map(({ question_id }, i) => [question_id, (i % 6) + 1]));
+      const result = buildResult(v2, answers, '종잇장');
+      const v2Reason = buildRecommendationReason(result.profile, result.weapons[0], result.weapons[1], v2.axisModel);
+      const html = renderResult(v2, result, { reason: v2Reason });
+      expect(html).toContain(`<span class="inline-weapon"><img class="inline-weapon__icon" src="${result.weapons[0].icon}" alt="" width="100" height="100" />${result.weapons[0].weapon_name}</span>`);
+      const content = shareContent({ gameName: gameLabel(v2), result, reason: v2Reason, weapons: v2.weapons, axisModel: v2.axisModel, weaponIcons: true });
+      expect(content.reason.lead.some(({ weapon }) => weapon)).toBe(true);
+      expect(shareTexts(content).filter((value) => !plain(html).includes(value))).toEqual([]);
+
+      const wildsAnswers = Object.fromEntries(wilds.questions.map(({ question_id }, i) => [question_id, (i % 6) + 1]));
+      const wildsResult = buildResult(wilds, wildsAnswers, '종잇장');
+      const wildsReason = buildRecommendationReason(wildsResult.profile, wildsResult.weapons[0], wildsResult.weapons[1]);
+      const wildsHtml = renderResult(wilds, wildsResult, { reason: wildsReason });
+      expect(wildsHtml).toContain('reason-title');
+      expect(wildsHtml).not.toContain('inline-weapon');
+    });
+
+    it('중앙형 특별 결과 안내에도 무기 아이콘을 넣는다', () => {
+      const result = buildResult(v2, Object.fromEntries(v2.questions.map(({ question_id }) => [question_id, 4])), '종잇장');
+      const html = renderResult(v2, result);
+      for (const weapon of result.weapons) expect(html).toContain(`${weapon.icon}" alt="" width="100" height="100" />${weapon.weapon_name}</span>`);
     });
   });
 });

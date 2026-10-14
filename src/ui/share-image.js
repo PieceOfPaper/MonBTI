@@ -1,11 +1,11 @@
 // 결과를 한 장의 PNG로 그린다. 브라우저 전용(canvas).
 // 결과 화면과 같은 내용(result-content.js의 shareContent)을 같은 순서로 그린다:
-// 1순위 무기(배경 캐릭터·아이콘·이름·입문 난이도·소개 문구) → 왜 이 무기인가요? → 무기별 기준 비교(순위 버튼·차트·표).
+// 1순위 무기(배경 캐릭터·아이콘·이름·입문 난이도·소개 문구) → 왜 이 무기인가요?(와일즈 V2는 문장 속 무기 아이콘 포함) → 무기별 기준 비교(순위 버튼·차트·표).
 // 순위 버튼은 화면처럼 1~3순위(부담이 적은 대안을 쓰는 검사는 네 번째 버튼까지)이며 대안에는 추천 표시를 붙인다.
 // 영상·버튼처럼 눌러서 쓰는 요소만 뺀다. 내용 길이에 따라 세로 길이가 달라진다.
 // 아이콘·캐릭터 이미지는 사이트와 같은 출처의 파일이라 캔버스를 내보낼 때 막히지 않는다.
 import { RADAR_RINGS, radarPoint, radarPolygon } from './radar.js';
-import { shareContent } from './result-content.js';
+import { segmentsText, shareContent } from './result-content.js';
 
 const WIDTH = 1080;
 const PAD = 72;
@@ -111,6 +111,87 @@ function paragraph(ctx, value, x, y, maxWidth, { size, weight = 400, color, alig
 
 const paragraphHeight = (ctx, value, maxWidth, { size, weight = 400, lineHeight = 1.7 }) => (
   wrapLines(ctx, value, maxWidth, size, weight).length * size * lineHeight);
+
+// 설명 문장(result-content.js의 조각 배열). 무기 조각이 없으면 기존 문단과 똑같이 그린다.
+// 무기 조각은 화면처럼 글자 높이에 맞춘 아이콘을 이름 앞에 붙이고, 아이콘·이름·뒤에 붙은 조사를 한 낱말로 묶어 줄을 바꾼다.
+const INLINE_ICON = 1.3;
+const INLINE_GAP = 0.15;
+const hasWeapon = (segments) => segments.some(({ weapon }) => weapon);
+
+// 띄어쓰기 단위 낱말. 각 낱말은 [{ text } | { weapon }] 조각 목록이다.
+function richWords(segments) {
+  const words = [[]];
+  for (const { text: value, weapon } of segments) {
+    if (weapon) {
+      words[words.length - 1].push({ weapon });
+      continue;
+    }
+    value.split(' ').forEach((piece, i) => {
+      if (i > 0) words.push([]);
+      if (piece) words[words.length - 1].push({ text: piece });
+    });
+  }
+  return words.filter((word) => word.length);
+}
+
+const pieceWidth = (ctx, piece, size) => (piece.weapon
+  ? size * (INLINE_ICON + INLINE_GAP) + ctx.measureText(piece.weapon.weapon_name).width
+  : ctx.measureText(piece.text).width);
+
+function wrapRich(ctx, segments, maxWidth, size, weight) {
+  setFont(ctx, size, weight);
+  const space = ctx.measureText(' ').width;
+  const lines = [];
+  let line = [];
+  let width = 0;
+  for (const word of richWords(segments)) {
+    const wordWidth = word.reduce((sum, piece) => sum + pieceWidth(ctx, piece, size), 0);
+    const next = line.length ? width + space + wordWidth : wordWidth;
+    if (line.length && next > maxWidth) {
+      lines.push(line);
+      line = [word];
+      width = wordWidth;
+    } else {
+      line.push(word);
+      width = next;
+    }
+  }
+  if (line.length) lines.push(line);
+  return lines;
+}
+
+// paragraph와 같은 규칙으로 조각 배열을 그린다. icons는 weapon_id별 아이콘 이미지다.
+function richParagraph(ctx, segments, x, y, maxWidth, options, icons) {
+  if (!hasWeapon(segments)) return paragraph(ctx, segmentsText(segments), x, y, maxWidth, options);
+  const { size, weight = 400, color, lineHeight = 1.7 } = options;
+  const step = size * lineHeight;
+  const lines = wrapRich(ctx, segments, maxWidth, size, weight);
+  lines.forEach((words, i) => {
+    const mid = y + step * (i + 0.5);
+    let cx = x;
+    words.forEach((word, w) => {
+      if (w > 0) cx += ctx.measureText(' ').width;
+      for (const piece of word) {
+        if (piece.weapon) {
+          const icon = icons.get(piece.weapon.weapon_id);
+          const iconSize = size * INLINE_ICON;
+          if (icon) ctx.drawImage(icon, cx, mid - iconSize / 2, iconSize, iconSize);
+          cx += icon ? iconSize + size * INLINE_GAP : 0;
+          text(ctx, piece.weapon.weapon_name, cx, mid, { size, weight, color });
+          cx += ctx.measureText(piece.weapon.weapon_name).width;
+        } else {
+          text(ctx, piece.text, cx, mid, { size, weight, color });
+          cx += ctx.measureText(piece.text).width;
+        }
+      }
+    });
+  });
+  return y + step * lines.length;
+}
+
+const richHeight = (ctx, segments, maxWidth, options) => (hasWeapon(segments)
+  ? wrapRich(ctx, segments, maxWidth, options.size, options.weight).length * options.size * (options.lineHeight ?? 1.7)
+  : paragraphHeight(ctx, segmentsText(segments), maxWidth, options));
 
 function roundRect(ctx, x, y, w, h, r, { fill, stroke, lineWidth = 2 }) {
   ctx.beginPath();
@@ -257,24 +338,25 @@ function drawWinner(ctx, winner, assets, top) {
   return top + height;
 }
 
-function drawReason(ctx, reason, top) {
+// icons는 설명 문장 속 무기 아이콘(weapon_id별 이미지)이다.
+function drawReason(ctx, reason, icons, top) {
   if (!reason) return top;
   let y = top;
   hr(ctx, y);
   y += 48;
   // 중앙형 특별 결과의 제목처럼 긴 제목은 화면처럼 여러 줄로 나눈다.
   y = paragraph(ctx, reason.title, PAD, y, INNER, { size: 46, weight: 800, color: COLORS.text, lineHeight: 52 / 46 }) + 32;
-  y = paragraph(ctx, reason.lead, PAD, y, INNER, { size: 36, weight: 700, color: COLORS.text });
+  y = richParagraph(ctx, reason.lead, PAD, y, INNER, { size: 36, weight: 700, color: COLORS.text }, icons);
   const padding = 36;
   for (const part of reason.parts) {
     y += 28;
     const bodyWidth = INNER - padding * 2;
     const height = padding * 2 + 46
-      + part.lines.reduce((sum, line) => sum + paragraphHeight(ctx, line, bodyWidth, { size: 32 }), 0);
+      + part.lines.reduce((sum, line) => sum + richHeight(ctx, line, bodyWidth, { size: 32 }), 0);
     roundRect(ctx, PAD, y, INNER, height, 36, { fill: COLORS.part, stroke: COLORS.partBorder });
     text(ctx, part.title, PAD + padding, y + padding + 18, { size: 32, weight: 800, color: COLORS.accent });
     let lineY = y + padding + 46;
-    for (const line of part.lines) lineY = paragraph(ctx, line, PAD + padding, lineY, bodyWidth, { size: 32, color: COLORS.body });
+    for (const line of part.lines) lineY = richParagraph(ctx, line, PAD + padding, lineY, bodyWidth, { size: 32, color: COLORS.body }, icons);
     y += height;
   }
   return y + 56;
@@ -403,8 +485,9 @@ function drawComparison(ctx, comparison, assets, top) {
 // gameName·result·reason은 결과 화면과 같은 값을 받는다. weapons는 입문 난이도 계산에 쓰는 작품 전체 무기,
 // axisModel은 작품의 축 모델이다.
 // others는 결과 화면과 같은 1~3순위 이후 무기 순위다.
-export async function drawShareImage({ gameName, result, reason, weapons, others, axisModel, siteUrl }) {
-  const content = shareContent({ gameName, result, reason, weapons, others, axisModel });
+// weaponIcons는 작품 설정 inlineWeaponIcons이며 설명 문장 속 무기 이름 앞에 아이콘을 그린다.
+export async function drawShareImage({ gameName, result, reason, weapons, others, axisModel, siteUrl, weaponIcons }) {
+  const content = shareContent({ gameName, result, reason, weapons, others, axisModel, weaponIcons });
   const characters = content.winner.weapon.characters ?? [];
   // icons는 순위 버튼 순서다. 첫 번째가 1순위라 상단 1순위 아이콘으로도 쓴다.
   const [icons, characterImages, siteIcon] = await Promise.all([
@@ -429,7 +512,9 @@ export async function drawShareImage({ gameName, result, reason, weapons, others
   fitText(ctx, content.title, PAD, 160, INNER, { size: 60, weight: 800 });
 
   let y = drawWinner(ctx, content.winner, assets, 220);
-  y = drawReason(ctx, content.reason, y);
+  // 설명 문장에 나오는 무기는 1~3순위라 순위 버튼 아이콘을 그대로 쓴다.
+  const inlineIcons = new Map(content.comparison.ranking.map(({ weapon }, i) => [weapon.weapon_id, icons[i]]));
+  y = drawReason(ctx, content.reason, inlineIcons, y);
   y = drawComparison(ctx, content.comparison, assets, y);
   hr(ctx, y);
   text(ctx, siteUrl, WIDTH / 2, y + 56, { size: 26, color: COLORS.muted, align: 'center' });

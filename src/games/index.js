@@ -18,6 +18,7 @@ const withMedia = (weapons, media) => weapons.map((weapon) => ({ ...weapon, ...m
 // 기존 와일즈는 자유도(freedom), 와일즈 V2는 행동 제약(constraint)과 부담 허용형 공식을 쓴다(docs/wilds-v2-plan.md).
 // centralResult가 true인 검사는 중앙형 응답에 특별 결과를 보여 준다(core/central.js, GitHub 이슈 #1). 현재 와일즈 V2에만 적용한다.
 // lighterAlternative가 true인 검사는 기준 비교에 네 번째 버튼을 두고 ‘부담이 적은 대안’(core/alternative.js, DEC-075·DEC-076)이 있으면 그 무기를, 없으면 4순위를 보여 준다. 축 묶음은 축 모델이 정한다.
+// inlineWeaponIcons가 true인 검사는 결과 설명 문장 속 무기 이름 앞에 무기 아이콘을 붙인다(result-content.js).
 // changes는 이전 버전 검사에서 달라진 점으로, 검사 설명 화면 맨 아래에 대략적으로 보여 준다. 새 변경은 목록 끝에 추가한다.
 export const supportedGames = [
   {
@@ -26,6 +27,7 @@ export const supportedGames = [
     version: 'V2',
     centralResult: true,
     lighterAlternative: true,
+    inlineWeaponIcons: true,
     axisModel: GAME_AXIS_MODELS.wilds_v2,
     changes: {
       from: '몬스터헌터 와일즈',
@@ -36,6 +38,7 @@ export const supportedGames = [
         '다섯 기준이 모두 가운데에 가까우면 재미로 고른 특별 결과를 보여 줘요.',
         '여러 무기의 기준값을 다시 다듬었어요.',
         '기준 비교에 무기 버튼을 하나 더 두고, 한방·반격은 비슷하면서 행동 제약·복잡·관리 요구가 더 낮은 무기가 있으면 ‘🪶 가벼운 추천’ 표시를 붙여 함께 추천해요.',
+        '결과 설명에 무기 이름이 나오면 이름 앞에 무기 아이콘을 함께 보여 줘요.',
       ],
     },
     logo: wildsLogo,

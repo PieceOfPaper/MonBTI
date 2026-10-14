@@ -230,17 +230,25 @@ export function renderRecommendationReason(reason, weapons) {
   return renderReasonContent(reasonContent(reason, weapons));
 }
 
+// 설명 문장(result-content.js의 조각 배열). 무기 조각은 아이콘과 이름을 줄바꿈되지 않게 묶고, 아이콘은 장식이라 낭독하지 않는다.
+// 아이콘 파일이 없는 무기는 이름만 쓴다.
+function renderSegments(segments) {
+  return segments.map(({ text, weapon }) => (weapon
+    ? `<span class="inline-weapon">${weapon.icon ? `<img class="inline-weapon__icon" src="${escapeHtml(weapon.icon)}" alt="" width="100" height="100" />` : ''}${escapeHtml(weapon.weapon_name)}</span>`
+    : escapeHtml(text))).join('');
+}
+
 // 설명 영역(추천 이유 또는 중앙형 특별 결과 안내)을 그린다. 내용은 result-content.js가 만든다.
 function renderReasonContent(content) {
   if (!content) return '';
   const parts = content.parts.map(({ title, lines }) => `
         <div class="reason__part">
           <h3>${escapeHtml(title)}</h3>
-          ${lines.map((line) => `<p>${escapeHtml(line)}</p>`).join('')}
+          ${lines.map((line) => `<p>${renderSegments(line)}</p>`).join('')}
         </div>`).join('');
   return `<section class="result__section reason" aria-labelledby="reason-title">
       <h2 id="reason-title">${escapeHtml(content.title)}</h2>
-      <p class="reason__lead">${escapeHtml(content.lead)}</p>${parts}
+      <p class="reason__lead">${renderSegments(content.lead)}</p>${parts}
     </section>`;
 }
 
@@ -345,7 +353,7 @@ export function renderResult(game, result, {
     <p class="eyebrow">${escapeHtml(gameLabel(game))}</p>
     <h1 id="result-title" tabindex="-1">${escapeHtml(resultTitle(name))}</h1>
     ${renderWinner(winner, game.weapons, axisModel, winnerBadge(result), winnerName(result))}
-    ${renderReasonContent(resultReasonContent(result, reason))}
+    ${renderReasonContent(resultReasonContent(result, reason, { weaponIcons: Boolean(game.inlineWeaponIcons) }))}
     ${renderComparison(result, slots, selected, selectedIndex, othersOpen, who, axisModel)}
     ${renderIntro(winner)}
     <section class="result__section share-section" aria-labelledby="share-title">

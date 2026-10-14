@@ -109,6 +109,9 @@ legend { padding: 0; margin-bottom: 1.5rem; }
 .reason .reason__lead { color: #f7f4ec; font-size: 1.1rem; font-weight: 700; }
 .reason__part { padding: .9rem 1.1rem; border: 1px solid #3f5640; border-radius: 1rem; background: #243529; }
 .reason__part h3 { margin: 0 0 .35rem; color: #c8da81; font-size: 1rem; }
+/* 설명 문장 속 무기 이름 앞의 아이콘(와일즈 V2). 글자 높이에 맞추고 아이콘과 이름이 줄바꿈으로 갈라지지 않게 묶는다. */
+.inline-weapon { white-space: nowrap; }
+.inline-weapon__icon { width: 1.3em; height: 1.3em; margin-right: .15em; object-fit: contain; vertical-align: -.3em; }
 .share-section { text-align: center; }
 .share { display: flex; justify-content: center; gap: 1.5rem; }
 .share__button { display: grid; justify-items: center; gap: .4rem; padding: 0; border: 0; color: inherit; background: none; cursor: pointer; }

@@ -45,10 +45,44 @@ export function quoteContent(weapon) {
   };
 }
 
+// 설명 문장 속 무기 이름 앞에 무기 아이콘을 붙이는 검사(작품 설정 inlineWeaponIcons, 현재 와일즈 V2)를 위한 표시.
+// 문구 함수(core/*-copy.js)는 이름의 끝 글자로 조사를 고르므로 표시는 이름 앞에만 붙이고, 문장을 만든 뒤 조각으로 나눈다.
+const WEAPON_MARK = '\uE000';
+
+// 설명 문장은 [{ text } | { weapon }] 조각 배열이다. 무기 조각은 아이콘과 이름으로 그린다.
+// weapons는 문장에 나올 수 있는 무기이며, 표시 뒤의 이름이 가장 길게 맞는 무기를 고른다(‘랜스’와 ‘건랜스’ 구분).
+function toSegments(line, weapons) {
+  const [head, ...marked] = line.split(WEAPON_MARK);
+  const segments = head ? [{ text: head }] : [];
+  for (const part of marked) {
+    const weapon = weapons
+      .filter(({ weapon_name }) => part.startsWith(weapon_name))
+      .sort((a, b) => b.weapon_name.length - a.weapon_name.length)[0];
+    if (!weapon) {
+      segments.push({ text: part });
+      continue;
+    }
+    segments.push({ weapon });
+    const rest = part.slice(weapon.weapon_name.length);
+    if (rest) segments.push({ text: rest });
+  }
+  return segments;
+}
+
+// 조각 배열을 아이콘 없이 이어 붙인 문장. 화면 낭독기가 읽는 문장과 같다.
+export const segmentsText = (segments) => segments.map(({ text, weapon }) => text ?? weapon.weapon_name).join('');
+
+// 문장에 넣을 무기 이름. weaponIcons가 켜져 있으면 조각으로 나눌 수 있게 이름 앞에 표시를 붙인다.
+const namer = (weapons, weaponIcons) => (id) => {
+  const name = weapons.find(({ weapon_id }) => weapon_id === id)?.weapon_name ?? '';
+  return weaponIcons && name ? `${WEAPON_MARK}${name}` : name;
+};
+
 // 1순위 추천 이유(core/reason.js 모델). weapons는 결과의 1~3순위이며 이름을 찾는 데만 쓴다. 없는 항목은 parts에서 뺀다.
-export function reasonContent(reason, weapons) {
+// lead와 parts의 lines는 조각 배열이다. weaponIcons가 켜져 있으면 무기 이름 앞에 아이콘 조각이 들어간다.
+export function reasonContent(reason, weapons, { weaponIcons = false } = {}) {
   if (!reason) return null;
-  const nameOf = (id) => weapons.find(({ weapon_id }) => weapon_id === id)?.weapon_name ?? '';
+  const nameOf = namer(weapons, weaponIcons);
   const winnerName = nameOf(reason.winnerId);
   const runnerName = nameOf(reason.runnerUpId);
   const closest = closestCopy(reason, winnerName);
@@ -58,37 +92,41 @@ export function reasonContent(reason, weapons) {
   const tradeoff = tradeoffCopy(reason, runnerName);
   const tradeoffs = [];
   if (tradeoff) (advantages.length ? advantages : cautions.length ? cautions : tradeoffs).push(tradeoff);
+  const rich = (line) => toSegments(line, weapons);
   return {
     title: REASON_TITLE,
-    lead: leadText(reason, winnerName, runnerName),
+    lead: rich(leadText(reason, winnerName, runnerName)),
     parts: [
       { title: closest.title, lines: [closest.text] },
       { title: SECTION_TITLES.advantages, lines: advantages },
       { title: SECTION_TITLES.caution, lines: cautions },
       { title: SECTION_TITLES.tradeoff, lines: tradeoffs },
-    ].filter(({ lines }) => lines.length > 0),
+    ].filter(({ lines }) => lines.length > 0).map(({ title, lines }) => ({ title, lines: lines.map(rich) })),
   };
 }
 
 // 중앙형 응답 특별 결과의 안내(core/central.js 모델). ‘왜 이 무기인가요?’ 자리에 같은 모양으로 보여 준다.
-export function centralContent(central, weapons) {
+// lead와 lines는 reasonContent와 같은 조각 배열이다.
+export function centralContent(central, weapons, { weaponIcons = false } = {}) {
   if (!central) return null;
-  const nameOf = (id) => weapons.find(({ weapon_id }) => weapon_id === id)?.weapon_name ?? '';
-  const others = centralOthersLine(weapons.slice(1).map(({ weapon_name }) => weapon_name));
+  const nameOf = namer(weapons, weaponIcons);
+  const others = centralOthersLine(weapons.slice(1).map(({ weapon_id }) => nameOf(weapon_id)));
+  const rich = (line) => toSegments(line, weapons);
   return {
     title: CENTRAL_TITLE,
-    lead: CENTRAL_LEAD,
+    lead: rich(CENTRAL_LEAD),
     parts: [
       { title: CENTRAL_SECTION_TITLES.winner, lines: centralWinnerLines(central, nameOf(central.winnerId)) },
       { title: CENTRAL_SECTION_TITLES.others, lines: others ? [others] : [] },
       { title: CENTRAL_SECTION_TITLES.chart, lines: [CENTRAL_CHART_LINE] },
-    ].filter(({ lines }) => lines.length > 0),
+    ].filter(({ lines }) => lines.length > 0).map(({ title, lines }) => ({ title, lines: lines.map(rich) })),
   };
 }
 
 // 결과 상단의 설명 영역. 중앙형 특별 결과면 특별 안내, 아니면 1순위 추천 이유다.
-export function resultReasonContent(result, reason) {
-  return result.central ? centralContent(result.central, result.weapons) : reasonContent(reason, result.weapons);
+// options.weaponIcons는 작품 설정 inlineWeaponIcons이며 문장 속 무기 이름 앞에 아이콘을 붙인다.
+export function resultReasonContent(result, reason, options = {}) {
+  return result.central ? centralContent(result.central, result.weapons, options) : reasonContent(reason, result.weapons, options);
 }
 
 const formatValue = (value) => (value === null || value === undefined ? '측정 안 됨' : String(Math.round(value)));
@@ -138,7 +176,10 @@ export function comparisonSlots(result, others = []) {
 // 영상·버튼·나머지 무기 목록처럼 눌러서 쓰는 요소는 이미지에서 쓸 수 없으므로 담지 않는다.
 // axisModel은 작품의 축 모델이며 입문 난이도와 기준 비교의 축을 정한다.
 // others는 결과 화면과 같은 1~3순위 이후 무기 순위이며 네 번째 비교 버튼을 정하는 데 쓴다.
-export function shareContent({ gameName, result, reason, weapons, others = [], axisModel = DEFAULT_AXIS_MODEL }) {
+// weaponIcons는 작품 설정 inlineWeaponIcons이며 설명 문장 속 무기 이름 앞에 아이콘을 붙인다.
+export function shareContent({
+  gameName, result, reason, weapons, others = [], axisModel = DEFAULT_AXIS_MODEL, weaponIcons = false,
+}) {
   const who = displayName(result.nickname);
   const winner = result.weapons[0];
   return {
@@ -152,7 +193,7 @@ export function shareContent({ gameName, result, reason, weapons, others = [], a
       difficulty: difficultyContent(winner, weapons, axisModel),
       quote: quoteContent(winner),
     },
-    reason: resultReasonContent(result, reason),
+    reason: resultReasonContent(result, reason, { weaponIcons }),
     comparison: {
       title: COMPARE_SECTION_TITLE,
       ranking: comparisonSlots(result, others).buttons.map((button, index) => ({ ...button, selected: index === 0 })),
