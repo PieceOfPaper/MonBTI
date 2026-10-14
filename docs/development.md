@@ -26,7 +26,7 @@ Vite 기반의 의존성 관리와 빌드에는 npm을 사용하고, 단위 테�
 | `src/assets/games/<작품 ID>/` | 작품 로고 파일 |
 | `src/assets/weapons/<작품 ID>/` | 무기 아이콘 파일 |
 | `src/assets/characters/<작품 ID>/` | 무기별 캐릭터 이미지 파일(`<weapon_id>_a·_b.webp`) |
-| `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함, `axes.js`), 작품별 축 모델(`axis-models.js`: 축 목록·불일치 공식·합산 가중치·입문 난이도 원점수, 기존 와일즈 `freedom`·V2 `constraint`), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 와일즈 V2의 중앙형 응답 특별 결과(`central.js`·`central-copy.js`), 입문 난이도 별표(`difficulty.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
+| `src/core/` | 기준 축(검사 설명용 쉬운 설명 포함, `axes.js`), 작품별 축 모델(`axis-models.js`: 축 목록·불일치 공식·합산 가중치·입문 난이도 원점수, 기존 와일즈 `freedom`·V2 `constraint`), 공통 응답, 축별 합산·사용자 점수 정규화, 무기 추천(`recommend.js`), 1순위 추천 이유(`reason.js`·`reason-copy.js`), 와일즈 V2의 중앙형 응답 특별 결과(`central.js`·`central-copy.js`), 와일즈 V2의 부담이 적은 대안(`alternative.js`), 입문 난이도 별표(`difficulty.js`), 질문 순서 섞기(`order.js`), 표시 이름 정리·인코딩(`nickname.js`), 공유 링크(`share.js`) |
 | `src/ui/views.js` | 화면 마크업(검사 선택과 개발 중인·오래된 검사 목록·검사 설명·이름 입력·질문·결과) |
 | `src/ui/radar.js` | 오각형 방사형 차트 위치 계산과 SVG |
 | `src/ui/result-content.js` | 결과 화면과 공유 이미지가 함께 쓰는 표시 내용(제목·입문 난이도·소개 문구·추천 이유·기준 비교) |

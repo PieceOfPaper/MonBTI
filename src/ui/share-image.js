@@ -1,6 +1,7 @@
 // 결과를 한 장의 PNG로 그린다. 브라우저 전용(canvas).
 // 결과 화면과 같은 내용(result-content.js의 shareContent)을 같은 순서로 그린다:
-// 1순위 무기(배경 캐릭터·아이콘·이름·입문 난이도·소개 문구) → 왜 이 무기인가요? → 무기별 기준 비교(1~3순위·차트·표).
+// 1순위 무기(배경 캐릭터·아이콘·이름·입문 난이도·소개 문구) → 왜 이 무기인가요? → 무기별 기준 비교(순위 버튼·차트·표).
+// 순위 버튼은 화면처럼 1~3순위(부담이 적은 대안을 쓰는 검사는 네 번째 버튼까지)이며 대안에는 추천 표시를 붙인다.
 // 영상·버튼처럼 눌러서 쓰는 요소만 뺀다. 내용 길이에 따라 세로 길이가 달라진다.
 // 아이콘·캐릭터 이미지는 사이트와 같은 출처의 파일이라 캔버스를 내보낼 때 막히지 않는다.
 import { RADAR_RINGS, radarPoint, radarPolygon } from './radar.js';
@@ -326,17 +327,26 @@ function drawComparison(ctx, comparison, assets, top) {
   text(ctx, comparison.title, PAD, y + 26, { size: 46, weight: 800 });
   y += 52 + 32;
 
-  // 1~3순위: 화면의 같은 크기 버튼 세 개. 처음 상태처럼 1순위가 선택되어 있다.
-  const gap = 28;
-  const cardWidth = (INNER - gap * 2) / 3;
+  // 순위 버튼: 화면의 같은 크기 버튼. 처음 상태처럼 1순위가 선택되어 있다.
+  // 부담이 적은 대안 버튼은 화면처럼 위 테두리 가운데에 차분한 색의 ‘가벼운 추천’ 표시를 붙인다(1~3순위보다 돋보이게 하지 않는다).
+  const count = comparison.ranking.length;
+  const gap = count === 4 ? 20 : 28;
+  const cardWidth = (INNER - gap * (count - 1)) / count;
   const cardHeight = 236;
-  comparison.ranking.forEach(({ weapon, label, selected }, i) => {
+  if (comparison.ranking.some(({ badge }) => badge)) y += 24;
+  comparison.ranking.forEach(({ weapon, label, selected, badge }, i) => {
     const x = PAD + i * (cardWidth + gap);
     roundRect(ctx, x, y, cardWidth, cardHeight, 36, {
       fill: selected ? COLORS.rankSelected : COLORS.rank,
       stroke: selected ? COLORS.accent : COLORS.grid,
       lineWidth: selected ? 3 : 2,
     });
+    if (badge) {
+      setFont(ctx, 24, 700);
+      const badgeWidth = ctx.measureText(badge.text).width + 32;
+      roundRect(ctx, x + (cardWidth - badgeWidth) / 2, y - 20, badgeWidth, 40, 20, { fill: COLORS.background, stroke: COLORS.grid });
+      text(ctx, badge.text, x + cardWidth / 2, y + 1, { size: 24, weight: 700, color: COLORS.muted, align: 'center' });
+    }
     text(ctx, label, x + cardWidth / 2, y + 40, { size: 26, weight: 700, color: COLORS.muted, align: 'center' });
     drawIcon(ctx, assets.icons[i], weapon, x + cardWidth / 2 - 50, y + 64, 100);
     fitText(ctx, weapon.weapon_name, x + cardWidth / 2, y + 198, cardWidth - 32, { size: 36, weight: 800, align: 'center' });
@@ -392,11 +402,13 @@ function drawComparison(ctx, comparison, assets, top) {
 
 // gameName·result·reason은 결과 화면과 같은 값을 받는다. weapons는 입문 난이도 계산에 쓰는 작품 전체 무기,
 // axisModel은 작품의 축 모델이다.
-export async function drawShareImage({ gameName, result, reason, weapons, axisModel, siteUrl }) {
-  const content = shareContent({ gameName, result, reason, weapons, axisModel });
+// others는 결과 화면과 같은 1~3순위 이후 무기 순위다.
+export async function drawShareImage({ gameName, result, reason, weapons, others, axisModel, siteUrl }) {
+  const content = shareContent({ gameName, result, reason, weapons, others, axisModel });
   const characters = content.winner.weapon.characters ?? [];
+  // icons는 순위 버튼 순서다. 첫 번째가 1순위라 상단 1순위 아이콘으로도 쓴다.
   const [icons, characterImages, siteIcon] = await Promise.all([
-    Promise.all(result.weapons.map((weapon) => loadImage(weapon.icon))),
+    Promise.all(content.comparison.ranking.map(({ weapon }) => loadImage(weapon.icon))),
     Promise.all(characters.map(({ src }) => loadImage(src))),
     loadImage(SITE_ICON),
   ]);

@@ -1,6 +1,7 @@
 // 해시 라우팅과 화면 상태. GitHub Pages 하위 경로(/MonBTI/)에서도 새로고침이 동작하도록
 // 경로 대신 #/<작품 ID>, #/<작품 ID>/guide, #/<작품 ID>/result, #/<작품 ID>/share/<코드> 형식을 사용한다.
 // 외부로 공유하는 링크만 ?r=<작품 ID>.<코드> 형식이며, 열면 내부 해시 주소로 바꾼다(core/share.js).
+import { findLighterAlternative } from './core/alternative.js';
 import { axisModelOf } from './core/axis-models.js';
 import { buildCentralModel, centralRecommendation, isCentralProfile } from './core/central.js';
 import { buildRecommendationReason } from './core/reason.js';
@@ -18,6 +19,7 @@ import {
   escapeHtml, renderComparisonView, renderEmpty, renderGameSelection, renderGuide, renderNameForm, renderQuestion, renderResult,
   renderVideoPlayer,
 } from './ui/views.js';
+import { comparisonSlots } from './ui/result-content.js';
 
 function safeDecode(text) {
   try {
@@ -49,22 +51,29 @@ export function shareParamToHash(search) {
 // nickname은 검사 시작 때 입력한 표시 이름이며 계산에는 쓰지 않는다.
 // 작품 설정 centralResult가 켜져 있고 응답이 중앙형이면 특별 결과(core/central.js)로 1~3순위를 정하고 central에 설명 모델을 담는다.
 // profile은 어느 경우든 원래 점수이며 그래프도 원래 점수를 그린다. 축과 계산식은 작품의 축 모델(core/axis-models.js)을 따른다.
+// 작품 설정 lighterAlternative가 켜져 있으면 1~3순위를 정한 뒤 부담이 적은 대안(core/alternative.js)을 alternative에 담는다.
 export function buildResult(game, answers, nickname) {
   const axisModel = axisModelOf(game);
   const profile = computeAxisProfile(computeAxisTotals(game.questions, answers, axisModel));
   if (game.centralResult && isCentralProfile(profile, axisModel)) {
     const weapons = centralRecommendation(game.weapons, profile, { axisModel });
-    return { weapons, profile, nickname, central: buildCentralModel(game.weapons, profile, weapons[0], { axisModel }) };
+    return withAlternative(game, { weapons, profile, nickname, central: buildCentralModel(game.weapons, profile, weapons[0], { axisModel }) });
   }
-  return { weapons: recommendWeapons(game.weapons, profile, { axisModel }), profile, nickname };
+  return withAlternative(game, { weapons: recommendWeapons(game.weapons, profile, { axisModel }), profile, nickname });
+}
+
+// 부담이 적은 대안은 확대하지 않은 원래 점수와 화면의 1~3순위로 고른다. 후보가 없거나 쓰지 않는 검사면 null이다.
+function withAlternative(game, result) {
+  if (!game.lighterAlternative) return result;
+  return { ...result, alternative: findLighterAlternative(game.weapons, result.profile, result.weapons, axisModelOf(game)) };
 }
 
 // 공유 링크로 받은 결과. 특별 결과 표시가 있고 작품이 그 규칙을 쓰면 반올림한 점수로 설명 모델을 다시 만든다.
-// 1~3순위는 링크에 담긴 그대로 두고 다시 계산하지 않는다.
+// 1~3순위는 링크에 담긴 그대로 두고 다시 계산하지 않는다. 부담이 적은 대안도 링크의 점수와 1~3순위로 다시 고른다.
 export function sharedResult(game, shared) {
   const { central, ...result } = shared;
-  if (!central || !game.centralResult) return result;
-  return { ...result, central: buildCentralModel(game.weapons, result.profile, result.weapons[0], { axisModel: axisModelOf(game) }) };
+  if (!central || !game.centralResult) return withAlternative(game, result);
+  return withAlternative(game, { ...result, central: buildCentralModel(game.weapons, result.profile, result.weapons[0], { axisModel: axisModelOf(game) }) });
 }
 
 // 공유 링크. 축 값은 0~100 정수로 반올림하고 표시 이름과 함께 담는다. # 없이 쿼리 하나만 써서 공유 과정의 변형을 피한다.
@@ -77,6 +86,54 @@ export function shareUrl(game, result, base = `${location.origin}${location.path
     central: Boolean(result.central),
   }, axisModel);
   return `${base}?${SHARE_PARAM}=${game.id}.${code}`;
+}
+
+// ‘가벼운 추천’ 추천 표시의 말풍선. 마우스는 표시나 말풍선 위에 있는 동안만 보여 주고, 터치·펜·키보드는 누를 때마다 여닫는다.
+// 말풍선 밖을 누르거나 Esc를 누르면 닫는다. 결과 화면을 다시 그려 표시가 사라지면 문서에 단 이벤트도 함께 뗀다.
+let tipListeners = null;
+function bindAlternativeTip(badge) {
+  tipListeners?.abort();
+  tipListeners = null;
+  if (!badge) return;
+  const tip = document.getElementById(badge.getAttribute('aria-controls'));
+  const listeners = new AbortController();
+  tipListeners = listeners;
+  const { signal } = listeners;
+  const setOpen = (open) => {
+    tip.hidden = !open;
+    badge.setAttribute('aria-expanded', String(open));
+  };
+  const inside = (node) => badge.contains(node) || tip.contains(node);
+  let pointerType = '';
+
+  for (const area of [badge, tip]) {
+    area.addEventListener('pointerenter', (event) => {
+      if (event.pointerType === 'mouse') setOpen(true);
+    }, { signal });
+    area.addEventListener('pointerleave', (event) => {
+      if (event.pointerType === 'mouse' && !inside(event.relatedTarget)) setOpen(false);
+    }, { signal });
+  }
+  badge.addEventListener('pointerdown', (event) => { pointerType = event.pointerType; }, { signal });
+  badge.addEventListener('click', () => {
+    // 마우스는 올려 둔 동안 이미 열려 있으므로 누름으로 닫지 않는다. 키보드로 누르면 pointerType이 비어 있다.
+    const mouse = pointerType === 'mouse';
+    pointerType = '';
+    if (!mouse) setOpen(tip.hidden);
+  }, { signal });
+  document.addEventListener('pointerdown', (event) => {
+    if (!badge.isConnected) {
+      listeners.abort();
+      return;
+    }
+    if (!tip.hidden && !inside(event.target)) setOpen(false);
+  }, { signal });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !tip.hidden) {
+      setOpen(false);
+      badge.focus();
+    }
+  }, { signal });
 }
 
 const storageKey = (gameId) => `monbti:answers:${gameId}`;
@@ -238,7 +295,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
   function showResult(game, result, { shared = false } = {}) {
     const axisModel = axisModelOf(game);
     const others = remainingWeapons(game.weapons, result.profile, result.weapons, axisModel);
-    const ranked = [...result.weapons, ...others];
+    const { order: ranked } = comparisonSlots(result, others);
     const winner = result.weapons[0];
     const who = escapeHtml(result.nickname || FALLBACK_NICKNAME);
     // 추천 이유는 정상·공유 결과 모두 결과에 담긴 1·2순위로 만든다. 순위를 다시 정하지 않는다.
@@ -259,6 +316,8 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
         );
       });
     });
+
+    bindAlternativeTip(root.querySelector('[data-action="toggle-tip"]'));
 
     root.querySelector('[data-action="toggle-others"]')?.addEventListener('click', (event) => {
       const open = event.currentTarget.getAttribute('aria-expanded') !== 'true';
@@ -296,7 +355,7 @@ export function startApp(root, { games = supportedGames, storage = safeSessionSt
         const { drawShareImage } = await import('./ui/share-image.js');
         const siteUrl = `${location.host}${location.pathname}`;
         const blob = await drawShareImage({
-          gameName: gameLabel(game), result, reason, weapons: game.weapons, axisModel, siteUrl,
+          gameName: gameLabel(game), result, reason, weapons: game.weapons, others, axisModel, siteUrl,
         });
         const file = new File([blob], 'monbti-result.png', { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {

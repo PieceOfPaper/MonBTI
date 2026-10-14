@@ -24,8 +24,10 @@ const freedomMismatch = (user, weapon) => Math.max(0, user - weapon) + LOWER_DEM
 // 최종 합산 가중치(DEC-044). 양방향 차이를 모두 반영하는 attack·counter의 실질 비중을 낮춘다.
 const PREFERENCE_WEIGHT = 0.75;
 
-const createModel = ({ id, axes, mismatch, weights, difficultyScore }) => ({
-  id, axes, axisIds: axes.map((axis) => axis.id), mismatch, weights, difficultyScore,
+// lighterAlternative는 ‘부담이 적은 대안’(core/alternative.js)에 쓰는 축 묶음이다. 비슷해야 하는 취향 축(similarAxes)과
+// 무기가 사용자 이하여야 하는 부담형 축(burdenAxes)을 정하며, 이 보조 추천을 쓰지 않는 모델은 null이다.
+const createModel = ({ id, axes, mismatch, weights, difficultyScore, lighterAlternative = null }) => ({
+  id, axes, axisIds: axes.map((axis) => axis.id), mismatch, weights, difficultyScore, lighterAlternative,
 });
 
 export const FREEDOM_MODEL = createModel({
@@ -56,6 +58,7 @@ export const CONSTRAINT_MODEL = createModel({
   },
   weights: { attack: PREFERENCE_WEIGHT, constraint: 1, complexity: 1, management: 1, counter: PREFERENCE_WEIGHT },
   difficultyScore: (weapon) => weapon.constraint + weapon.complexity + weapon.management,
+  lighterAlternative: { similarAxes: ['attack', 'counter'], burdenAxes: ['constraint', 'complexity', 'management'] },
 });
 
 export const DEFAULT_AXIS_MODEL = FREEDOM_MODEL;

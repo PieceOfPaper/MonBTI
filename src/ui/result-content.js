@@ -11,7 +11,6 @@ import {
   REASON_TITLE, SECTION_TITLES, advantagesCopy, cautionCopy, closestCopy, leadText, tradeoffCopy,
 } from '../core/reason-copy.js';
 
-export const RANK_LABELS = ['1순위', '2순위', '3순위'];
 export const COMPARE_SECTION_TITLE = '무기별 기준 비교';
 export const DIFFICULTY_TITLE = '입문 난이도';
 
@@ -99,10 +98,47 @@ export function comparisonRows(profile, weapon, axisModel = DEFAULT_AXIS_MODEL) 
   return axisModel.axes.map(({ id, short }) => ({ id, short, me: formatValue(profile[id]), weapon: formatValue(weapon[id]) }));
 }
 
+// 기준 비교 무기 버튼의 순위 표기. index는 결과 화면 순서(1~3순위 뒤에 나머지 무기)의 위치다.
+export const rankLabel = (index) => `${index + 1}순위`;
+
+// 부담이 적은 대안(core/alternative.js)인 무기 버튼에 붙이는 추천 표시. text는 순위 밖에서 취향이 가깝고 부담이 적어
+// 추천한다는 뜻을 버튼 위에 들어가게 줄인 표기이고, label은 화면 낭독기가 무기 버튼과 함께 읽는 풀어 쓴 이름이다.
+export const ALTERNATIVE_BADGE = { text: '🪶 가벼운 추천', label: '순위 밖이지만 취향이 비슷하고 부담이 적어 추천하는 무기' };
+
+// 결과 화면에서 추천 표시를 누르거나 마우스를 올리면 나오는 말풍선 설명. 축 이름은 작품의 축 모델에서 받는다.
+// 눌러서 보는 요소라 공유 이미지에는 담지 않는다.
+export function alternativeTip(axisModel = DEFAULT_AXIS_MODEL) {
+  const config = axisModel.lighterAlternative;
+  if (!config) return null;
+  const shorts = (ids) => ids.map((id) => axisModel.axes.find((axis) => axis.id === id).short).join('·');
+  return `1~3순위에는 들지 않았지만 ${shorts(config.similarAxes)} 성향은 나와 비슷하고 ${shorts(config.burdenAxes)} 부담은 더 적어서 함께 추천하는 무기예요. 무기 자체가 쉽다는 뜻은 아니에요.`;
+}
+
+// 기준 비교의 무기 버튼과 접힌 ‘나머지 무기’ 목록. others는 1~3순위 이후 무기를 순위대로 담는다.
+// 부담이 적은 대안을 쓰는 검사(result.alternative가 undefined가 아님)는 버튼이 네 개이며, 네 번째 버튼은
+// 대안이 있으면 그 무기에 추천 표시를 붙이고, 없으면(가장 앞선 후보가 이미 1~3순위인 경우 포함) 4순위 무기를 둔다.
+// 순위 표기는 버튼 위치가 아니라 결과 화면 순서의 실제 순위이며, 버튼에 올린 무기는 나머지 목록에서 뺀다.
+// order는 버튼과 나머지 목록을 이어 붙인 비교 대상 순서로, data-select 번호가 이 순서를 가리킨다.
+export function comparisonSlots(result, others = []) {
+  const ranked = [...result.weapons, ...others];
+  const indexOf = (weapon) => ranked.findIndex(({ weapon_id }) => weapon_id === weapon.weapon_id);
+  const slot = (weapon, badge = null) => ({ weapon, label: rankLabel(indexOf(weapon)), badge });
+  const buttons = result.weapons.map((weapon) => slot(weapon));
+  if (result.alternative !== undefined) {
+    const alternative = result.alternative && ranked.find(({ weapon_id }) => weapon_id === result.alternative.weapon.weapon_id);
+    if (alternative) buttons.push(slot(alternative, ALTERNATIVE_BADGE));
+    else if (others.length) buttons.push(slot(others[0]));
+  }
+  const shown = new Set(buttons.map(({ weapon }) => weapon.weapon_id));
+  const rest = others.filter(({ weapon_id }) => !shown.has(weapon_id)).map((weapon) => slot(weapon));
+  return { buttons, others: rest, order: [...buttons, ...rest].map(({ weapon }) => weapon) };
+}
+
 // 공유 이미지에 담는 결과 전체. 결과 화면의 첫 상태(1순위와 비교)와 같다.
 // 영상·버튼·나머지 무기 목록처럼 눌러서 쓰는 요소는 이미지에서 쓸 수 없으므로 담지 않는다.
 // axisModel은 작품의 축 모델이며 입문 난이도와 기준 비교의 축을 정한다.
-export function shareContent({ gameName, result, reason, weapons, axisModel = DEFAULT_AXIS_MODEL }) {
+// others는 결과 화면과 같은 1~3순위 이후 무기 순위이며 네 번째 비교 버튼을 정하는 데 쓴다.
+export function shareContent({ gameName, result, reason, weapons, others = [], axisModel = DEFAULT_AXIS_MODEL }) {
   const who = displayName(result.nickname);
   const winner = result.weapons[0];
   return {
@@ -119,7 +155,7 @@ export function shareContent({ gameName, result, reason, weapons, axisModel = DE
     reason: resultReasonContent(result, reason),
     comparison: {
       title: COMPARE_SECTION_TITLE,
-      ranking: result.weapons.map((weapon, index) => ({ weapon, label: RANK_LABELS[index], selected: index === 0 })),
+      ranking: comparisonSlots(result, others).buttons.map((button, index) => ({ ...button, selected: index === 0 })),
       subtitle: compareTitle(who, winner),
       legend: [who, winner.weapon_name],
       profile: result.profile,

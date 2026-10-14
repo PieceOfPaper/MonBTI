@@ -1,13 +1,15 @@
 // 화면 마크업. 상태를 받아 문자열을 돌려주며 이벤트 연결은 app.js가 맡는다.
+import { MIN_REDUCTION, SIMILAR_LIMIT } from '../core/alternative.js';
 import { DEFAULT_AXIS_MODEL, axisModelOf } from '../core/axis-models.js';
 import { AMPLIFY_FACTOR } from '../core/central.js';
+import { josa } from '../core/reason-copy.js';
 import { NICKNAME_MAX_LENGTH } from '../core/nickname.js';
 import { RESPONSES } from '../core/responses.js';
 import { gameLabel } from '../games/index.js';
 import monbtiLogo from '../assets/brand/monbti-logo.webp';
 import { renderRadarSvg } from './radar.js';
 import {
-  COMPARE_SECTION_TITLE, RANK_LABELS, comparisonRows, difficultyContent, displayName, winnerBadge, winnerName, quoteContent, reasonContent, resultReasonContent, resultTitle,
+  ALTERNATIVE_BADGE, COMPARE_SECTION_TITLE, alternativeTip, comparisonRows, comparisonSlots, difficultyContent, displayName, winnerBadge, winnerName, quoteContent, reasonContent, resultReasonContent, resultTitle,
 } from './result-content.js';
 
 export function escapeHtml(value) {
@@ -179,26 +181,38 @@ function renderWinner(weapon, weapons, axisModel, badge = null, name = weapon.we
     </div>`;
 }
 
-// 비교할 무기를 고르는 1~3순위 버튼. 세 버튼은 같은 크기이며 누르면 기준 비교만 바뀐다.
-function renderRanking(weapons, selectedIndex) {
-  return weapons.map((weapon, index) => `
-      <li class="rank">
-        <button class="rank__button" type="button" data-select="${index}" aria-pressed="${index === selectedIndex}">
-          <span class="rank__label">${RANK_LABELS[index]}</span>
+// 비교할 무기를 고르는 순위 버튼(result-content.js의 comparisonSlots). 버튼은 같은 크기이며 누르면 기준 비교만 바뀐다.
+// 부담이 적은 대안 버튼은 위 테두리에 추천 표시를 붙인다. 추천 표시는 무기 버튼 안에 둘 수 없어 같은 칸에 따로 둔 버튼이며,
+// 누르거나 마우스를 올리면 말풍선(tip)으로 뜻을 설명한다. 여닫기는 app.js가 맡는다.
+function renderRanking(buttons, selectedIndex, tip) {
+  return buttons.map(({ weapon, label, badge }, index) => `
+      <li class="rank${badge ? ' rank--alternative' : ''}">
+        <button class="rank__button${badge ? ' rank__button--alternative' : ''}" type="button" data-select="${index}" aria-pressed="${index === selectedIndex}"${badge ? ` aria-label="${escapeHtml(`${label} ${weapon.weapon_name}, ${badge.label}`)}"` : ''}>
+          <span class="rank__label">${label}</span>
           ${weaponIcon(weapon, 'rank__icon')}
           <strong class="rank__name">${escapeHtml(weapon.weapon_name)}</strong>
-        </button>
+        </button>${badge ? renderBadge(badge, tip) : ''}
       </li>`).join('');
 }
 
-// 1~3순위 버튼 아래의 접히는 '나머지 무기' 목록. 순위 번호는 4순위부터 이어지고, 누르면 그 무기와 비교한다.
-function renderOthers(others, selectedIndex, open) {
+// 추천 표시 버튼과 말풍선. 말풍선은 처음에 닫혀 있다.
+function renderBadge(badge, tip) {
+  return `
+        <button class="rank__badge" type="button" data-action="toggle-tip" aria-expanded="false" aria-controls="alternative-tip">${escapeHtml(badge.text)}</button>
+        <div class="rank__tip" id="alternative-tip" role="tooltip" hidden>
+          <p class="rank__tip-box">${escapeHtml(tip ?? badge.label)}</p>
+        </div>`;
+}
+
+// 순위 버튼 아래의 접히는 '나머지 무기' 목록. 버튼에 올리지 않은 무기를 실제 순위 표기와 함께 보여 주고, 누르면 그 무기와 비교한다.
+// offset은 버튼 개수이며 data-select 번호가 버튼 다음부터 이어진다.
+function renderOthers(others, offset, selectedIndex, open) {
   if (others.length === 0) return '';
-  const items = others.map((weapon, offset) => {
-    const index = offset + RANK_LABELS.length;
+  const items = others.map(({ weapon, label }, position) => {
+    const index = offset + position;
     return `
         <li><button class="others__button" type="button" data-select="${index}" aria-pressed="${index === selectedIndex}">
-          <span class="others__rank">${index + 1}순위</span>
+          <span class="others__rank">${label}</span>
           ${weaponIcon(weapon, 'others__icon')}
           <span class="others__name">${escapeHtml(weapon.weapon_name)}</span>
         </button></li>`;
@@ -255,13 +269,14 @@ export function renderComparisonView(profile, weapon, who, axisModel = DEFAULT_A
       </div>`;
 }
 
-// 비교 대상 버튼(1~3순위와 나머지 무기)과 기준 비교.
-function renderComparison(result, others, selected, selectedIndex, othersOpen, who, axisModel) {
+// 비교 대상 버튼(순위 버튼과 나머지 무기)과 기준 비교. slots는 result-content.js의 comparisonSlots 결과다.
+function renderComparison(result, slots, selected, selectedIndex, othersOpen, who, axisModel) {
+  const columns = slots.buttons.length === 4 ? ' ranking--four' : '';
   return `<section class="result__section" aria-labelledby="compare-section-title">
       <h2 id="compare-section-title">${COMPARE_SECTION_TITLE}</h2>
-      <ol class="ranking" aria-label="추천 무기 순위">${renderRanking(result.weapons, selectedIndex)}
+      <ol class="ranking${columns}" aria-label="추천 무기 순위">${renderRanking(slots.buttons, selectedIndex, alternativeTip(axisModel))}
       </ol>
-      ${renderOthers(others, selectedIndex, othersOpen)}
+      ${renderOthers(slots.others, slots.buttons.length, selectedIndex, othersOpen)}
       <div class="compare-view" id="compare-view" aria-live="polite">
       ${renderComparisonView(result.profile, selected, who, axisModel)}
       </div>
@@ -307,9 +322,10 @@ export function renderVideoPlayer(videoId, title) {
   return `<iframe src="${src}" title="${escapeHtml(title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
 }
 
-// result: { weapons: [1~3순위], profile: { 축: 0~100 | null }, nickname: 표시 이름, central?: 중앙형 특별 결과 모델 }
+// result: { weapons: [1~3순위], profile: { 축: 0~100 | null }, nickname: 표시 이름, central?: 중앙형 특별 결과 모델,
+//   alternative?: 부담이 적은 대안 모델(core/alternative.js) }
 // central이 있으면 추천 이유 대신 중앙형 특별 결과 안내를 보여 준다.
-// others는 4순위 이후 무기이며 selectedIndex는 기준 비교에 처음 보여 줄 무기의 전체 순위 위치다.
+// others는 4순위 이후 무기이며 selectedIndex는 기준 비교에 처음 보여 줄 무기의 비교 대상 순서(comparisonSlots의 order) 위치다.
 // shared가 참이면 공유 링크로 연 결과이며 다시 하기 대신 검사 시작을 안내한다.
 // reason은 1순위 추천 이유 모델이며 없으면 그 영역을 생략한다.
 export function renderResult(game, result, {
@@ -317,7 +333,8 @@ export function renderResult(game, result, {
 } = {}) {
   const winner = result.weapons[0];
   const axisModel = axisModelOf(game);
-  const selected = [...result.weapons, ...others][selectedIndex] ?? winner;
+  const slots = comparisonSlots(result, others);
+  const selected = slots.order[selectedIndex] ?? winner;
   const name = displayName(result.nickname);
   const who = escapeHtml(name);
   const actions = shared
@@ -329,7 +346,7 @@ export function renderResult(game, result, {
     <h1 id="result-title" tabindex="-1">${escapeHtml(resultTitle(name))}</h1>
     ${renderWinner(winner, game.weapons, axisModel, winnerBadge(result), winnerName(result))}
     ${renderReasonContent(resultReasonContent(result, reason))}
-    ${renderComparison(result, others, selected, selectedIndex, othersOpen, who, axisModel)}
+    ${renderComparison(result, slots, selected, selectedIndex, othersOpen, who, axisModel)}
     ${renderIntro(winner)}
     <section class="result__section share-section" aria-labelledby="share-title">
       <h2 id="share-title">결과 공유하기</h2>
@@ -356,6 +373,24 @@ function renderCentralGuide() {
         <li>1순위는 답변에서 살짝 기운 쪽을 ${AMPLIFY_FACTOR}배로 키워서 고른 무기예요. 재미로 고른 결과라 평소보다 잘 맞지 않을 수 있어요.</li>
         <li>2·3순위는 키우기 전 원래 답변으로 계산한 가장 가까운 무기예요.</li>
         <li>그래프와 표는 키우기 전 실제 답변 점수를 보여 줘요.</li>
+      </ul>
+    </section>`;
+}
+
+// 부담이 적은 대안(core/alternative.js)을 쓰는 검사의 설명. 축 이름은 작품의 축 모델에서 받는다.
+function renderAlternativeGuide(axisModel) {
+  const short = (ids) => ids.map((id) => axisModel.axes.find((axis) => axis.id === id).short);
+  const [first, second] = short(axisModel.lighterAlternative.similarAxes);
+  const burden = short(axisModel.lighterAlternative.burdenAxes).join('·');
+  return `
+    <section aria-labelledby="guide-alternative">
+      <h2 id="guide-alternative">‘${ALTERNATIVE_BADGE.text}’ 표시가 붙은 무기</h2>
+      <p>결과의 무기별 기준 비교에는 1~3순위 옆에 무기 하나를 더 보여 줘요. 1~3순위에는 들지 않았지만 ${first}·${second} 성향은 나와 비슷하면서 ${burden} 요구는 더 낮은 무기가 있으면 그 무기에 <strong>${ALTERNATIVE_BADGE.text}</strong> 표시를 붙여 함께 추천해요.</p>
+      <ul class="guide__list">
+        <li>${josa(`${first}·${second}`, '은', '는')} 내 점수와 각각 ${SIMILAR_LIMIT}점 이내로 가까워야 해요.</li>
+        <li>${josa(burden, '은', '는')} 모두 내 점수보다 낮거나 같고, 그중 하나 이상은 ${MIN_REDUCTION}점 이상 낮아야 해요.</li>
+        <li>조건에 맞는 무기 중 원래 순위가 가장 높은 무기를 골라요. 그 무기가 이미 1~3순위에 있거나 조건에 맞는 무기가 없으면 네 번째 자리에는 4순위 무기를 보여 줘요.</li>
+        <li>1~3순위를 정하는 방법은 바뀌지 않아요. ${burden} 기준만 비교한 결과라 무기 자체가 쉽다는 뜻은 아니에요.</li>
       </ul>
     </section>`;
 }
@@ -406,7 +441,7 @@ export function renderGuide(game) {
       <ul class="guide__axes">${axes}
       </ul>
       <p>다섯 기준을 합쳐서 가장 잘 맞는 무기부터 순위를 정해요. 한방과 반격은 어느 쪽으로 달라도 차이를 모두 반영하기 때문에, 다른 세 기준과 영향이 비슷해지도록 조금 낮은 비중으로 합쳐요.</p>
-    </section>${game.centralResult ? renderCentralGuide() : ''}
+    </section>${game.centralResult ? renderCentralGuide() : ''}${game.lighterAlternative && axisModelOf(game).lighterAlternative ? renderAlternativeGuide(axisModelOf(game)) : ''}
     <section aria-labelledby="guide-not">
       <h2 id="guide-not">이런 것은 보지 않아요</h2>
       <ul class="guide__list">
